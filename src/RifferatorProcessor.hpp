@@ -4,6 +4,7 @@
 #include "public.sdk/source/vst/vstaudioeffect.h"
 #include "pluginterfaces/vst/ivstprocesscontext.h"
 #include <vector>
+#include <array>
 
 namespace a125::rifferator {
 class Processor final : public Steinberg::Vst::AudioEffect {
@@ -21,7 +22,9 @@ private:
   Config config_{};
   std::vector<Step> steps_{};
   FillOptions fill_{};
-  Arrangement arranged_{};
+  std::array<Arrangement,11> fillVariants_{};
+  int fillIndex_{};
+  void prepareFillVariants();
   BlockScheduler scheduler_{};
   bool flushOnNextProcess_{};
   LiveControls live_{};
