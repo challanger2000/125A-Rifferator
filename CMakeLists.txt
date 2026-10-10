@@ -40,3 +40,6 @@ if(WIN32)
   ${vst3sdk_SOURCE_DIR}/public.sdk/source/main/dllmain.cpp)
 endif()
 smtg_target_configure_version_file(Rifferator)
+
+add_executable(rifferator_arrangement_tests tests/riff_arrangement_tests.cpp)
+add_test(NAME rifferator_arrangement COMMAND rifferator_arrangement_tests)
