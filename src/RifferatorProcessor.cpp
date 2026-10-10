@@ -70,13 +70,23 @@ tresult PLUGIN_API Processor::process(ProcessData& data) {
     // parameters at block boundaries; cached arrangement refactoring needed
     // before these changes can be enabled in a release build.
     if(changed) {
-      // Do not allocate or regenerate MIDI in the realtime process callback.
-      // Rebuilding the arrangement requires a separately prepared snapshot.
-      // Until the snapshot handoff exists, reject these runtime changes.
-      // Keep the current musical state coherent instead of pretending
-      // controller automation has been applied.
-      (void)next;
-      (void)nextFill;
+      // Gate, root and bass changes use only fixed-size transforms at render
+      // time. The fill generation remains a non-realtime operation.
+      if(next.guitarGate!=config_.guitarGate || next.bassGate!=config_.bassGate ||
+         next.rootMidi!=config_.rootMidi || next.bassOn!=config_.bassOn ||
+         next.bassVelocity!=config_.bassVelocity)
+        flushOnNextProcess_=true;
+      live_.guitarGate=next.guitarGate;
+      live_.bassGate=next.bassGate;
+      live_.bassEnabled=next.bassOn;
+      live_.bassVelocity=next.bassVelocity;
+      live_.rootSemitones=next.rootMidi-40;
+      config_.guitarGate=next.guitarGate;
+      config_.bassGate=next.bassGate;
+      config_.bassOn=next.bassOn;
+      config_.bassVelocity=next.bassVelocity;
+      config_.rootMidi=next.rootMidi;
+      (void)nextFill; // Fill intensity is not enabled for automation yet.
     }
   }
   if(data.numSamples<=0 || !data.outputEvents)return kResultOk;
@@ -98,8 +108,7 @@ tresult PLUGIN_API Processor::process(ProcessData& data) {
     return data.outputEvents->addEvent(e)==kResultOk;
   };
   if(flushOnNextProcess_) {
-    scheduler_.flush(sink,0);
-    flushOnNextProcess_=false;
+    if(scheduler_.flush(sink,0))flushOnNextProcess_=false;
   }
   const auto* ctx=data.processContext;
   const bool running=ctx && (ctx->state&ProcessContext::kPlaying)!=0;
@@ -111,7 +120,7 @@ tresult PLUGIN_API Processor::process(ProcessData& data) {
     (60.*processSetup.sampleRate):0.);
   scheduler_.process(arranged_.midi,start,end,data.numSamples,
     arranged_.periodTicks,sink,
-    running&&havePosition&&haveTempo);
+    running&&havePosition&&haveTempo,live_);
   return kResultOk;
 }
 
@@ -187,6 +196,11 @@ tresult PLUGIN_API Processor::setState(IBStream* stream) {
   steps_=std::move(parsed);
   config_=next;
   arranged_=std::move(arranged);
+  live_.guitarGate=config_.guitarGate;
+  live_.bassGate=config_.bassGate;
+  live_.bassEnabled=config_.bassOn;
+  live_.bassVelocity=config_.bassVelocity;
+  live_.rootSemitones=config_.rootMidi-40;
   flushOnNextProcess_=true;
   return kResultOk;
 }
