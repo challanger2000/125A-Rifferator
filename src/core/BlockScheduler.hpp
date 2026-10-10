@@ -17,7 +17,7 @@ public:
   void reset() noexcept { active_={}; haveExpected_=false; }
   template<class Sink>
   void process(const Pair& pattern, double startPpq, double endPpq,
-               int blockSize, Sink&& sink, bool playing) noexcept {
+               int blockSize, int64_t patternTicks, Sink&& sink, bool playing) noexcept {
     if(blockSize<=0) return;
     if(!playing || !std::isfinite(startPpq) || !std::isfinite(endPpq) ||
        endPpq<=startPpq) {
@@ -28,7 +28,7 @@ public:
     if(haveExpected_ && std::abs(startPpq-expectedPpq_)>0.002) flush(sink,0);
     expectedPpq_=endPpq; haveExpected_=true;
     // Rendered note positions are in MIDI ticks (960 per quarter note).
-    const int64_t period=patternPeriod(pattern);
+    const int64_t period=patternTicks;
     if(period<=0) return;
     std::array<ScheduledMidiEvent,kCapacity> events{};
     int count=0;
@@ -78,15 +78,6 @@ public:
     }
   }
 private:
-  // Explicit configured pattern length must be passed by the adapter: this
-  // scheduler currently uses the final note end as a provisional bound.
-  // A full-grid silence at the tail requires its full pattern period.
-  static int64_t patternPeriod(const Pair& p) noexcept {
-    int64_t maxTick=0;
-    for(const auto& n:p.guitar) if(n.endTick>maxTick)maxTick=n.endTick;
-    for(const auto& n:p.bass) if(n.endTick>maxTick)maxTick=n.endTick;
-    return ((maxTick+239)/240)*240;
-  }
   std::array<std::array<bool,128>,2> active_{};
   bool haveExpected_{};
   double expectedPpq_{};
