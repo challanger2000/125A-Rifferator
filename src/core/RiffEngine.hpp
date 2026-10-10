@@ -58,7 +58,11 @@ inline Pair render(const std::vector<Step>& steps, const Config& cfg) {
     const int pitch=clampMidi(cfg.rootMidi+degreeOffset(s.degree,cfg.scale));
     for(int hit=0; hit<count; ++hit) {
       const int64_t t=begin+ticks*hit/count;
-      const int64_t boundary=begin+ticks*(hit+1)/count;
+      int64_t boundary=begin+ticks*(hit+1)/count;
+      // A non-final double stroke ends before the second stroke. A final
+      // stroke ends at the next step boundary (including explicit REST).
+      // A REST never sustains the previous note.
+      if(hit==count-1) boundary=begin+ticks;
       const auto gate=[&](int percent) {
         return t + (boundary-t)*std::clamp(percent,0,100)/100;
       };
