@@ -26,7 +26,7 @@ inline Arrangement arrange(const std::vector<Step>& base, const Config& config,
       result.midi.guitar.push_back(n);
     }
     for(auto& n:notes.bass) {
-      n.startTick+=offset;n.endTick+=offset;
+      n.startTick+=offset;n.endTick+=offset;n.boundaryTick+=offset;
       result.midi.bass.push_back(n);
     }
   }
