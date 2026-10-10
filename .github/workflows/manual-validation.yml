@@ -18,6 +18,15 @@ jobs:
         run: cmake --build build --config Release --parallel 4
       - name: Core regression tests
         run: ctest --test-dir build -C Release --output-on-failure
+      - name: Steinberg Validator
+        shell: pwsh
+        run: |
+          $validator = Get-ChildItem build -Recurse -Filter validator.exe | Where-Object { $_.FullName -match 'Release' } | Select-Object -First 1
+          if (-not $validator) { throw 'Steinberg validator.exe not found' }
+          $plugin = Join-Path (Resolve-Path 'build/VST3/Release') 'Rifferator.vst3'
+          if (-not (Test-Path $plugin)) { throw 'Rifferator VST3 bundle missing' }
+          & $validator.FullName -e $plugin
+          if ($LASTEXITCODE -ne 0) { throw "Steinberg validator failed: $LASTEXITCODE" }
       - name: Save built binaries
         uses: actions/upload-artifact@v4
         with:
