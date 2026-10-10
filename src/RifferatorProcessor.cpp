@@ -147,7 +147,7 @@ template<class T> bool readExact(Steinberg::IBStream* stream,T& value) {
 }
 tresult PLUGIN_API Processor::getState(IBStream* stream) {
   const uint32_t magic=0x31524641u; // AFR1
-  const uint32_t version=1;
+  const uint32_t version=2;
   const int32 count=static_cast<int32>(steps_.size());
   if(!writeExact(stream,magic)||!writeExact(stream,version)||!writeExact(stream,count))
     return kResultFalse;
@@ -156,6 +156,7 @@ tresult PLUGIN_API Processor::getState(IBStream* stream) {
     config_.guitarGate,config_.bassGate,config_.ticksPerStep,
     config_.bassOn?1:0};
   for(auto v:settings) if(!writeExact(stream,v))return kResultFalse;
+  if(!writeExact(stream,static_cast<int32>(fill_.intensityPercent)))return kResultFalse;
   for(const auto& step:steps_) {
     const std::array<int32,4> values{
       static_cast<int32>(step.articulation),step.degree,
@@ -168,7 +169,7 @@ tresult PLUGIN_API Processor::setState(IBStream* stream) {
   uint32_t magic=0,version=0;
   int32 count=0;
   if(!readExact(stream,magic)||!readExact(stream,version)||
-     !readExact(stream,count)||magic!=0x31524641u||version!=1||
+     !readExact(stream,count)||magic!=0x31524641u||(version!=1&&version!=2)||
      count<1||count>32)return kResultFalse;
   std::array<int32,7> settings{};
   for(auto& v:settings)if(!readExact(stream,v))return kResultFalse;
@@ -179,6 +180,8 @@ tresult PLUGIN_API Processor::setState(IBStream* stream) {
      settings[4]<0||settings[4]>100||
      settings[5]<1||settings[5]>960||
      settings[6]<0||settings[6]>1)return kResultFalse;
+  int32 restoredFill=0;
+  if(version>=2 && (!readExact(stream,restoredFill)||restoredFill<0||restoredFill>100))return kResultFalse;
   std::vector<Step> parsed(static_cast<std::size_t>(count));
   for(auto& step:parsed) {
     std::array<int32,4> values{};
@@ -202,6 +205,8 @@ tresult PLUGIN_API Processor::setState(IBStream* stream) {
   // Construct fill variants outside the audio process callback.
   steps_=std::move(parsed);
   config_=next;
+  fill_.intensityPercent=restoredFill;
+  fillIndex_=std::clamp((restoredFill+5)/10,0,10);
   prepareFillVariants();
   live_.guitarGate=config_.guitarGate;
   live_.bassGate=config_.bassGate;
