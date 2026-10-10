@@ -11,13 +11,15 @@ struct ScheduledMidiEvent {
   int bus{}, sampleOffset{}, pitch{}, velocity{}, noteId{-1};
   bool on{};
 };
+struct LiveControls { int guitarGate{95}; int bassGate{95}; int rootSemitones{}; int bassVelocity{100}; bool bassEnabled{true}; };
 class BlockScheduler {
 public:
   static constexpr int kCapacity=256;
   void reset() noexcept { active_={}; haveExpected_=false; }
   template<class Sink>
   void process(const Pair& pattern, double startPpq, double endPpq,
-               int blockSize, int64_t patternTicks, Sink&& sink, bool playing) noexcept {
+               int blockSize, int64_t patternTicks, Sink&& sink, bool playing,
+               LiveControls live={}) noexcept {
     if(blockSize<=0) return;
     if(!playing || !std::isfinite(startPpq) || !std::isfinite(endPpq) ||
        endPpq<=startPpq) {
@@ -35,6 +37,7 @@ public:
     std::array<ScheduledMidiEvent,kCapacity> events{};
     int count=0;
     auto collect=[&](const std::vector<MidiNote>& notes,int bus) {
+      if(bus==1 && !live.bassEnabled)return;
       for(const auto& note:notes) {
         const double periodPpq=static_cast<double>(period)/960.0;
         const double phase=static_cast<double>(note.startTick)/960.0;
@@ -49,9 +52,13 @@ public:
             const auto offset=static_cast<int>(std::floor(
               (t-startPpq)/(endPpq-startPpq)*blockSize));
             events[static_cast<std::size_t>(count++)]={
-              bus,offset,note.note,on?note.velocity:0,-1,on};
+              bus,offset,std::clamp(note.note+live.rootSemitones,0,127),
+              on?(bus==1?live.bassVelocity:note.velocity):0,-1,on};
           };
-          push(cycle+static_cast<double>(note.endTick)/960.0,false);
+          const int gate=std::clamp(bus==0?live.guitarGate:live.bassGate,0,100);
+          const int64_t endTick=note.startTick+(note.boundaryTick-note.startTick)*gate/100;
+          if(gate<=0) continue;
+          push(cycle+static_cast<double>(endTick)/960.0,false);
           push(cycle+phase,true);
         }
       }
