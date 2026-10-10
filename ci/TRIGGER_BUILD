@@ -2,3 +2,4 @@
 2026-10-11 retry on windows-2022
 2026-10-11 validation gate + recovery regression
 2026-10-11 arrangement and validator regression
+2026-10-11 controller parameters compile verification
