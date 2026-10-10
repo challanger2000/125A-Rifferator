@@ -1,6 +1,11 @@
-name: Rifferator V1 manual verification
+name: Rifferator V1 controlled verification
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - develop/v1.0.0
+    paths:
+      - ci/TRIGGER_BUILD
 jobs:
   build-and-core-tests:
     runs-on: windows-latest
