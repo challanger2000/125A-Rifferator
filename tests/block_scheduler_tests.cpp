@@ -26,5 +26,23 @@ int main() {
   events.clear();
   scheduler.process(pattern,4.0,5.0,48000,period,sink,true);
   assert(!events.empty());
+
+  scheduler.reset();
+  events.clear();
+  scheduler.process(pattern,0.0,1.0,48000,period,sink,true);
+  bool rejected=false;
+  auto rejectOff=[&](const ScheduledMidiEvent& e) {
+    if(!e.on && !rejected) { rejected=true; return false; }
+    events.push_back(e); return true;
+  };
+  scheduler.process(pattern,1.0,2.0,48000,period,rejectOff,false);
+  assert(rejected);
+  int recoveredOffs=0;
+  auto recovery=[&](const ScheduledMidiEvent& e) {
+    if(!e.on) ++recoveredOffs;
+    return true;
+  };
+  assert(scheduler.flush(recovery,0));
+  assert(recoveredOffs>=1);
   scheduler.reset();
 }
