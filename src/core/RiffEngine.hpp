@@ -12,7 +12,7 @@ struct Step {
   bool doubled{false};
   bool locked{false};
 };
-struct MidiNote { int64_t startTick{}, endTick{}; int note{}, velocity{}; };
+struct MidiNote { int64_t startTick{}, endTick{}; int note{}, velocity{}; int64_t boundaryTick{}; };
 struct Pair { std::vector<MidiNote> guitar, bass; };
 struct Config {
   int rootMidi{40};      // E2; adjusted to guitar library range by user
@@ -70,12 +70,12 @@ inline Pair render(const std::vector<Step>& steps, const Config& cfg) {
       if(cfg.guitarGate>0 && vel>0) {
         auto off=gate(cfg.guitarGate);
         if(off<=t) off=t+1;
-        out.guitar.push_back({t,off,pitch,clampMidi(vel)});
+        out.guitar.push_back({t,off,pitch,clampMidi(vel),boundary});
       }
       if(cfg.bassOn && cfg.bassGate>0 && bassFollows(s.articulation)) {
         auto off=gate(cfg.bassGate);
         if(off<=t) off=t+1;
-        out.bass.push_back({t,off,clampMidi(pitch+cfg.bassOffset),clampMidi(cfg.bassVelocity)});
+        out.bass.push_back({t,off,clampMidi(pitch+cfg.bassOffset),clampMidi(cfg.bassVelocity),boundary});
       }
     }
   }
