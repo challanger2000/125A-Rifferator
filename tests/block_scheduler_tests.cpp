@@ -32,7 +32,7 @@ int main() {
   scheduler.process(pattern,0.0,0.1,4800,period,sink,true);
   bool rejected=false;
   auto rejectOff=[&](const ScheduledMidiEvent& e) {
-    if(!e.on && !rejected) { rejected=true; return false; }
+    if(!e.on) { rejected=true; return false; }
     events.push_back(e); return true;
   };
   scheduler.process(pattern,0.1,0.2,4800,period,rejectOff,false);
