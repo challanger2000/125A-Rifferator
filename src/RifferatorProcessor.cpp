@@ -14,11 +14,18 @@ using namespace Steinberg::Vst;
 namespace {
 const FUID controllerId(0x125A4602,0x52494646,0x45524154,0x4F520100);
 }
+void Processor::prepareFillVariants() {
+  for(int index=0;index<11;++index) {
+    FillOptions options=fill_;
+    options.intensityPercent=index*10;
+    fillVariants_[static_cast<std::size_t>(index)]=arrange(steps_,config_,options,16);
+  }
+}
 Processor::Processor() {
   setControllerClass(controllerId);
   steps_.resize(16);
   for(int i=0;i<16;i+=2) steps_[i].articulation=Articulation::PalmMute;
-  arranged_=arrange(steps_,config_,fill_,16);
+  prepareFillVariants();
 }
 FUnknown* Processor::createInstance(void*) {
   return static_cast<IAudioProcessor*>(new Processor);
@@ -66,9 +73,6 @@ tresult PLUGIN_API Processor::process(ProcessData& data) {
         default:break;
       }
     }
-    // Pre-rendering is not real-time safe. This initial adapter applies
-    // parameters at block boundaries; cached arrangement refactoring needed
-    // before these changes can be enabled in a release build.
     if(changed) {
       // Gate, root and bass changes use only fixed-size transforms at render
       // time. The fill generation remains a non-realtime operation.
@@ -86,7 +90,9 @@ tresult PLUGIN_API Processor::process(ProcessData& data) {
       config_.bassOn=next.bassOn;
       config_.bassVelocity=next.bassVelocity;
       config_.rootMidi=next.rootMidi;
-      (void)nextFill; // Fill intensity is not enabled for automation yet.
+      const int newFillIndex=std::clamp((nextFill.intensityPercent+5)/10,0,10);
+      if(newFillIndex!=fillIndex_) { fillIndex_=newFillIndex;flushOnNextProcess_=true; }
+      fill_.intensityPercent=nextFill.intensityPercent;
     }
   }
   if(data.numSamples<=0 || !data.outputEvents)return kResultOk;
@@ -118,8 +124,9 @@ tresult PLUGIN_API Processor::process(ProcessData& data) {
   const double start=havePosition?ctx->projectTimeMusic:0.;
   const double end=start+(haveTempo?double(data.numSamples)*ctx->tempo/
     (60.*processSetup.sampleRate):0.);
-  scheduler_.process(arranged_.midi,start,end,data.numSamples,
-    arranged_.periodTicks,sink,
+  const auto& active=fillVariants_[static_cast<std::size_t>(fillIndex_)];
+  scheduler_.process(active.midi,start,end,data.numSamples,
+    active.periodTicks,sink,
     running&&havePosition&&haveTempo,live_);
   return kResultOk;
 }
@@ -192,10 +199,10 @@ tresult PLUGIN_API Processor::setState(IBStream* stream) {
   next.ticksPerStep=settings[5];
   next.bassOn=settings[6]!=0;
   // Commit only after complete state validation. No partial modification.
-  auto arranged=arrange(parsed,next,fill_,16);
+  // Construct fill variants outside the audio process callback.
   steps_=std::move(parsed);
   config_=next;
-  arranged_=std::move(arranged);
+  prepareFillVariants();
   live_.guitarGate=config_.guitarGate;
   live_.bassGate=config_.bassGate;
   live_.bassEnabled=config_.bassOn;
