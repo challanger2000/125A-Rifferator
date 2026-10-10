@@ -115,6 +115,7 @@ tresult PLUGIN_API Processor::process(ProcessData& data) {
   };
   if(flushOnNextProcess_) {
     if(scheduler_.flush(sink,0))flushOnNextProcess_=false;
+    else return kResultOk; // Reattempt off events; do not add new notes.
   }
   const auto* ctx=data.processContext;
   const bool running=ctx && (ctx->state&ProcessContext::kPlaying)!=0;
