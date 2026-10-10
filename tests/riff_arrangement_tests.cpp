@@ -13,6 +13,8 @@ int main(){
   assert(a.midi.guitar.size()==32 && a.midi.bass.size()==32);
   assert(a.midi.guitar[0].startTick==0);
   assert(a.midi.guitar[2].startTick==3840);
+  assert(a.midi.bass[2].boundaryTick==4080);
+  assert(a.midi.bass[2].endTick>a.midi.bass[2].startTick);
   fill.intensityPercent=100;
   auto b=arrange(base,config,fill,16);
   auto again=arrange(base,config,fill,16);
