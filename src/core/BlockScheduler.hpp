@@ -21,11 +21,13 @@ public:
     if(blockSize<=0) return;
     if(!playing || !std::isfinite(startPpq) || !std::isfinite(endPpq) ||
        endPpq<=startPpq) {
-      flush(sink,0);
+      if(!flush(sink,0)) return;
       haveExpected_=false;
       return;
     }
-    if(haveExpected_ && std::abs(startPpq-expectedPpq_)>0.002) flush(sink,0);
+    if(haveExpected_ && std::abs(startPpq-expectedPpq_)>0.002) {
+      if(!flush(sink,0)) return;
+    }
     expectedPpq_=endPpq; haveExpected_=true;
     // Rendered note positions are in MIDI ticks (960 per quarter note).
     const int64_t period=patternTicks;
@@ -39,7 +41,7 @@ public:
         const int64_t first=static_cast<int64_t>(std::floor((startPpq-phase)/periodPpq))-1;
         const int64_t last=static_cast<int64_t>(std::ceil((endPpq-phase)/periodPpq))+1;
         // protect realtime complexity on corrupt/huge host jumps
-        if(last-first>64) continue;
+        if(last-first>64) { flush(sink,0); return; }
         for(int64_t n=first;n<=last;++n) {
           const double cycle=periodPpq*static_cast<double>(n);
           auto push=[&](double t,bool on) {
@@ -71,13 +73,19 @@ public:
       const auto e=events[static_cast<std::size_t>(i)];
       if(!e.on && !active_[static_cast<std::size_t>(e.bus)][static_cast<std::size_t>(e.pitch)]) continue;
       if(sink(e)) active_[static_cast<std::size_t>(e.bus)][static_cast<std::size_t>(e.pitch)]=e.on;
+      else { flush(sink,e.sampleOffset); return; }
     }
   }
-  template<class Sink> void flush(Sink&& sink,int offset) noexcept {
+  template<class Sink> bool flush(Sink&& sink,int offset) noexcept {
+    bool complete=true;
     for(int bus=0;bus<2;++bus) for(int pitch=0;pitch<128;++pitch) {
       auto& active=active_[static_cast<std::size_t>(bus)][static_cast<std::size_t>(pitch)];
-      if(active && sink(ScheduledMidiEvent{bus,offset,pitch,0,-1,false}))active=false;
+      if(active) {
+        if(sink(ScheduledMidiEvent{bus,offset,pitch,0,-1,false}))active=false;
+        else complete=false;
+      }
     }
+    return complete;
   }
 private:
   std::array<std::array<bool,128>,2> active_{};
