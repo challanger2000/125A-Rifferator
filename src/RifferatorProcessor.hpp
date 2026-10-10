@@ -1,5 +1,6 @@
 #pragma once
 #include "core/BlockScheduler.hpp"
+#include "core/RiffArrangement.hpp"
 #include "public.sdk/source/vst/vstaudioeffect.h"
 #include "pluginterfaces/vst/ivstprocesscontext.h"
 #include <vector>
@@ -19,7 +20,8 @@ public:
 private:
   Config config_{};
   std::vector<Step> steps_{};
-  Pair rendered_{};
+  FillOptions fill_{};
+  Arrangement arranged_{};
   BlockScheduler scheduler_{};
   bool flushOnNextProcess_{};
 };
