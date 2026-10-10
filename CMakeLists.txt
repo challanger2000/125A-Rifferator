@@ -13,3 +13,6 @@ add_test(NAME rifferator_random COMMAND rifferator_random_tests)
 
 add_executable(rifferator_fill_tests tests/riff_fill_tests.cpp)
 add_test(NAME rifferator_fill COMMAND rifferator_fill_tests)
+
+add_executable(rifferator_scheduler_tests tests/block_scheduler_tests.cpp)
+add_test(NAME rifferator_scheduler COMMAND rifferator_scheduler_tests)
