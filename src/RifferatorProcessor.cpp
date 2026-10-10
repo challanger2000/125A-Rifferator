@@ -1,5 +1,7 @@
 #include "RifferatorProcessor.hpp"
 #include "pluginterfaces/vst/ivstevents.h"
+#include "pluginterfaces/base/ibstream.h"
+#include <array>
 #include <cstdint>
 
 namespace a125::rifferator {
@@ -73,4 +75,81 @@ tresult PLUGIN_API Processor::process(ProcessData& data) {
     running&&havePosition&&haveTempo);
   return kResultOk;
 }
+
+namespace {
+template<class T> bool writeExact(Steinberg::IBStream* stream,const T& value) {
+  if(!stream)return false;
+  Steinberg::int32 count=0;
+  return stream->write(const_cast<T*>(&value),sizeof(T),&count)==Steinberg::kResultOk &&
+    count==sizeof(T);
+}
+template<class T> bool readExact(Steinberg::IBStream* stream,T& value) {
+  if(!stream)return false;
+  Steinberg::int32 count=0;
+  return stream->read(&value,sizeof(T),&count)==Steinberg::kResultOk &&
+    count==sizeof(T);
+}
+}
+tresult PLUGIN_API Processor::getState(IBStream* stream) {
+  const uint32_t magic=0x31524641u; // AFR1
+  const uint32_t version=1;
+  const int32 count=static_cast<int32>(steps_.size());
+  if(!writeExact(stream,magic)||!writeExact(stream,version)||!writeExact(stream,count))
+    return kResultFalse;
+  const std::array<int32,7> settings{
+    config_.rootMidi,config_.bassVelocity,config_.bassOffset,
+    config_.guitarGate,config_.bassGate,config_.ticksPerStep,
+    config_.bassOn?1:0};
+  for(auto v:settings) if(!writeExact(stream,v))return kResultFalse;
+  for(const auto& step:steps_) {
+    const std::array<int32,4> values{
+      static_cast<int32>(step.articulation),step.degree,
+      step.doubled?1:0,step.locked?1:0};
+    for(auto v:values)if(!writeExact(stream,v))return kResultFalse;
+  }
+  return kResultOk;
+}
+tresult PLUGIN_API Processor::setState(IBStream* stream) {
+  uint32_t magic=0,version=0;
+  int32 count=0;
+  if(!readExact(stream,magic)||!readExact(stream,version)||
+     !readExact(stream,count)||magic!=0x31524641u||version!=1||
+     count<1||count>32)return kResultFalse;
+  std::array<int32,7> settings{};
+  for(auto& v:settings)if(!readExact(stream,v))return kResultFalse;
+  if(settings[0]<0||settings[0]>127||
+     settings[1]<1||settings[1]>127||
+     settings[2]<-48||settings[2]>48||
+     settings[3]<0||settings[3]>100||
+     settings[4]<0||settings[4]>100||
+     settings[5]<1||settings[5]>960||
+     settings[6]<0||settings[6]>1)return kResultFalse;
+  std::vector<Step> parsed(static_cast<std::size_t>(count));
+  for(auto& step:parsed) {
+    std::array<int32,4> values{};
+    for(auto& v:values)if(!readExact(stream,v))return kResultFalse;
+    if(values[0]<0||values[0]>5||values[1]<-13||values[1]>15||
+       values[2]<0||values[2]>1||values[3]<0||values[3]>1)return kResultFalse;
+    step.articulation=static_cast<Articulation>(values[0]);
+    step.degree=values[1];
+    step.doubled=values[2]!=0;
+    step.locked=values[3]!=0;
+  }
+  Config next=config_;
+  next.rootMidi=settings[0];
+  next.bassVelocity=settings[1];
+  next.bassOffset=settings[2];
+  next.guitarGate=settings[3];
+  next.bassGate=settings[4];
+  next.ticksPerStep=settings[5];
+  next.bassOn=settings[6]!=0;
+  // Commit only after complete state validation. No partial modification.
+  auto rendered=render(parsed,next);
+  steps_=std::move(parsed);
+  config_=next;
+  rendered_=std::move(rendered);
+  flushOnNextProcess_=true;
+  return kResultOk;
+}
+
 }
