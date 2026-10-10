@@ -1,5 +1,8 @@
 #include "RifferatorProcessor.hpp"
 #include "RifferatorParameters.hpp"
+#include "pluginterfaces/base/ibstream.h"
+#include <array>
+#include <algorithm>
 #include "public.sdk/source/vst/vstparameters.h"
 #include "public.sdk/source/vst/vsteditcontroller.h"
 #include "public.sdk/source/main/pluginfactory.h"
@@ -19,6 +22,35 @@ public:
     parameters.addParameter(STR16("Bass Velocity"),nullptr,126,99.0/126.0,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kBassVelocity);
     parameters.addParameter(STR16("Fill Intensity"),STR16("%"),0,0.0,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kFillIntensity);
     return Steinberg::kResultOk;
+  }
+  Steinberg::tresult PLUGIN_API setComponentState(Steinberg::IBStream* state) override {
+    using namespace Steinberg;
+    using namespace Steinberg::Vst;
+    if(!state)return kResultFalse;
+    auto read32=[&](uint32_t& v) {
+      int32 read=0;
+      return state->read(&v,sizeof(v),&read)==kResultOk && read==sizeof(v);
+    };
+    uint32_t magic=0,version=0,count=0;
+    if(!read32(magic)||!read32(version)||!read32(count) ||
+       magic!=0x31524641u || (version!=1 && version!=2) ||
+       count<1 || count>32) return kResultFalse;
+    std::array<uint32_t,7> values{};
+    for(auto& v:values)if(!read32(v))return kResultFalse;
+    uint32_t fill=0;
+    if(version>=2 && !read32(fill))return kResultFalse;
+    if(values[0]>127 || values[1]<1 || values[1]>127 ||
+       values[3]>100 || values[4]>100 || values[6]>1 ||
+       fill>100)return kResultFalse;
+    // The processor owns the pattern. The controller only synchronizes
+    // the automatable parameter values presented to the host/GUI.
+    setParamNormalized(a125::rifferator::kRootPitch,double(values[0])/127.);
+    setParamNormalized(a125::rifferator::kBassVelocity,double(values[1]-1)/126.);
+    setParamNormalized(a125::rifferator::kGuitarGate,double(values[3])/100.);
+    setParamNormalized(a125::rifferator::kBassGate,double(values[4])/100.);
+    setParamNormalized(a125::rifferator::kBassEnabled,values[6]?1.:0.);
+    setParamNormalized(a125::rifferator::kFillIntensity,double(fill)/100.);
+    return kResultOk;
   }
   static Steinberg::FUnknown* createInstance(void*) {
     return static_cast<Steinberg::Vst::IEditController*>(new Controller);
