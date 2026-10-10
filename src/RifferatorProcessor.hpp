@@ -25,5 +25,6 @@ private:
   BlockScheduler scheduler_{};
   bool flushOnNextProcess_{};
   LiveControls live_{};
+  int preparedRootMidi_{40};
 };
 }
