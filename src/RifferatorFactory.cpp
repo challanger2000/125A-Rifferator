@@ -17,7 +17,6 @@ public:
     parameters.addParameter(STR16("Bass Enabled"),nullptr,1,1.0,0,a125::rifferator::kBassEnabled);
     parameters.addParameter(STR16("Root MIDI"),nullptr,127,40.0/127.0,0,a125::rifferator::kRootPitch);
     parameters.addParameter(STR16("Bass Velocity"),nullptr,126,99.0/126.0,0,a125::rifferator::kBassVelocity);
-    parameters.addParameter(STR16("Fill Intensity"),STR16("%"),0,0.0,0,a125::rifferator::kFillIntensity);
     return Steinberg::kResultOk;
   }
   static Steinberg::FUnknown* createInstance(void*) {
