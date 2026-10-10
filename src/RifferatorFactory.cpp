@@ -42,6 +42,15 @@ public:
     if(values[0]>127 || values[1]<1 || values[1]>127 ||
        values[3]>100 || values[4]>100 || values[6]>1 ||
        fill>100)return kResultFalse;
+    // Validate the entire serialized riff before publishing parameter values.
+    // A truncated pattern must never partially restore the controller.
+    for(uint32_t i=0;i<count;++i) {
+      std::array<uint32_t,4> step{};
+      for(auto& value:step)if(!read32(value))return kResultFalse;
+      const int32_t degree=static_cast<int32_t>(step[1]);
+      if(step[0]>5 || degree<-13 || degree>15 ||
+         step[2]>1 || step[3]>1)return kResultFalse;
+    }
     // The processor owns the pattern. The controller only synchronizes
     // the automatable parameter values presented to the host/GUI.
     setParamNormalized(a125::rifferator::kRootPitch,double(values[0])/127.);
