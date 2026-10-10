@@ -24,5 +24,6 @@ private:
   Arrangement arranged_{};
   BlockScheduler scheduler_{};
   bool flushOnNextProcess_{};
+  LiveControls live_{};
 };
 }
