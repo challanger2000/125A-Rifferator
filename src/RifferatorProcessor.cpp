@@ -1,4 +1,8 @@
 #include "RifferatorProcessor.hpp"
+#include "RifferatorParameters.hpp"
+#include "pluginterfaces/vst/ivstparameterchanges.h"
+#include <algorithm>
+#include <cmath>
 #include "pluginterfaces/vst/ivstevents.h"
 #include "pluginterfaces/base/ibstream.h"
 #include <array>
@@ -40,6 +44,37 @@ tresult PLUGIN_API Processor::setActive(TBool active) {
   return AudioEffect::setActive(active);
 }
 tresult PLUGIN_API Processor::process(ProcessData& data) {
+  if(data.inputParameterChanges) {
+    Config next=config_;
+    FillOptions nextFill=fill_;
+    bool changed=false;
+    for(int i=0;i<data.inputParameterChanges->getParameterCount();++i) {
+      auto* queue=data.inputParameterChanges->getParameterData(i);
+      if(!queue || queue->getPointCount()<=0)continue;
+      int32 offset=0;ParamValue value=0;
+      if(queue->getPoint(queue->getPointCount()-1,offset,value)!=kResultOk ||
+         !std::isfinite(value))continue;
+      value=std::clamp(value,0.,1.);
+      const int v=static_cast<int>(std::lround(value*100.));
+      switch(queue->getParameterId()) {
+        case kGuitarGate:next.guitarGate=v;changed=true;break;
+        case kBassGate:next.bassGate=v;changed=true;break;
+        case kBassEnabled:next.bassOn=value>=0.5;changed=true;break;
+        case kRootPitch:next.rootMidi=static_cast<int>(std::lround(value*127.));changed=true;break;
+        case kBassVelocity:next.bassVelocity=1+static_cast<int>(std::lround(value*126.));changed=true;break;
+        case kFillIntensity:nextFill.intensityPercent=v;changed=true;break;
+        default:break;
+      }
+    }
+    // Pre-rendering is not real-time safe. This initial adapter applies
+    // parameters at block boundaries; cached arrangement refactoring needed
+    // before these changes can be enabled in a release build.
+    if(changed) {
+      config_=next;fill_=nextFill;
+      arranged_=arrange(steps_,config_,fill_,16);
+      flushOnNextProcess_=true;
+    }
+  }
   if(data.numSamples<=0 || !data.outputEvents)return kResultOk;
   auto sink=[&](const ScheduledMidiEvent& midi) {
     Event e{};
