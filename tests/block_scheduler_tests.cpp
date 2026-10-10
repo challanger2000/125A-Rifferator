@@ -44,5 +44,25 @@ int main() {
   };
   assert(scheduler.flush(recovery,0));
   assert(recoveredOffs>=1);
+
+  // Runtime gate and transpose must not modify precomputed MIDI vectors.
+  events.clear();
+  LiveControls live;
+  live.guitarGate=50;
+  live.bassGate=25;
+  live.rootSemitones=2;
+  live.bassVelocity=110;
+  BlockScheduler liveScheduler;
+  liveScheduler.process(pattern,0.0,0.25,12000,period,sink,true,live);
+  assert(!events.empty());
+  for(const auto& e:events) if(e.on) {
+    assert(e.pitch==42 || e.pitch==30);
+    if(e.bus==1) assert(e.velocity==110);
+  }
+  events.clear();
+  live.bassEnabled=false;
+  liveScheduler.reset();
+  liveScheduler.process(pattern,0.0,0.25,12000,period,sink,true,live);
+  for(const auto& e:events) assert(e.bus==0);
   scheduler.reset();
 }
