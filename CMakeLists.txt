@@ -1,0 +1,10 @@
+cmake_minimum_required(VERSION 3.25)
+project(125A_Rifferator VERSION 1.0.0 LANGUAGES CXX)
+set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+enable_testing()
+add_executable(rifferator_core_tests tests/riff_engine_tests.cpp)
+target_include_directories(rifferator_core_tests PRIVATE src/core)
+add_test(NAME rifferator_core COMMAND rifferator_core_tests)
+# VST3 host adapter pending SDK pin and independently verified multi-bus routing.
