@@ -14,7 +14,7 @@ Processor::Processor() {
   setControllerClass(controllerId);
   steps_.resize(16);
   for(int i=0;i<16;i+=2) steps_[i].articulation=Articulation::PalmMute;
-  rendered_=render(steps_,config_);
+  arranged_=arrange(steps_,config_,fill_,16);
 }
 FUnknown* Processor::createInstance(void*) {
   return static_cast<IAudioProcessor*>(new Processor);
@@ -70,8 +70,8 @@ tresult PLUGIN_API Processor::process(ProcessData& data) {
   const double start=havePosition?ctx->projectTimeMusic:0.;
   const double end=start+(haveTempo?double(data.numSamples)*ctx->tempo/
     (60.*processSetup.sampleRate):0.);
-  scheduler_.process(rendered_,start,end,data.numSamples,
-    int64_t(steps_.size())*config_.ticksPerStep,sink,
+  scheduler_.process(arranged_.midi,start,end,data.numSamples,
+    arranged_.periodTicks,sink,
     running&&havePosition&&haveTempo);
   return kResultOk;
 }
@@ -144,10 +144,10 @@ tresult PLUGIN_API Processor::setState(IBStream* stream) {
   next.ticksPerStep=settings[5];
   next.bassOn=settings[6]!=0;
   // Commit only after complete state validation. No partial modification.
-  auto rendered=render(parsed,next);
+  auto arranged=arrange(parsed,next,fill_,16);
   steps_=std::move(parsed);
   config_=next;
-  rendered_=std::move(rendered);
+  arranged_=std::move(arranged);
   flushOnNextProcess_=true;
   return kResultOk;
 }
