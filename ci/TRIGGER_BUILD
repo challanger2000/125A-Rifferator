@@ -6,3 +6,4 @@
 2026-10-11 runtime transform and regression build
 2026-10-11 realtime fill snapshot and bass boundary verification
 2026-10-11 state V2 and controller synchronization
+2026-10-11 full controller state validation and NoteOff retry
