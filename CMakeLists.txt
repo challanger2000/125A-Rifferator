@@ -7,4 +7,6 @@ enable_testing()
 add_executable(rifferator_core_tests tests/riff_engine_tests.cpp)
 target_include_directories(rifferator_core_tests PRIVATE src/core)
 add_test(NAME rifferator_core COMMAND rifferator_core_tests)
+add_executable(rifferator_random_tests tests/riff_random_tests.cpp)
+add_test(NAME rifferator_random COMMAND rifferator_random_tests)
 # VST3 host adapter pending SDK pin and independently verified multi-bus routing.
