@@ -55,6 +55,8 @@ public:
       }
     };
     collect(pattern.guitar,0); collect(pattern.bass,1);
+    // Fail closed on capacity overflow rather than silently losing Note-Offs.
+    // The processor should retain a pending recovery flag when a host rejects events.
     // Stable tie order: NoteOff before NoteOn at the same sample and pitch.
     for(int i=1;i<count;++i) {
       auto key=events[static_cast<std::size_t>(i)];int j=i-1;
