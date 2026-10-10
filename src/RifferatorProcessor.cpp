@@ -80,7 +80,7 @@ tresult PLUGIN_API Processor::process(ProcessData& data) {
       live_.bassGate=next.bassGate;
       live_.bassEnabled=next.bassOn;
       live_.bassVelocity=next.bassVelocity;
-      live_.rootSemitones=next.rootMidi-40;
+      live_.rootSemitones=next.rootMidi-preparedRootMidi_;
       config_.guitarGate=next.guitarGate;
       config_.bassGate=next.bassGate;
       config_.bassOn=next.bassOn;
@@ -200,7 +200,8 @@ tresult PLUGIN_API Processor::setState(IBStream* stream) {
   live_.bassGate=config_.bassGate;
   live_.bassEnabled=config_.bassOn;
   live_.bassVelocity=config_.bassVelocity;
-  live_.rootSemitones=config_.rootMidi-40;
+  preparedRootMidi_=config_.rootMidi;
+  live_.rootSemitones=0;
   flushOnNextProcess_=true;
   return kResultOk;
 }
