@@ -14,6 +14,8 @@ public:
   Steinberg::tresult PLUGIN_API canProcessSampleSize(Steinberg::int32) override;
   Steinberg::tresult PLUGIN_API process(Steinberg::Vst::ProcessData&) override;
   Steinberg::tresult PLUGIN_API setActive(Steinberg::TBool) override;
+  Steinberg::tresult PLUGIN_API getState(Steinberg::IBStream*) override;
+  Steinberg::tresult PLUGIN_API setState(Steinberg::IBStream*) override;
 private:
   Config config_{};
   std::vector<Step> steps_{};
