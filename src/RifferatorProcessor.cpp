@@ -70,9 +70,13 @@ tresult PLUGIN_API Processor::process(ProcessData& data) {
     // parameters at block boundaries; cached arrangement refactoring needed
     // before these changes can be enabled in a release build.
     if(changed) {
-      config_=next;fill_=nextFill;
-      arranged_=arrange(steps_,config_,fill_,16);
-      flushOnNextProcess_=true;
+      // Do not allocate or regenerate MIDI in the realtime process callback.
+      // Rebuilding the arrangement requires a separately prepared snapshot.
+      // Until the snapshot handoff exists, reject these runtime changes.
+      // Keep the current musical state coherent instead of pretending
+      // controller automation has been applied.
+      (void)next;
+      (void)nextFill;
     }
   }
   if(data.numSamples<=0 || !data.outputEvents)return kResultOk;
