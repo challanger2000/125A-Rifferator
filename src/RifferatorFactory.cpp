@@ -55,6 +55,20 @@ public:
     if(EditControllerEx1::initialize(context)!=Steinberg::kResultOk) return Steinberg::kResultFalse;
     parameters.addParameter(STR16("Guitar Gate"),STR16("%"),0,0.95,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kGuitarGate);
     parameters.addParameter(STR16("Bass Gate"),STR16("%"),0,0.95,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kBassGate);
+    {
+      auto* mode=new StringListParameter(STR16("Bass Mode"),a125::rifferator::kBassMode);
+      mode->appendString(STR16("FOLLOW"));
+      mode->appendString(STR16("EBM"));
+      mode->appendString(STR16("HYBRID"));
+      parameters.addParameter(mode);
+      auto* style=new StringListParameter(STR16("EBM Style"),a125::rifferator::kEbmStyle);
+      style->appendString(STR16("CLASSIC"));
+      style->appendString(STR16("CHROMATIC"));
+      style->appendString(STR16("OCTAVE"));
+      style->appendString(STR16("INDUSTRIAL"));
+      style->appendString(STR16("ROLLING"));
+      parameters.addParameter(style);
+    }
     parameters.addParameter(STR16("Bass Enabled"),nullptr,1,1.0,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kBassEnabled);
     parameters.addParameter(STR16("Root MIDI"),nullptr,127,40.0/127.0,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kRootPitch);
     parameters.addParameter(STR16("Bass Velocity"),nullptr,126,99.0/126.0,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kBassVelocity);
@@ -360,7 +374,7 @@ public:
     };
     uint32_t magic=0,version=0,count=0;
     if(!read32(magic)||!read32(version)||!read32(count) ||
-       magic!=0x31524641u || (version!=1 && version!=2 && version!=3 && version!=4 && version!=5) ||
+       magic!=0x31524641u || (version!=1 && version!=2 && version!=3 && version!=4 && version!=5 && version!=6) ||
        count<1 || count>32) return kResultFalse;
     std::array<uint32_t,7> values{};
     for(auto& v:values)if(!read32(v))return kResultFalse;
@@ -403,8 +417,14 @@ public:
       }
       for(auto& value:guitarLocks)if(!read32(value)||value>1)return kResultFalse;
     }
+    uint32_t restoredMode=0,restoredStyle=0;
+    if(version>=6 && (!read32(restoredMode)||restoredMode>2||
+                      !read32(restoredStyle)||restoredStyle>4))
+      return kResultFalse;
     // The processor owns the pattern. The controller only synchronizes
     // the automatable parameter values presented to the host/GUI.
+    setParamNormalized(a125::rifferator::kBassMode,restoredMode/2.);
+    setParamNormalized(a125::rifferator::kEbmStyle,restoredStyle/4.);
     setParamNormalized(a125::rifferator::kRootPitch,double(values[0])/127.);
     setParamNormalized(a125::rifferator::kBassVelocity,double(values[1]-1)/126.);
     setParamNormalized(a125::rifferator::kGuitarGate,double(values[3])/100.);
