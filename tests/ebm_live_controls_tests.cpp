@@ -36,4 +36,23 @@ int main() {
   assert(adapter.process(arrangement,0.,0.25,960,true,sink,-100,50));
   for(const auto& e:events)assert(e.pitch==0);
   assert(!events.empty());
+  // Gate-to-zero must release a note currently sounding, not only block new ons.
+  events.clear();
+  assert(adapter.flush(sink,0));
+  adapter.reset();
+  assert(adapter.process(arrangement,0.,0.125,512,true,sink,0,100));
+  bool sounding=false;
+  for(const auto& e:events)if(e.on)sounding=true;
+  assert(sounding);
+  events.clear();
+  assert(adapter.process(arrangement,0.125,0.25,512,true,sink,0,0));
+  bool sawRelease=false;
+  for(const auto& e:events) {
+    if(!e.on && e.bus==1)sawRelease=true;
+    assert(!e.on);
+  }
+  assert(sawRelease);
+  events.clear();
+  assert(adapter.process(arrangement,0.25,0.375,512,true,sink,0,0));
+  assert(events.empty());
 }
