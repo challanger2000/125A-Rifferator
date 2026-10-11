@@ -6,12 +6,22 @@
 #include "public.sdk/source/vst/vstparameters.h"
 #include "public.sdk/source/vst/vsteditcontroller.h"
 #include "public.sdk/source/main/pluginfactory.h"
+#include "vstgui/plugin-bindings/vst3editor.h"
+#include <cstring>
 
 namespace {
 const Steinberg::FUID processorUid(0x125A4601,0x52494646,0x45524154,0x4F520100);
 const Steinberg::FUID controllerUid(0x125A4602,0x52494646,0x45524154,0x4F520100);
 class Controller final : public Steinberg::Vst::EditControllerEx1 {
 public:
+  Steinberg::IPlugView* PLUGIN_API createView(Steinberg::FIDString name) override {
+    if(name && std::strcmp(name,Steinberg::Vst::ViewType::kEditor)==0) {
+      auto* editor=new VSTGUI::VST3Editor(this,"RifferatorView","rifferator.uidesc");
+      editor->setZoomFactor(1.);
+      return editor;
+    }
+    return nullptr;
+  }
   Steinberg::tresult PLUGIN_API initialize(Steinberg::FUnknown* context) override {
     using namespace Steinberg::Vst;
     if(EditControllerEx1::initialize(context)!=Steinberg::kResultOk) return Steinberg::kResultFalse;
