@@ -77,5 +77,15 @@ int main() {
     unchanged=true;
   }
   assert(unchanged);
+  events.clear();
+  assert(adapter.flush(sink,0));
+  adapter.reset();
+  assert(adapter.process(arrangement,0.,0.25,960,true,sink,0,100,nullptr,40,nullptr,120));
+  bool stronger=false;
+  for(const auto& e:events)if(e.on) {
+    assert(e.velocity==std::clamp(arrangement.midi.bass.front().velocity+20,1,127));
+    stronger=true;
+  }
+  assert(stronger);
 }
 
