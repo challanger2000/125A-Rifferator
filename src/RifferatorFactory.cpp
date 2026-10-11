@@ -22,6 +22,23 @@ class Controller final : public Steinberg::Vst::EditControllerEx1,
 public:
   unsigned generateCount_{};
   VSTGUI::VST3Editor* activeEditor_{};
+  std::array<VSTGUI::CControl*,21> commandButtons_{};
+  void refreshCommands() {
+    const auto selected=[&](int tag) -> bool {
+      using namespace a125::rifferator;
+      if(tag==701||tag==702)return zoomFactor_==(tag==701?1.:1.5);
+      if(tag>=710&&tag<=712)return std::clamp(static_cast<int>(getParamNormalized(kBassMode)*2.+0.5),0,2)==tag-710;
+      if(tag>=713&&tag<=717)return std::clamp(static_cast<int>(getParamNormalized(kChordsQuality)*4.+0.5),0,4)==tag-713;
+      if(tag==718)return getParamNormalized(kChordsEnabled)>=0.5;
+      if(tag==719)return getParamNormalized(kBassEnabled)>=0.5;
+      if(tag==720)return getParamNormalized(kChordsMode)>=0.5;
+      return false;
+    };
+    for(int tag=701;tag<=720;++tag)if(auto* button=commandButtons_[static_cast<std::size_t>(tag-700)]) {
+      button->setValueNormalized(selected(tag)?1.f:0.f);
+      button->invalid();
+    }
+  }
   double zoomFactor_{1.};
   std::array<std::array<VSTGUI::CControl*,16>,6> guitarCells_{};
   void refreshGuitarStep(int step) {
@@ -36,6 +53,7 @@ public:
   Steinberg::tresult PLUGIN_API setParamNormalized(Steinberg::Vst::ParamID id,Steinberg::Vst::ParamValue value) override {
     const auto result=EditControllerEx1::setParamNormalized(id,value);
     if(result==Steinberg::kResultOk) {
+      if(id==a125::rifferator::kBassMode || id==a125::rifferator::kChordsQuality || id==a125::rifferator::kChordsEnabled || id==a125::rifferator::kBassEnabled || id==a125::rifferator::kChordsMode) refreshCommands();
       if(id>=a125::rifferator::kGuitarStepBase && id<a125::rifferator::kGuitarStepBase+16)refreshGuitarStep(static_cast<int>(id-a125::rifferator::kGuitarStepBase));
       if(id>=a125::rifferator::kGuitarArticulationBase && id<a125::rifferator::kGuitarArticulationBase+16)refreshGuitarStep(static_cast<int>(id-a125::rifferator::kGuitarArticulationBase));
     }
@@ -45,6 +63,7 @@ public:
     if(activeEditor_==editor)activeEditor_=nullptr;
     // Clear all non-owning GUI pointers before the editor destroys its views.
     for(auto& row:guitarCells_)row.fill(nullptr);
+    commandButtons_.fill(nullptr);
   }
   VSTGUI::CView* verifyView(VSTGUI::CView* view,
                             const VSTGUI::UIAttributes&,
@@ -53,6 +72,10 @@ public:
     if(auto* control=dynamic_cast<VSTGUI::CControl*>(view)) {
       if((control->getTag()>=500 && control->getTag()<596) || (control->getTag()>=700 && control->getTag()<=720))
         control->setListener(this);
+      if(control->getTag()>=701 && control->getTag()<=720) {
+        commandButtons_[static_cast<std::size_t>(control->getTag()-700)]=control;
+        refreshCommands();
+      }
       if(control->getTag()>=500 && control->getTag()<596) {
         const int tag=control->getTag()-500;
         guitarCells_[static_cast<std::size_t>(tag/16)][static_cast<std::size_t>(tag%16)]=control;
@@ -67,6 +90,7 @@ public:
     if(command==701 || command==702) {
       zoomFactor_=command==701?1.:1.5;
       if(activeEditor_)activeEditor_->setZoomFactor(zoomFactor_);
+      refreshCommands();
       return;
     }
     const auto send=[&](Steinberg::Vst::ParamID id,double value) {
