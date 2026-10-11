@@ -53,9 +53,10 @@ public:
                  int frames,bool playing,Sink&& sink,
                  int transpose=0,int gatePercent=100,
                  const HarmonyMap* harmony=nullptr,int harmonyRoot=40,
-                 const GuitarGuide* guitar=nullptr) noexcept {
+                 const GuitarGuide* guitar=nullptr,int bassVelocity=100) noexcept {
         transpose=std::clamp(transpose,-127,127);
         gatePercent=std::clamp(gatePercent,0,100);
+        bassVelocity=std::clamp(bassVelocity,1,127);
         if(frames<=0) return true;
         // A gate of zero must release notes that were already sounding.
         // Otherwise skipping note events suppresses their NoteOffs as well.
@@ -127,7 +128,7 @@ public:
                     if(size==static_cast<int>(events.size())) return false;
                     const double fraction=(at-startPpq)/(endPpq-startPpq);
                     const int offset=std::clamp(static_cast<int>(fraction*frames),0,frames-1);
-                    events[size++]={offset,outPitch,on?n.velocity:0,on,at};
+                    events[size++]={offset,outPitch,on?std::clamp(static_cast<int>(n.velocity)+bassVelocity-100,1,127):0,on,at};
                     return true;
                 };
                 if(!add(base+static_cast<double>(gatedEnd)/960.0,false) ||
