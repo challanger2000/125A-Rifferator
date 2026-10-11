@@ -22,7 +22,7 @@ struct LiveControls {
       drumSteps[0][i]=i%4==0;
       drumSteps[1][i]=i==4||i==12;
       drumSteps[2][i]=true;
-      guitarSteps[i]=(i%2)==0;
+      guitarSteps[i]=true;
     }
   }
 };
