@@ -26,6 +26,8 @@ Processor::Processor() {
   steps_.resize(16);
   for(int i=0;i<16;i+=2) steps_[i].articulation=Articulation::PalmMute;
   prepareFillVariants();
+  drumNotes_=renderDrums(drumPattern_,16);
+  scheduler_.setDrums(&drumNotes_);
 }
 FUnknown* Processor::createInstance(void*) {
   return static_cast<IAudioProcessor*>(new Processor);
@@ -36,6 +38,7 @@ tresult PLUGIN_API Processor::initialize(FUnknown* context) {
   addEventInput(STR16("MIDI In"),16,kMain,BusInfo::kDefaultActive);
   addEventOutput(STR16("Guitar Out"),1,kMain,BusInfo::kDefaultActive);
   addEventOutput(STR16("Bass Out"),1,kAux,BusInfo::kDefaultActive);
+  addEventOutput(STR16("Drums Out"),1,kAux,BusInfo::kDefaultActive);
   return kResultOk;
 }
 uint32 PLUGIN_API Processor::getProcessContextRequirements() {
