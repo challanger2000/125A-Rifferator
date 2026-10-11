@@ -18,7 +18,16 @@ void Processor::prepareFillVariants() {
   for(int index=0;index<11;++index) {
     FillOptions options=fill_;
     options.intensityPercent=index*10;
-    fillVariants_[static_cast<std::size_t>(index)]=arrange(steps_,config_,options,16);
+    // Prepare one neutral candidate for every live step; a previously OFF
+    // step must become playable immediately when selected in the GUI.
+    // Actual articulation, pitch, velocity and rests are determined by
+    // LiveControls, not stale arrangement snapshots.
+    auto candidates=steps_;
+    for(auto& step:candidates) {
+      step.articulation=Articulation::PalmMute;
+      step.degree=1;
+    }
+    fillVariants_[static_cast<std::size_t>(index)]=arrange(candidates,config_,options,16);
   }
 }
 Processor::Processor() {
