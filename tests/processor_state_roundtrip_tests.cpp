@@ -41,4 +41,57 @@ int main(){
   MemoryStream upgraded;
   assert(migrated.getState(&upgraded)==Steinberg::kResultOk);
   assert(upgraded.getSize()==full.getSize());
+// V8 non-default full snapshot: validate every serialized feature class,
+// including MIDI register controls that a default-only roundtrip misses.
+  {
+    std::vector<unsigned char> changed(data,data+full.getSize());
+    auto write32=[&](std::size_t index,std::int32_t value) {
+      assert((index+1)*4<=changed.size());
+      std::memcpy(changed.data()+index*4,&value,4);
+    };
+    std::int32_t count=0;
+    std::memcpy(&count,changed.data()+8,4);
+    assert(count>=1 && count<=32);
+    write32(3,52);   // Root E3
+    write32(4,117);  // Bass velocity
+    write32(5,-24);  // Bass offset
+    write32(6,58);   // Guitar gate
+    write32(7,72);   // Bass gate
+    write32(9,0);    // Bass disabled
+    write32(10,75);  // Fill intensity
+    const std::size_t afterSteps=11u+static_cast<std::size_t>(count)*4u;
+    write32(afterSteps,0);     // Drums disabled
+    write32(afterSteps+1,0);   // First kick disabled
+    const std::size_t guitarOn=afterSteps+49;
+    write32(guitarOn+0,0);
+    const std::size_t art=guitarOn+16;
+    write32(art+0,4);
+    const std::size_t deg=art+16;
+    write32(deg+0,7);
+    const std::size_t locks=deg+16;
+    write32(locks+0,1);
+    const std::size_t bassMode=locks+16;
+    write32(bassMode,2);       // HYBRID
+    write32(bassMode+1,3);     // EBM style
+    write32(bassMode+2,1);     // Chords enabled
+    write32(bassMode+3,1);     // Chords root-only
+    write32(bassMode+4,45);    // First bar explicit root
+    write32(bassMode+20,4);    // Sus4 chord quality
+    MemoryStream custom(changed.data(),static_cast<Steinberg::TSize>(changed.size()));
+    Processor customProcessor;
+    assert(customProcessor.setState(&custom)==Steinberg::kResultOk);
+    MemoryStream customSaved;
+    assert(customProcessor.getState(&customSaved)==Steinberg::kResultOk);
+    assert(customSaved.getSize()==static_cast<Steinberg::TSize>(changed.size()));
+    assert(std::memcmp(customSaved.getData(),changed.data(),changed.size())==0);
+    // Invalid later field: do not publish any partially applied state.
+    write32(bassMode+20,99);
+    MemoryStream corrupt(changed.data(),static_cast<Steinberg::TSize>(changed.size()));
+    assert(customProcessor.setState(&corrupt)!=Steinberg::kResultOk);
+    MemoryStream afterReject;
+    assert(customProcessor.getState(&afterReject)==Steinberg::kResultOk);
+    assert(afterReject.getSize()==customSaved.getSize());
+    assert(std::memcmp(afterReject.getData(),customSaved.getData(),customSaved.getSize())==0);
+  }
+
 }
