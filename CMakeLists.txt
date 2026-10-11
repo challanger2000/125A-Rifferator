@@ -80,3 +80,8 @@ add_test(NAME rifferator_ebm_shared_routing COMMAND rifferator_ebm_shared_routin
 
 add_executable(rifferator_ebm_live_controls_tests tests/ebm_live_controls_tests.cpp)
 add_test(NAME rifferator_ebm_live_controls COMMAND rifferator_ebm_live_controls_tests)
+
+add_executable(rifferator_chord_tests tests/chord_companion_tests.cpp)
+add_test(NAME rifferator_chords COMMAND rifferator_chord_tests)
+add_executable(rifferator_hybrid_harmony_tests tests/ebm_hybrid_harmony_tests.cpp)
+add_test(NAME rifferator_hybrid_harmony COMMAND rifferator_hybrid_harmony_tests)
