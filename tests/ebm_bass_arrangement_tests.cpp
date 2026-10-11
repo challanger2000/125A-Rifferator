@@ -105,4 +105,38 @@ int main() {
       assert(unfilled[i].note==source.midi.bass[i].note);
       assert(unfilled[i].velocity==source.midi.bass[i].velocity);
     }
+
+    // Unset harmony falls back to the configured EBM root (not MIDI zero).
+    BassPlan defaults;
+    defaults.mode=BassMode::Ebm;
+    defaults.tension=Tension::Stable;
+    defaults.sequence.root=52;
+    Arrangement emptyGuitar;
+    prepare(emptyGuitar,defaults);
+    assert(emptyGuitar.midi.bass.size()==256);
+    for(const auto& n:emptyGuitar.midi.bass) assert(n.note==40);
+    // MIDI root zero is a genuine note and must not be mistaken for "unset".
+    defaults.harmonicRoots[0]=0;
+    prepare(emptyGuitar,defaults);
+    for(const auto& n:emptyGuitar.midi.bass) assert(n.note==0);
+    // HYBRID changes harmony without inheriting guitar pauses.
+    defaults.mode=BassMode::Hybrid;
+    defaults.harmonicRoots.fill(52);
+    defaults.harmonicRoots[7]=57;
+    prepare(emptyGuitar,defaults);
+    assert(emptyGuitar.midi.bass.size()==256);
+    assert(emptyGuitar.midi.bass[6*16].note==40);
+    assert(emptyGuitar.midi.bass[7*16].note==45);
+    assert(emptyGuitar.midi.bass[8*16].note==40);
+    for (unsigned i=1;i<emptyGuitar.midi.bass.size();++i) {
+      assert(emptyGuitar.midi.bass[i].startTick>emptyGuitar.midi.bass[i-1].startTick);
+      assert(emptyGuitar.midi.bass[i-1].endTick<=emptyGuitar.midi.bass[i].startTick);
+      assert(emptyGuitar.midi.bass[i].endTick<=emptyGuitar.periodTicks);
+    }
+    // Invalid geometry must never corrupt a prepared arrangement.
+    const auto before=emptyGuitar.midi.bass;
+    defaults.ticksPerStep=1000001;
+    prepare(emptyGuitar,defaults);
+    assert(emptyGuitar.midi.bass.size()==before.size());
+
 }

@@ -37,3 +37,8 @@ The 16-bar assumption is intentional here, to match the product brief; revisit b
 - Fills keep MIDI note count, starts, durations and rests unchanged. Only velocity accent and a deterministic optional octave lift change; guitar is unaffected.
 - Invalid fillEveryBars values disable fills safely.
 - BassPlan defaults preserve prior sound, fillIntensity=0 and phraseVariation=0.
+
+## Harmony input safety
+- harmonicRoots defaults to 255 (unspecified), falling back to sequence.root. This keeps the configured root meaningful when no song map is provided.
+- Explicit MIDI note 0 is valid and never treated as absent. EBM reads bar zero only; HYBRID reads each bar.
+- Reject impossible step tick geometry before changing an existing arrangement; guitar notes are never rewritten.

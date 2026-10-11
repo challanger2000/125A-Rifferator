@@ -19,7 +19,10 @@ struct BassPlan {
     int bassOctaveOffset{-12};
     // Explicit harmonic roots: absolute MIDI pitch, one per bar.
     // EBM ignores later roots; Hybrid consults root at each bar.
-    std::array<uint8_t,16> harmonicRoots{};
+    // 255 means unspecified: use sequence.root. MIDI note 0 is valid.
+    std::array<uint8_t,16> harmonicRoots = [] {
+        std::array<uint8_t,16> roots{}; roots.fill(255); return roots;
+    }();
     uint8_t phraseVariation{0}; // 0: locked four-bar motifs
     uint8_t fillIntensity{0};   // 0: no fills; 100: strongest turnaround
     uint8_t fillEveryBars{4};  // 4, 8 or 16; other values disable fills
@@ -36,7 +39,7 @@ inline int controlledInterval(int raw, Tension tension, uint32_t hash) noexcept 
 // VST3 host event scheduling continues through existing BlockScheduler.
 inline void prepare(Arrangement& arrangement, const BassPlan& p) {
     if(p.mode==BassMode::Follow) return;
-    if(p.bars!=16 || p.ticksPerStep<=0) return;
+    if(p.bars!=16 || p.ticksPerStep<=0 || p.ticksPerStep>1000000) return;
     if(p.sequence.gatePermille==0) { arrangement.midi.bass.clear(); return; }
     std::vector<MidiNote> bass;
     bass.reserve(16u*32u);
@@ -48,8 +51,8 @@ inline void prepare(Arrangement& arrangement, const BassPlan& p) {
             && ((bar+1)%p.fillEveryBars==0) && p.fillIntensity>0;
         sequence.seed=p.sequence.seed+(p.phraseVariation ? static_cast<uint32_t>(bar/4) : 0u);
         sequence.variation=static_cast<uint8_t>(std::min<unsigned>(p.sequence.variation,p.phraseVariation));
-        sequence.root=static_cast<uint8_t>(std::clamp<int>(
-          p.mode==BassMode::Hybrid ? p.harmonicRoots[bar] : p.harmonicRoots[0],0,127));
+        const auto suppliedRoot=p.harmonicRoots[p.mode==BassMode::Hybrid ? bar : 0];
+        sequence.root=suppliedRoot<=127 ? suppliedRoot : p.sequence.root;
         sequence.steps=16;
         const auto pattern=ebm::generate(sequence);
         for(unsigned i=0;i<pattern.count;++i) {
