@@ -31,6 +31,7 @@ jobs:
           g++ -std=c++23 -O2 -Wall -Wextra -Wpedantic -Werror tests/ebm_bass_midi_audit_tests.cpp -o ebm-test-bin/midi-audit
           g++ -std=c++23 -O2 -Wall -Wextra -Wpedantic -Werror tests/ebm_bass_scheduler_tests.cpp -o ebm-test-bin/scheduler
           g++ -std=c++23 -O2 -Wall -Wextra -Wpedantic -Werror tests/ebm_bass_end_to_end_tests.cpp -o ebm-test-bin/end-to-end
+          g++ -std=c++23 -O2 -Wall -Wextra -Wpedantic -Werror tests/ebm_bass_realtime_tests.cpp -o ebm-test-bin/realtime
       - name: Run EBM regressions
         shell: bash
         run: |
@@ -40,3 +41,4 @@ jobs:
           ./ebm-test-bin/midi-audit
           ./ebm-test-bin/scheduler
           ./ebm-test-bin/end-to-end
+          ./ebm-test-bin/realtime
