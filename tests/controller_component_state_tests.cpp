@@ -21,8 +21,8 @@ int main() {
   Processor processor;
   MemoryStream normal;
   assert(processor.getState(&normal)==Steinberg::kResultOk);
-  std::vector<unsigned char> snapshot(static_cast<unsigned char*>(normal.getData()),
-     static_cast<unsigned char*>(normal.getData())+normal.getSize());
+  std::vector<unsigned char> snapshot(reinterpret_cast<unsigned char*>(normal.getData()),
+     reinterpret_cast<unsigned char*>(normal.getData())+normal.getSize());
   auto read32=[&](int index) {std::int32_t v=0;std::memcpy(&v,snapshot.data()+index*4,4);return v;};
   auto write32=[&](int index,std::int32_t v) {assert(index>=0 && (index+1)*4<=static_cast<int>(snapshot.size()));std::memcpy(snapshot.data()+index*4,&v,4);};
   int count=read32(2);assert(count>=1 && count<=32);
