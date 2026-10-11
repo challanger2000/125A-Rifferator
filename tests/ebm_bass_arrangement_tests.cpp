@@ -139,4 +139,36 @@ int main() {
     prepare(emptyGuitar,defaults);
     assert(emptyGuitar.midi.bass.size()==before.size());
 
+    BassPlan arc;
+    arc.mode=BassMode::Ebm;
+    arc.tension=Tension::Stable;
+    arc.sequence.velocity=90;
+    Arrangement shaped;
+    prepare(shaped,arc);
+    const auto baseline=shaped.midi.bass;
+    arc.dynamics=96;
+    prepare(shaped,arc);
+    assert(shaped.midi.bass.size()==baseline.size());
+    bool altered=false;
+    for(unsigned i=0;i<baseline.size();++i) {
+      const auto& original=baseline[i];
+      const auto& modified=shaped.midi.bass[i];
+      assert(original.startTick==modified.startTick);
+      assert(original.endTick==modified.endTick);
+      assert(original.note==modified.note);
+      const int bar=static_cast<int>(original.startTick/3840);
+      if(bar<4) assert(modified.velocity<=original.velocity);
+      if(bar>=12) assert(modified.velocity>=original.velocity);
+      if(modified.velocity!=original.velocity) altered=true;
+    }
+    assert(altered);
+    const auto repeat=shaped.midi.bass;
+    prepare(shaped,arc);
+    for(unsigned i=0;i<repeat.size();++i)
+      assert(repeat[i].velocity==shaped.midi.bass[i].velocity);
+    arc.dynamics=0;
+    prepare(shaped,arc);
+    for(unsigned i=0;i<baseline.size();++i)
+      assert(baseline[i].velocity==shaped.midi.bass[i].velocity);
+
 }
