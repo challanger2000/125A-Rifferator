@@ -43,6 +43,8 @@ Processor::Processor() {
   candidates.kick.fill(true);candidates.snare.fill(true);candidates.hat.fill(true);
   drumNotes_=renderDrums(candidates,16);
   scheduler_.setDrums(&drumNotes_);
+  chordNotes_=makeChordCandidates();
+  scheduler_.setChords(&chordNotes_);
   live_.drumsEnabled=drumPattern_.enabled;
   live_.drumSteps={drumPattern_.kick,drumPattern_.snare,drumPattern_.hat};
 }
@@ -56,6 +58,7 @@ tresult PLUGIN_API Processor::initialize(FUnknown* context) {
   addEventOutput(STR16("Guitar Out"),1,kMain,BusInfo::kDefaultActive);
   addEventOutput(STR16("Bass Out"),1,kAux,BusInfo::kDefaultActive);
   addEventOutput(STR16("Drums Out"),1,kAux,BusInfo::kDefaultActive);
+  addEventOutput(STR16("Chords Out"),1,kAux,BusInfo::kDefaultActive);
   return kResultOk;
 }
 uint32 PLUGIN_API Processor::getProcessContextRequirements() {
@@ -84,6 +87,25 @@ tresult PLUGIN_API Processor::process(ProcessData& data) {
       value=std::clamp(value,0.,1.);
       const int v=static_cast<int>(std::lround(value*100.));
       const auto id=queue->getParameterId();
+      if(id==kChordsEnabled) {
+        const bool on=value>=0.5;
+        if(live_.chordsEnabled!=on)flushOnNextProcess_=true;
+        live_.chordsEnabled=on;
+        continue;
+      }
+      if(id==kChordsMode) {
+        const bool root=value>=0.5;
+        if(live_.chordsRootOnly!=root)flushOnNextProcess_=true;
+        live_.chordsRootOnly=root;
+        continue;
+      }
+      if(id>=kHybridRootBase && id<kHybridRootBase+16) {
+        const auto bar=static_cast<std::size_t>(id-kHybridRootBase);
+        const int root=std::clamp(static_cast<int>(std::lround(value*128.)),0,128);
+        if(live_.harmony.roots[bar]!=root)flushOnNextProcess_=true;
+        live_.harmony.roots[bar]=root;
+        continue;
+      }
       if(id==kBassMode) {
         const int mode=std::clamp(static_cast<int>(std::lround(value*2.)),0,2);
         if(bassMode_!=mode) {bassMode_=mode;bassSwitchPending_=true;}
@@ -251,7 +273,7 @@ template<class T> bool readExact(Steinberg::IBStream* stream,T& value) {
 }
 tresult PLUGIN_API Processor::getState(IBStream* stream) {
   const uint32_t magic=0x31524641u; // AFR1
-  const uint32_t version=6;
+  const uint32_t version=7;
   const int32 count=static_cast<int32>(steps_.size());
   if(!writeExact(stream,magic)||!writeExact(stream,version)||!writeExact(stream,count))
     return kResultFalse;
@@ -281,13 +303,17 @@ tresult PLUGIN_API Processor::getState(IBStream* stream) {
     if(!writeExact(stream,static_cast<int32>(locked?1:0)))return kResultFalse;
   if(!writeExact(stream,static_cast<int32>(bassMode_)) ||
      !writeExact(stream,static_cast<int32>(ebmStyle_)))return kResultFalse;
+  if(!writeExact(stream,static_cast<int32>(live_.chordsEnabled?1:0)) ||
+     !writeExact(stream,static_cast<int32>(live_.chordsRootOnly?1:0)))return kResultFalse;
+  for(int root:live_.harmony.roots)
+    if(!writeExact(stream,static_cast<int32>(root)))return kResultFalse;
   return kResultOk;
 }
 tresult PLUGIN_API Processor::setState(IBStream* stream) {
   uint32_t magic=0,version=0;
   int32 count=0;
   if(!readExact(stream,magic)||!readExact(stream,version)||
-     !readExact(stream,count)||magic!=0x31524641u||(version!=1&&version!=2&&version!=3&&version!=4&&version!=5&&version!=6)||
+     !readExact(stream,count)||magic!=0x31524641u||(version!=1&&version!=2&&version!=3&&version!=4&&version!=5&&version!=6&&version!=7)||
      count<1||count>32)return kResultFalse;
   std::array<int32,7> settings{};
   for(auto& v:settings)if(!readExact(stream,v))return kResultFalse;
@@ -368,6 +394,17 @@ tresult PLUGIN_API Processor::setState(IBStream* stream) {
      (!readExact(stream,restoredBassMode)||restoredBassMode<0||restoredBassMode>2||
       !readExact(stream,restoredEbmStyle)||restoredEbmStyle<0||restoredEbmStyle>4))
     return kResultFalse;
+  int32 restoredChords=0,restoredChordMode=0;
+  HarmonyMap restoredHarmony;
+  if(version>=7) {
+    if(!readExact(stream,restoredChords)||restoredChords<0||restoredChords>1||
+       !readExact(stream,restoredChordMode)||restoredChordMode<0||restoredChordMode>1)return kResultFalse;
+    for(auto& root:restoredHarmony.roots) {
+      int32 value=0;
+      if(!readExact(stream,value)||value<0||value>128)return kResultFalse;
+      root=value;
+    }
+  }
   Config next=config_;
   next.rootMidi=settings[0];
   next.bassVelocity=settings[1];
@@ -386,6 +423,9 @@ tresult PLUGIN_API Processor::setState(IBStream* stream) {
   fill_.intensityPercent=restoredFill;
   fillIndex_=std::clamp((restoredFill+5)/10,0,10);
   prepareFillVariants();
+  live_.chordsEnabled=restoredChords!=0;
+  live_.chordsRootOnly=restoredChordMode!=0;
+  live_.harmony=restoredHarmony;
   bassMode_=restoredBassMode;
   ebmStyle_=restoredEbmStyle;
   bassSwitchPending_=true;
