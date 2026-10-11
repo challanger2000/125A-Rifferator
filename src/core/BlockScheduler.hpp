@@ -51,16 +51,22 @@ public:
       haveExpected_=false;
       return;
     }
+    // Bound all float-to-int64 cycle conversions before scheduling. Host values
+    // can be finite but far outside the representable cycle-index range.
+    // Invalid periods/positions fail closed without starting new notes.
+    const int64_t period=patternTicks;
+    if(period<=0 || std::abs(startPpq)>1.0e12 || std::abs(endPpq)>1.0e12) {
+      if(flush(sink,0))haveExpected_=false;
+      return;
+    }
     if(haveExpected_ && std::abs(startPpq-expectedPpq_)>0.002) {
       if(!flush(sink,0)) return;
     }
     expectedPpq_=endPpq; haveExpected_=true;
-    // Rendered note positions are in MIDI ticks (960 per quarter note).
-    const int64_t period=patternTicks;
-    if(period<=0) return;
     std::array<ScheduledMidiEvent,kCapacity> events{};
     int count=0;
     bool eventOverflow=false;
+    bool invalidWindow=false;
     auto collect=[&](const std::vector<MidiNote>& notes,int bus) {
       if(bus==1 && (!live.bassEnabled || live.externalBassMode))return;
       if(bus==2 && !live.drumsEnabled)return;
@@ -85,7 +91,7 @@ public:
         const int64_t first=static_cast<int64_t>(std::floor((startPpq-phase)/periodPpq))-1;
         const int64_t last=static_cast<int64_t>(std::ceil((endPpq-phase)/periodPpq))+1;
         // protect realtime complexity on corrupt/huge host jumps
-        if(last-first>64) { flush(sink,0); return; }
+        if(last<first || last-first>64) { invalidWindow=true; return; }
         for(int64_t n=first;n<=last;++n) {
           const double cycle=periodPpq*static_cast<double>(n);
           auto push=[&](double t,bool on,int fifth=0) {
@@ -156,7 +162,7 @@ public:
     collect(pattern.guitar,0); collect(pattern.bass,1);
     if(drums_)collect(*drums_,2);
     if(chords_)collect(*chords_,3);
-    if(eventOverflow) {
+    if(eventOverflow || invalidWindow) {
       // Do not deliver a partial batch that may have omitted NoteOff events.
       flush(sink,0);
       haveExpected_=false;
