@@ -83,6 +83,15 @@ public:
     const int art=(tag-500)/16;
     const auto id=a125::rifferator::kGuitarArticulationBase+step;
     if(getParamNormalized(a125::rifferator::kGuitarLockBase+step)>=0.5)return;
+    // A selected articulation activates the step; REST deactivates it.
+    // Both parameters must be published, otherwise a previously silent
+    // generated step remains silent after selecting Palm Mute or OPEN.
+    const auto activeId=a125::rifferator::kGuitarStepBase+step;
+    const double enabled=art==0?0.:1.;
+    beginEdit(activeId);
+    setParamNormalized(activeId,enabled);
+    performEdit(activeId,enabled);
+    endEdit(activeId);
     beginEdit(id);
     setParamNormalized(id,static_cast<double>(art)/5.);
     performEdit(id,static_cast<double>(art)/5.);
