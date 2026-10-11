@@ -31,9 +31,12 @@ int main(){
   bool root=false,fifth=false;
   for(const auto& e:events)if(e.on){if(e.pitch==40)root=true;if(e.pitch==47)fifth=true;assert(e.bus==0);}
   assert(root&&fifth);
-  events.clear();
-  assert(scheduler.flush(sink,0));
+  // Both notes have already received their scheduled NoteOff within
+  // this complete quarter-note block; flush should emit nothing further.
   root=false;fifth=false;
   for(const auto& e:events)if(!e.on){if(e.pitch==40)root=true;if(e.pitch==47)fifth=true;}
   assert(root&&fifth);
+  events.clear();
+  assert(scheduler.flush(sink,0));
+  assert(events.empty());
 }
