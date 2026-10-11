@@ -263,6 +263,7 @@ tresult PLUGIN_API Processor::process(ProcessData& data) {
   for(auto& root:resolvedHarmony.roots)if(root==128)root=autoRoot;
   LiveControls routing=live_;
   routing.absoluteRoot=config_.rootMidi;
+  routing.bassOffset=config_.bassOffset;
   routing.harmony=resolvedHarmony;
   routing.externalBassMode=activeBassMode_!=0;
   scheduler_.process(active.midi,start,end,data.numSamples,
