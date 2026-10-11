@@ -3,6 +3,7 @@
  <colors><color name="Bg" rgba="#0D1115FF"/><color name="Panel" rgba="#182229FF"/><color name="Text" rgba="#E7ECEFFF"/><color name="Accent" rgba="#62C7B3FF"/><color name="Line" rgba="#364750FF"/></colors>
  <fonts><font name="Title" font-name="Arial" size="26" bold="true"/><font name="Normal" font-name="Arial" size="15"/><font name="Small" font-name="Arial" size="12"/></fonts>
  <control-tags>
+  <control-tag name="GuitarGenerate" tag="700"/>
   <control-tag name="GCell0_0" tag="500"/>
   <control-tag name="GCell0_1" tag="501"/>
   <control-tag name="GCell0_2" tag="502"/>
@@ -389,7 +390,8 @@
   <view class="CTextButton" control-tag="GCell5_14" origin="935, 230" size="43, 24" title="&#x2022;" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="true"/>
   <view class="CTextButton" control-tag="GCell5_15" origin="991, 230" size="43, 24" title="&#x2022;" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="true"/>
  </view>
- <view class="CTextLabel" origin="34, 450" size="980, 26" title="GUITAR GENERATE / VARIATE / LOCK: controller commands pending" font="Normal" font-color="Text" transparent="true"/>
+ <view class="CTextButton" control-tag="GuitarGenerate" origin="34, 448" size="185, 32" title="GENERATE GUITAR" font="Normal" text-color="Text" text-color-highlighted="Accent" frame-color="Accent" frame-color-highlighted="Accent" frame-width="1" kick-style="true"/>
+ <view class="CTextLabel" origin="233, 450" size="825, 26" title="INDUSTRIAL RIFF  |  PM / POWER / REST  |  LOCKED STEPS PROTECTED" font="Small" font-color="Text" transparent="true"/>
  <view class="CTextLabel" origin="34, 503" size="1030, 25" title="BASS     FOLLOW / EBM / HYBRID     |     DETAILS (pending)" font="Normal" font-color="Text" transparent="true"/>
  <view class="CTextLabel" origin="34, 553" size="1030, 25" title="DRUMS     GM 36 / 38 / 42   |   16-STEP EDITOR" font="Normal" font-color="Accent" transparent="true"/>
  <view class="CTextLabel" origin="34, 582" size="76, 20" title="KICK" font="Small" font-color="Text" transparent="true"/>
