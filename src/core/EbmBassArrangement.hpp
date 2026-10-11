@@ -70,8 +70,8 @@ inline void prepare(Arrangement& arrangement, const BassPlan& p) {
             const int accent=turnaround ? static_cast<int>(std::min<unsigned>(p.fillIntensity,100u))/10 : 0;
             const int level=std::min<int>(p.dynamics,100);
             const int section=bar/4;
-            const int lift=(section==0 ? -level/8 : section==1 ? 0 : section==2 ? level/12 : level/6);
-            const int velocity=std::clamp(static_cast<int>(n.velocity)+accent+lift,1,127);
+            const int velocityArc=(section==0 ? -level/8 : section==1 ? 0 : section==2 ? level/12 : level/6);
+            const int velocity=std::clamp(static_cast<int>(n.velocity)+accent+velocityArc,1,127);
             const auto start=barTicks*bar+stepTicks*n.step;
             if(n.gatePermille==0) continue;
             // Per-note gate maps to the MIDI lifetime. During integration,
