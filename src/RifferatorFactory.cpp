@@ -108,7 +108,7 @@ public:
     };
     uint32_t magic=0,version=0,count=0;
     if(!read32(magic)||!read32(version)||!read32(count) ||
-       magic!=0x31524641u || (version!=1 && version!=2 && version!=3) ||
+       magic!=0x31524641u || (version!=1 && version!=2 && version!=3 && version!=4) ||
        count<1 || count>32) return kResultFalse;
     std::array<uint32_t,7> values{};
     for(auto& v:values)if(!read32(v))return kResultFalse;
@@ -137,6 +137,10 @@ public:
         drumValues[static_cast<std::size_t>(i+1)]=active;
       }
     }
+    std::array<uint32_t,16> guitarActive{};
+    if(version>=4) {
+      for(auto& value:guitarActive)if(!read32(value)||value>1)return kResultFalse;
+    }
     // The processor owns the pattern. The controller only synchronizes
     // the automatable parameter values presented to the host/GUI.
     setParamNormalized(a125::rifferator::kRootPitch,double(values[0])/127.);
@@ -145,6 +149,9 @@ public:
     setParamNormalized(a125::rifferator::kBassGate,double(values[4])/100.);
     setParamNormalized(a125::rifferator::kBassEnabled,values[6]?1.:0.);
     setParamNormalized(a125::rifferator::kFillIntensity,double(fill)/100.);
+    if(version>=4) {
+      for(int i=0;i<16;++i)setParamNormalized(a125::rifferator::kGuitarStepBase+i,guitarActive[static_cast<std::size_t>(i)]?1.:0.);
+    }
     if(version>=3) {
       setParamNormalized(a125::rifferator::kDrumEnabled,drumValues[0]?1.:0.);
       for(int i=0;i<48;++i)setParamNormalized(a125::rifferator::kDrumStepBase+i,drumValues[static_cast<std::size_t>(i+1)]?1.:0.);
