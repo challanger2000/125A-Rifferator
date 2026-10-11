@@ -31,6 +31,14 @@ Processor::Processor() {
     live_.guitarDegree[static_cast<std::size_t>(i)]=1;
   }
   prepareFillVariants();
+  // Immutable style snapshots: construction is off the process callback.
+  for(int i=0;i<5;++i) {
+    ebm_integration::BassPlan plan;
+    plan.mode=ebm_integration::BassMode::Ebm;
+    plan.sequence.style=static_cast<::rifferator::ebm::Style>(i);
+    plan.sequence.root=52; // Existing guitar-root baseline is 40; bass octave -12.
+    ebm_integration::prepare(ebmPrepared_[static_cast<std::size_t>(i)],plan);
+  }
   DrumPattern candidates;
   candidates.kick.fill(true);candidates.snare.fill(true);candidates.hat.fill(true);
   drumNotes_=renderDrums(candidates,16);
@@ -76,6 +84,16 @@ tresult PLUGIN_API Processor::process(ProcessData& data) {
       value=std::clamp(value,0.,1.);
       const int v=static_cast<int>(std::lround(value*100.));
       const auto id=queue->getParameterId();
+      if(id==kBassMode) {
+        const int mode=std::clamp(static_cast<int>(std::lround(value*2.)),0,2);
+        if(bassMode_!=mode) {bassMode_=mode;bassSwitchPending_=true;}
+        continue;
+      }
+      if(id==kEbmStyle) {
+        const int style=std::clamp(static_cast<int>(std::lround(value*4.)),0,4);
+        if(ebmStyle_!=style) {ebmStyle_=style;bassSwitchPending_=true;}
+        continue;
+      }
       if(id>=kGuitarLockBase && id<kGuitarLockBase+16) {
         const auto index=static_cast<std::size_t>(id-kGuitarLockBase);
         live_.guitarLocks[index]=value>=0.5;
@@ -178,8 +196,17 @@ tresult PLUGIN_API Processor::process(ProcessData& data) {
     }
     return data.outputEvents->addEvent(e)==kResultOk;
   };
+  if(bassSwitchPending_) {
+    // Never activate a second bus-1 producer before the first one is silent.
+    if(!scheduler_.flush(sink,0) || !ebmScheduler_.patternChanged(sink))
+      return kResultOk;
+    activeBassMode_=bassMode_;
+    bassSwitchPending_=false;
+    return kResultOk; // new-mode NoteOns start only on a later callback
+  }
   if(flushOnNextProcess_) {
-    if(scheduler_.flush(sink,0))flushOnNextProcess_=false;
+    if(!scheduler_.flush(sink,0) || !ebmScheduler_.flush(sink,0))return kResultOk;
+    flushOnNextProcess_=false;
     else return kResultOk; // Reattempt off events; do not add new notes.
   }
   const auto* ctx=data.processContext;
@@ -191,9 +218,20 @@ tresult PLUGIN_API Processor::process(ProcessData& data) {
   const double end=start+(haveTempo?double(data.numSamples)*ctx->tempo/
     (60.*processSetup.sampleRate):0.);
   const auto& active=fillVariants_[static_cast<std::size_t>(fillIndex_)];
+  LiveControls routing=live_;
+  routing.externalBassMode=activeBassMode_!=0;
   scheduler_.process(active.midi,start,end,data.numSamples,
     active.periodTicks,sink,
-    running&&havePosition&&haveTempo,live_);
+    running&&havePosition&&haveTempo,routing);
+  if(activeBassMode_!=0 && live_.bassEnabled) {
+    // HYBRID falls back to explicit constant root until song-map input exists.
+    const auto& prepared=ebmPrepared_[static_cast<std::size_t>(ebmStyle_)];
+    if(!ebmScheduler_.process(prepared,start,end,data.numSamples,
+         running&&havePosition&&haveTempo,sink))
+      flushOnNextProcess_=true;
+  } else if(!ebmScheduler_.flush(sink,0)) {
+    flushOnNextProcess_=true;
+  }
   return kResultOk;
 }
 
@@ -213,7 +251,7 @@ template<class T> bool readExact(Steinberg::IBStream* stream,T& value) {
 }
 tresult PLUGIN_API Processor::getState(IBStream* stream) {
   const uint32_t magic=0x31524641u; // AFR1
-  const uint32_t version=5;
+  const uint32_t version=6;
   const int32 count=static_cast<int32>(steps_.size());
   if(!writeExact(stream,magic)||!writeExact(stream,version)||!writeExact(stream,count))
     return kResultFalse;
@@ -241,13 +279,15 @@ tresult PLUGIN_API Processor::getState(IBStream* stream) {
     if(!writeExact(stream,static_cast<int32>(value)))return kResultFalse;
   for(bool locked:live_.guitarLocks)
     if(!writeExact(stream,static_cast<int32>(locked?1:0)))return kResultFalse;
+  if(!writeExact(stream,static_cast<int32>(bassMode_)) ||
+     !writeExact(stream,static_cast<int32>(ebmStyle_)))return kResultFalse;
   return kResultOk;
 }
 tresult PLUGIN_API Processor::setState(IBStream* stream) {
   uint32_t magic=0,version=0;
   int32 count=0;
   if(!readExact(stream,magic)||!readExact(stream,version)||
-     !readExact(stream,count)||magic!=0x31524641u||(version!=1&&version!=2&&version!=3&&version!=4&&version!=5)||
+     !readExact(stream,count)||magic!=0x31524641u||(version!=1&&version!=2&&version!=3&&version!=4&&version!=5&&version!=6)||
      count<1||count>32)return kResultFalse;
   std::array<int32,7> settings{};
   for(auto& v:settings)if(!readExact(stream,v))return kResultFalse;
@@ -323,6 +363,11 @@ tresult PLUGIN_API Processor::setState(IBStream* stream) {
       restoredLocks[static_cast<std::size_t>(i)]=step.locked;
     }
   }
+  int32 restoredBassMode=0,restoredEbmStyle=0;
+  if(version>=6 &&
+     (!readExact(stream,restoredBassMode)||restoredBassMode<0||restoredBassMode>2||
+      !readExact(stream,restoredEbmStyle)||restoredEbmStyle<0||restoredEbmStyle>4))
+    return kResultFalse;
   Config next=config_;
   next.rootMidi=settings[0];
   next.bassVelocity=settings[1];
@@ -341,6 +386,9 @@ tresult PLUGIN_API Processor::setState(IBStream* stream) {
   fill_.intensityPercent=restoredFill;
   fillIndex_=std::clamp((restoredFill+5)/10,0,10);
   prepareFillVariants();
+  bassMode_=restoredBassMode;
+  ebmStyle_=restoredEbmStyle;
+  bassSwitchPending_=true;
   live_.guitarSteps=restoredGuitar;
   live_.guitarArticulation=restoredArt;
   live_.guitarDegree=restoredDegree;
