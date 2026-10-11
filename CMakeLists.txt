@@ -53,3 +53,6 @@ add_test(NAME rifferator_drums COMMAND rifferator_drum_tests)
 
 add_executable(rifferator_generation_tests tests/riff_generation_tests.cpp)
 add_test(NAME rifferator_generation COMMAND rifferator_generation_tests)
+
+add_executable(rifferator_guitar_steps_tests tests/guitar_step_controls_tests.cpp)
+add_test(NAME rifferator_guitar_steps COMMAND rifferator_guitar_steps_tests)
