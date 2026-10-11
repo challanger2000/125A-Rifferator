@@ -181,7 +181,7 @@ template<class T> bool readExact(Steinberg::IBStream* stream,T& value) {
 }
 tresult PLUGIN_API Processor::getState(IBStream* stream) {
   const uint32_t magic=0x31524641u; // AFR1
-  const uint32_t version=3;
+  const uint32_t version=4;
   const int32 count=static_cast<int32>(steps_.size());
   if(!writeExact(stream,magic)||!writeExact(stream,version)||!writeExact(stream,count))
     return kResultFalse;
@@ -201,13 +201,15 @@ tresult PLUGIN_API Processor::getState(IBStream* stream) {
   if(!writeExact(stream,static_cast<int32>(drumPattern_.enabled?1:0)))return kResultFalse;
   for(const auto& row:{&drumPattern_.kick,&drumPattern_.snare,&drumPattern_.hat})
     for(bool hit:*row)if(!writeExact(stream,static_cast<int32>(hit?1:0)))return kResultFalse;
+  for(bool active:live_.guitarSteps)
+    if(!writeExact(stream,static_cast<int32>(active?1:0)))return kResultFalse;
   return kResultOk;
 }
 tresult PLUGIN_API Processor::setState(IBStream* stream) {
   uint32_t magic=0,version=0;
   int32 count=0;
   if(!readExact(stream,magic)||!readExact(stream,version)||
-     !readExact(stream,count)||magic!=0x31524641u||(version!=1&&version!=2&&version!=3)||
+     !readExact(stream,count)||magic!=0x31524641u||(version!=1&&version!=2&&version!=3&&version!=4)||
      count<1||count>32)return kResultFalse;
   std::array<int32,7> settings{};
   for(auto& v:settings)if(!readExact(stream,v))return kResultFalse;
@@ -243,6 +245,19 @@ tresult PLUGIN_API Processor::setState(IBStream* stream) {
         hit=value!=0;
       }
   }
+  std::array<bool,16> restoredGuitar{};
+  if(version>=4) {
+    for(auto& active:restoredGuitar) {
+      int32 v=0;
+      if(!readExact(stream,v)||v<0||v>1)return kResultFalse;
+      active=v!=0;
+    }
+  } else {
+    for(int i=0;i<16;++i)
+      restoredGuitar[static_cast<std::size_t>(i)]=
+        i<static_cast<int>(parsed.size()) &&
+        parsed[static_cast<std::size_t>(i)].articulation!=Articulation::Off;
+  }
   Config next=config_;
   next.rootMidi=settings[0];
   next.bassVelocity=settings[1];
@@ -261,6 +276,7 @@ tresult PLUGIN_API Processor::setState(IBStream* stream) {
   fill_.intensityPercent=restoredFill;
   fillIndex_=std::clamp((restoredFill+5)/10,0,10);
   prepareFillVariants();
+  live_.guitarSteps=restoredGuitar;
   live_.guitarGate=config_.guitarGate;
   live_.bassGate=config_.bassGate;
   live_.bassEnabled=config_.bassOn;
