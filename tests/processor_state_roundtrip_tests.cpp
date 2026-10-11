@@ -1,6 +1,7 @@
 #include "../src/RifferatorProcessor.hpp"
 #include "../src/RifferatorParameters.hpp"
 #include "public.sdk/source/vst/hosting/parameterchanges.h"
+#include "public.sdk/source/vst/hosting/eventlist.h"
 #include "public.sdk/source/common/memorystream.h"
 #ifdef NDEBUG
 #error Regression asserts disabled in CI
@@ -152,4 +153,42 @@ int main(){
     assert(wordAt(base+48u+15u)==1);
   }
 
+  // Regression: project recall must apply every stored drum step to the LIVE
+  // MIDI masks. A byte-identical getState roundtrip alone missed this defect.
+  {
+    std::vector<unsigned char> state(data,data+full.getSize());
+    auto put=[&](std::size_t i,std::int32_t v){
+      assert((i+1)*4<=state.size());std::memcpy(state.data()+i*4,&v,4);
+    };
+    const std::size_t drums=11u+16u*4u;
+    put(drums,1); // enable drums
+    for(std::size_t i=0;i<48;++i)put(drums+1+i,0);
+    put(drums+1,1); // only kick at step 0; all hats/snare OFF
+    MemoryStream saved(state.data(),static_cast<Steinberg::TSize>(state.size()));
+    Processor replay;
+    assert(replay.setState(&saved)==Steinberg::kResultOk);
+    Steinberg::Vst::ProcessSetup setup{};
+    setup.processMode=Steinberg::Vst::kRealtime;
+    setup.symbolicSampleSize=Steinberg::Vst::kSample32;
+    setup.sampleRate=48000.;setup.maxSamplesPerBlock=6000;
+    assert(replay.setupProcessing(setup)==Steinberg::kResultOk);
+    Steinberg::Vst::ProcessContext ctx{};
+    ctx.state=Steinberg::Vst::ProcessContext::kPlaying |
+              Steinberg::Vst::ProcessContext::kProjectTimeMusicValid |
+              Steinberg::Vst::ProcessContext::kTempoValid;
+    ctx.projectTimeMusic=0.;ctx.tempo=120.;
+    Steinberg::Vst::EventList emitted(512);
+    Steinberg::Vst::ProcessData block{};
+    block.numSamples=6000;block.processContext=&ctx;block.outputEvents=&emitted;
+    assert(replay.process(block)==Steinberg::kResultOk);
+    int kickOns=0,otherDrumOns=0;
+    for(Steinberg::int32 i=0;i<emitted.getEventCount();++i){
+      Steinberg::Vst::Event e{};
+      assert(emitted.getEvent(i,e)==Steinberg::kResultOk);
+      if(e.busIndex==2 && e.type==Steinberg::Vst::Event::kNoteOnEvent){
+        if(e.noteOn.pitch==36)++kickOns;else ++otherDrumOns;
+      }
+    }
+    assert(kickOns==1 && otherDrumOns==0);
+  }
 }
