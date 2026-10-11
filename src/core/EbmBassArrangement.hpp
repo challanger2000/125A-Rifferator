@@ -41,7 +41,11 @@ inline int controlledInterval(int raw, Tension tension, uint32_t hash) noexcept 
 inline void prepare(Arrangement& arrangement, const BassPlan& p) {
     if(p.mode==BassMode::Follow) return;
     if(p.bars!=16 || p.ticksPerStep<=0 || p.ticksPerStep>1000000) return;
-    if(p.sequence.gatePermille==0) { arrangement.midi.bass.clear(); return; }
+    if(p.sequence.gatePermille==0) {
+        arrangement.midi.bass.clear();
+        arrangement.periodTicks=static_cast<int64_t>(p.ticksPerStep)*16*16;
+        return;
+    }
     std::vector<MidiNote> bass;
     bass.reserve(16u*32u);
     auto sequence=p.sequence;

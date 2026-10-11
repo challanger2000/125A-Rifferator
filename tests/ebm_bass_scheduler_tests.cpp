@@ -68,6 +68,28 @@ int main() {
     int recovered=0;
     assert(adapter.flush([&](const ScheduledMidiEvent& e){if(!e.on)++recovered;return true;}));
     assert(recovered==1);
+    // Empty pattern emits no NoteOns and does not retain a previously active note.
+    {
+        EbmSchedulerAdapter unit;
+        Arrangement sounding;
+        sounding.periodTicks=3840;
+        sounding.midi.bass={{0,240,36,105,240}};
+        std::vector<ScheduledMidiEvent> got;
+        auto collect=[&](const ScheduledMidiEvent& e) { got.push_back(e); return true; };
+        assert(unit.process(sounding,0.0,0.1,480,true,collect));
+        assert(got.size()==1 && got[0].on);
+        got.clear();
+        assert(unit.patternChanged(collect));
+        assert(got.size()==1 && !got[0].on && got[0].pitch==36);
+        got.clear();
+        sounding.midi.bass.clear();
+        assert(unit.process(sounding,0.1,0.2,480,true,collect));
+        assert(got.empty());
+        // Invalid note range must fail and flush rather than reach an indexed active array.
+        sounding.midi.bass={{0,240,128,100,240}};
+        assert(!unit.process(sounding,0.2,0.3,480,true,collect));
+        assert(got.empty());
+    }
     // Stress: varying block lengths, repeated 16-bar loop and stop recovery.
     {
         Arrangement stress;

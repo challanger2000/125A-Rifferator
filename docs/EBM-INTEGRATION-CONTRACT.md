@@ -59,3 +59,7 @@ The 16-bar assumption is intentional here, to match the product brief; revisit b
 - If the host rejects a NoteOff, patternChanged returns false; retry before switching patterns. Do not use reset() on sounding notes, because reset() deliberately clears tracking without outputting MIDI.
 - Do not mutate/swap the arrangement while process() is reading it; coordinate immutable snapshot publication off the audio thread.
 - Host DAW lifecycle and VST3 output-bus integration still require separate end-to-end validation.
+
+## Silent-mode lifecycle
+- For a valid 16-bar EBM/HYBRID plan with gatePermille=0, prepare() must clear bass notes AND retain the intended 16-bar period. Invalid geometry must leave the entire Arrangement unchanged.
+- Runtime transitions to a silent prepared snapshot require patternChanged() before publication; silence alone does not deliver NoteOffs for previously sounding notes.

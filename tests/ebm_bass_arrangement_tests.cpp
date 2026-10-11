@@ -139,6 +139,22 @@ int main() {
     prepare(emptyGuitar,defaults);
     assert(emptyGuitar.midi.bass.size()==before.size());
 
+    // Silent EBM still supplies a valid 16-bar transport period for a fresh arrangement.
+    BassPlan silent;
+    silent.mode=BassMode::Ebm;
+    silent.ticksPerStep=120;
+    silent.sequence.gatePermille=0;
+    Arrangement silence;
+    silence.midi.guitar.push_back({0,100,40,90,120});
+    prepare(silence,silent);
+    assert(silence.periodTicks==30720);
+    assert(silence.midi.bass.empty());
+    assert(silence.midi.guitar.size()==1);
+    // Invalid silent geometry must leave the original arrangement untouched.
+    silent.ticksPerStep=-1;
+    prepare(silence,silent);
+    assert(silence.periodTicks==30720);
+
     BassPlan arc;
     arc.mode=BassMode::Ebm;
     arc.tension=Tension::Stable;
