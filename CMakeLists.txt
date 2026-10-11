@@ -132,3 +132,11 @@ set_tests_properties(rifferator_gui_layout PROPERTIES WORKING_DIRECTORY ${CMAKE_
 # The former standalone createView()/release() probe was invalid: it
 # segfaulted without proper host initialization. Keep that experimental
 # source out of CTest until a correctly initialized host harness exists.
+
+add_executable(rifferator_chord_sustain_tests tests/chord_sustain_scheduler_tests.cpp)
+add_test(NAME rifferator_chord_sustain COMMAND rifferator_chord_sustain_tests)
+if(MSVC)
+  target_compile_options(rifferator_chord_sustain_tests PRIVATE "/FI${CMAKE_CURRENT_SOURCE_DIR}/tests/enable_asserts.h")
+else()
+  target_compile_options(rifferator_chord_sustain_tests PRIVATE -UNDEBUG)
+endif()
