@@ -37,7 +37,7 @@ struct LiveControls {
 class BlockScheduler {
 public:
   static constexpr int kCapacity=1024;
-  void reset() noexcept { active_={}; haveExpected_=false; }
+  void reset() noexcept { active_={}; haveExpected_=false; recoveryPending_=false; }
   void setDrums(const std::vector<MidiNote>* notes) noexcept { drums_=notes; }
   void setChords(const std::vector<MidiNote>* notes) noexcept { chords_=notes; }
   template<class Sink>
@@ -45,6 +45,12 @@ public:
                int blockSize, int64_t patternTicks, Sink&& sink, bool playing,
                LiveControls live={}) noexcept {
     if(blockSize<=0) return;
+    // A rejected host event may have left notes active. Finish releasing them
+    // before generating any more NoteOns, even on a continuous timeline.
+    if(recoveryPending_) {
+      if(flush(sink,0)) { recoveryPending_=false; haveExpected_=false; }
+      return;
+    }
     if(!playing || !std::isfinite(startPpq) || !std::isfinite(endPpq) ||
        endPpq<=startPpq) {
       if(!flush(sink,0)) return;
@@ -57,6 +63,7 @@ public:
     const int64_t period=patternTicks;
     if(period<=0 || std::abs(startPpq)>1.0e12 || std::abs(endPpq)>1.0e12) {
       if(flush(sink,0))haveExpected_=false;
+      else recoveryPending_=true;
       return;
     }
     if(haveExpected_ && std::abs(startPpq-expectedPpq_)>0.002) {
@@ -164,7 +171,7 @@ public:
     if(chords_)collect(*chords_,3);
     if(eventOverflow || invalidWindow) {
       // Do not deliver a partial batch that may have omitted NoteOff events.
-      flush(sink,0);
+      if(!flush(sink,0))recoveryPending_=true;
       haveExpected_=false;
       return;
     }
@@ -188,7 +195,12 @@ public:
         if(!flushBus(e.bus,sink,e.sampleOffset))return;
       }
       if(sink(e)) active_[static_cast<std::size_t>(e.bus)][static_cast<std::size_t>(e.pitch)]=e.on;
-      else { flush(sink,e.sampleOffset); return; }
+      else {
+        // The failed event may have been a NoteOff. Preserve pending recovery
+        // until the sink accepts the outstanding releases.
+        recoveryPending_=true;
+        return;
+      }
     }
   }
   template<class Sink> bool flushBus(int bus,Sink&& sink,int offset) noexcept {
@@ -219,6 +231,7 @@ private:
   const std::vector<MidiNote>* drums_{};
   const std::vector<MidiNote>* chords_{};
   bool haveExpected_{};
+  bool recoveryPending_{};
   double expectedPpq_{};
 };
 } // namespace a125::rifferator
