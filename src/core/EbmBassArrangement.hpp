@@ -25,6 +25,7 @@ struct BassPlan {
     }();
     uint8_t phraseVariation{0}; // 0: locked four-bar motifs
     uint8_t fillIntensity{0};   // 0: no fills; 100: strongest turnaround
+    uint8_t dynamics{0}; // four-phrase velocity arc
     uint8_t fillEveryBars{4};  // 4, 8 or 16; other values disable fills
 };
 inline int controlledInterval(int raw, Tension tension, uint32_t hash) noexcept {
@@ -67,7 +68,10 @@ inline void prepare(Arrangement& arrangement, const BassPlan& p) {
             const bool lift=turnaround && (fillHash%100u)<std::min<unsigned>(p.fillIntensity,100u)/2u;
             const auto note=clampMidi(static_cast<int>(sequence.root)+interval+(lift?12:0)+p.bassOctaveOffset);
             const int accent=turnaround ? static_cast<int>(std::min<unsigned>(p.fillIntensity,100u))/10 : 0;
-            const int velocity=std::clamp(static_cast<int>(n.velocity)+accent,1,127);
+            const int level=std::min<int>(p.dynamics,100);
+            const int section=bar/4;
+            const int lift=(section==0 ? -level/8 : section==1 ? 0 : section==2 ? level/12 : level/6);
+            const int velocity=std::clamp(static_cast<int>(n.velocity)+accent+lift,1,127);
             const auto start=barTicks*bar+stepTicks*n.step;
             if(n.gatePermille==0) continue;
             // Per-note gate maps to the MIDI lifetime. During integration,
