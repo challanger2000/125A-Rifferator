@@ -7,16 +7,44 @@
 #include "public.sdk/source/vst/vsteditcontroller.h"
 #include "public.sdk/source/main/pluginfactory.h"
 #include "vstgui/plugin-bindings/vst3editor.h"
+#include "vstgui/lib/controls/ccontrol.h"
+#include "vstgui/lib/controls/cbuttons.h"
+#include "vstgui/uidescription/uiattributes.h"
 #include <cstring>
 
 namespace {
 const Steinberg::FUID processorUid(0x125A4601,0x52494646,0x45524154,0x4F520100);
 const Steinberg::FUID controllerUid(0x125A4602,0x52494646,0x45524154,0x4F520100);
-class Controller final : public Steinberg::Vst::EditControllerEx1 {
+class Controller final : public Steinberg::Vst::EditControllerEx1,
+                         public VSTGUI::VST3EditorDelegate,
+                         public VSTGUI::IControlListener {
 public:
+  VSTGUI::CView* verifyView(VSTGUI::CView* view,
+                            const VSTGUI::UIAttributes&,
+                            const VSTGUI::IUIDescription*,
+                            VSTGUI::VST3Editor*) override {
+    if(auto* control=dynamic_cast<VSTGUI::CControl*>(view)) {
+      if(control->getTag()>=500 && control->getTag()<596)
+        control->setListener(this);
+    }
+    return view;
+  }
+  void valueChanged(VSTGUI::CControl* control) override {
+    if(!control || control->getValueNormalized()<=0.5f)return;
+    const int tag=control->getTag();
+    if(tag<500||tag>=596)return;
+    const int step=(tag-500)%16;
+    const int art=(tag-500)/16;
+    const auto id=a125::rifferator::kGuitarArticulationBase+step;
+    if(getParamNormalized(a125::rifferator::kGuitarLockBase+step)>=0.5)return;
+    beginEdit(id);
+    performEdit(id,static_cast<double>(art)/5.);
+    endEdit(id);
+  }
   Steinberg::IPlugView* PLUGIN_API createView(Steinberg::FIDString name) override {
     if(name && std::strcmp(name,Steinberg::Vst::ViewType::kEditor)==0) {
       auto* editor=new VSTGUI::VST3Editor(this,"RifferatorView","rifferator.uidesc");
+      editor->setDelegate(this);
       editor->setZoomFactor(1.);
       return editor;
     }
