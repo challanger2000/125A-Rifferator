@@ -135,7 +135,7 @@ tresult PLUGIN_API Processor::process(ProcessData& data) {
       if(id>=kGuitarLockBase && id<kGuitarLockBase+16) {
         const auto index=static_cast<std::size_t>(id-kGuitarLockBase);
         live_.guitarLocks[index]=value>=0.5;
-        steps_[index].locked=live_.guitarLocks[index];
+        if(index<steps_.size())steps_[index].locked=live_.guitarLocks[index];
         continue;
       }
       if(id>=kGuitarArticulationBase && id<kGuitarArticulationBase+16) {
@@ -143,7 +143,7 @@ tresult PLUGIN_API Processor::process(ProcessData& data) {
         const int articulation=std::clamp(static_cast<int>(std::lround(value*5.)),0,5);
         if(!live_.guitarLocks[index] && live_.guitarArticulation[index]!=articulation) {
           live_.guitarArticulation[index]=articulation;
-          steps_[index].articulation=static_cast<Articulation>(articulation);
+          if(index<steps_.size())steps_[index].articulation=static_cast<Articulation>(articulation);
           flushOnNextProcess_=true;
         }
         continue;
@@ -153,7 +153,7 @@ tresult PLUGIN_API Processor::process(ProcessData& data) {
         const int degree=std::clamp(static_cast<int>(std::lround(value*28.))-13,-13,15);
         if(!live_.guitarLocks[index] && live_.guitarDegree[index]!=degree) {
           live_.guitarDegree[index]=degree;
-          steps_[index].degree=degree;
+          if(index<steps_.size())steps_[index].degree=degree;
           flushOnNextProcess_=true;
         }
         continue;
