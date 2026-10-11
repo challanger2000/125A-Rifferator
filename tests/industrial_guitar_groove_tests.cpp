@@ -15,6 +15,11 @@ int main(){
     if(i%4==0){assert(riff.articulation[i]==4);assert(riff.velocity[i]==127);}
     if(i%4==1||i%4==2)assert(riff.articulation[i]==2);
   }
+  // Audible instrument articulations must follow the selected row, not the
+  // position of the step. Check each Heavier7Strings velocity band.
+  constexpr int expected[6]{0,20,50,95,115,127};
+  for(int step=0;step<16;++step)for(int art=0;art<6;++art)
+    assert(guitarStepVelocity(step,art)==expected[art]);
   assert(!makeIndustrialGuitarGroove(49).enabled[15]);
   assert(makeIndustrialGuitarGroove(50).enabled[15]);
   Pair pair;
