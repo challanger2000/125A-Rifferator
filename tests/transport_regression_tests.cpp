@@ -44,6 +44,32 @@ int main() {
   assert(scheduler.flush(rejectSink,0));
   assert(emitted.size()==2);
   for(const auto& e:emitted)assert(!e.on);
+  // Host rejects a NoteOff on STOP, then transport restarts. The first
+  // recovery callback must deliver only releases and never new NoteOns.
+  {
+    BlockScheduler retry;
+    std::vector<ScheduledMidiEvent> observed;
+    auto accept=[&](const ScheduledMidiEvent& e){observed.push_back(e);return true;};
+    retry.process(pair,0.,0.1,4800,period,accept,true);
+    assert(!observed.empty());
+    observed.clear();
+    int failures=0;
+    auto rejectOff=[&](const ScheduledMidiEvent& e){
+      if(!e.on){++failures;return false;}
+      observed.push_back(e);return true;
+    };
+    retry.process(pair,0.1,0.2,4800,period,rejectOff,false);
+    assert(failures>0);
+    observed.clear();
+    retry.process(pair,4.,4.1,4800,period,accept,true);
+    assert(!observed.empty());
+    for(const auto& e:observed)assert(!e.on);
+    observed.clear();
+    retry.process(pair,4.,4.1,4800,period,accept,true);
+    int noteOns=0;
+    for(const auto& e:observed)if(e.on)++noteOns;
+    assert(noteOns==2);
+  }
   // Three-bus integration: drum pitches must not transpose and must panic.
   BlockScheduler threeBus;
   auto drumNotes=renderDrums(DrumPattern::standard(),16);
