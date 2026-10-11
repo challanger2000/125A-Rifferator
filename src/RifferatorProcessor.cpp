@@ -272,7 +272,7 @@ tresult PLUGIN_API Processor::process(ProcessData& data) {
          running&&havePosition&&haveTempo,sink,
          config_.rootMidi-40,config_.bassGate,
          activeBassMode_==2?&resolvedHarmony:nullptr,config_.rootMidi,
-         &guide))
+         &guide,config_.bassVelocity))
       flushOnNextProcess_=true;
   } else if(!ebmScheduler_.flush(sink,0)) {
     flushOnNextProcess_=true;
