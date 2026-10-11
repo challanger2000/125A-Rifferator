@@ -1,0 +1,4 @@
+// Ensure VSTGUI can resolve its UIDescription by Windows resource name.
+// The package also carries a separate Resources/rifferator.uidesc copy.
+#include <windows.h>
+"rifferator.uidesc" DATA "rifferator.uidesc"
