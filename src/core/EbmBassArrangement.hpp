@@ -57,9 +57,12 @@ inline void prepare(Arrangement& arrangement, const BassPlan& p) {
             const auto start=barTicks*bar+stepTicks*n.step;
             const auto boundary=start+stepTicks;
             if(n.gatePermille==0) continue;
-            // Nominal end is informational; BlockScheduler uses boundaryTick
-            // and LiveControls.bassGate. Do not silently apply two gates.
-            bass.push_back({start,boundary,note,n.velocity,boundary});
+            // Per-note gate maps to the MIDI lifetime. During integration,
+            // set the scheduler's live bassGate to 100% in EBM/HYBRID.
+            const auto duration=std::min(stepTicks,std::max<int64_t>(1,
+                stepTicks*static_cast<int64_t>(n.gatePermille)/1000));
+            const auto off=start+duration;
+            bass.push_back({start,off,note,n.velocity,off});
         }
     }
     arrangement.midi.bass=std::move(bass);
