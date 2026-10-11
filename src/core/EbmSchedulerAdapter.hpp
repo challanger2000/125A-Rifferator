@@ -42,7 +42,8 @@ public:
     template<class Sink>
     bool process(const Arrangement& arrangement,double startPpq,double endPpq,
                  int frames,bool playing,Sink&& sink,
-                 int transpose=0,int gatePercent=100) noexcept {
+                 int transpose=0,int gatePercent=100,
+                 const HarmonyMap* harmony=nullptr,int harmonyRoot=40) noexcept {
         transpose=std::clamp(transpose,-127,127);
         gatePercent=std::clamp(gatePercent,0,100);
         if(frames<=0) return true;
@@ -83,7 +84,10 @@ public:
                || n.note<0 || n.note>127 || n.velocity<1 || n.velocity>127)
                 { return failClosed(sink,0); }
             if(gatePercent==0)continue;
-            const int outPitch=std::clamp(n.note+transpose,0,127);
+            const int bar=static_cast<int>(n.startTick/3840)%16;
+            const int outputRoot=harmony?chordOutputPitch(40,bar,*harmony,harmonyRoot):harmonyRoot;
+            const int extra=harmony?outputRoot-harmonyRoot:0;
+            const int outPitch=std::clamp(n.note+transpose+extra,0,127);
             const auto duration=n.endTick-n.startTick;
             const auto gatedEnd=n.startTick+std::max<int64_t>(1,duration*gatePercent/100);
             const double phase=static_cast<double>(n.startTick)/960.0;
