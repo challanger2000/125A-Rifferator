@@ -35,6 +35,7 @@ smtg_add_vst3plugin(Rifferator
  src/RifferatorFactory.cpp
 )
 target_link_libraries(Rifferator PRIVATE sdk vstgui_support)
+smtg_target_add_plugin_resources(Rifferator RESOURCES resource/rifferator.uidesc)
 if(WIN32)
  target_sources(Rifferator PRIVATE
   ${vst3sdk_SOURCE_DIR}/public.sdk/source/main/dllmain.cpp)
