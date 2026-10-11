@@ -8,3 +8,4 @@
 2026-10-11 state V2 and controller synchronization
 2026-10-11 full controller state validation and NoteOff retry
 2026-10-11 transport regression and panic checks
+2026-10-11 integration contract and minimum-gate regression
