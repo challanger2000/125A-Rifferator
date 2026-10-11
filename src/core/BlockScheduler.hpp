@@ -14,7 +14,7 @@ struct ScheduledMidiEvent {
 };
 struct LiveControls {
   int guitarGate{95}; int bassGate{95}; int rootSemitones{};
-  int bassVelocity{100}; bool bassEnabled{true}; bool drumsEnabled{true};
+  int bassVelocity{100}; bool bassEnabled{true}; bool drumsEnabled{true}; bool externalBassMode{false};
   std::array<std::array<bool,16>,3> drumSteps{};
   std::array<bool,16> guitarSteps{};
   std::array<int,16> guitarArticulation{};
@@ -57,7 +57,7 @@ public:
     std::array<ScheduledMidiEvent,kCapacity> events{};
     int count=0;
     auto collect=[&](const std::vector<MidiNote>& notes,int bus) {
-      if(bus==1 && !live.bassEnabled)return;
+      if(bus==1 && (!live.bassEnabled || live.externalBassMode))return;
       if(bus==2 && !live.drumsEnabled)return;
       for(const auto& note:notes) {
         if(bus==0 || bus==1) {
