@@ -1,0 +1,53 @@
+#include <cassert>
+#include <fstream>
+#include <regex>
+#include <string>
+#include <set>
+#include <map>
+#include <iterator>
+int main(){
+  std::ifstream file("resource/rifferator.uidesc");
+  assert(file.good());
+  const std::string xml((std::istreambuf_iterator<char>(file)),std::istreambuf_iterator<char>());
+  assert(xml.find("size=\"1120, 695\"")!=std::string::npos);
+  std::regex tagDef(R"(<control-tag name="([^"]+)" tag="([0-9]+)")");
+  std::regex viewTag(R"(<view[^>]*control-tag="([^"]+)")");
+  std::set<std::string> tags;
+  std::set<std::string> viewTags;
+  std::map<std::string,int> counts;
+  for(auto it=std::sregex_iterator(xml.begin(),xml.end(),tagDef);it!=std::sregex_iterator();++it){
+    const auto tag=(*it)[1].str();
+    assert(tags.insert(tag).second);
+    counts[tag]=std::stoi((*it)[2].str());
+  }
+  for(auto it=std::sregex_iterator(xml.begin(),xml.end(),viewTag);it!=std::sregex_iterator();++it){
+    const auto tag=(*it)[1].str();
+    assert(tags.count(tag)==1);
+    assert(viewTags.insert(tag).second);
+  }
+  assert(viewTags.size()>=160);
+  for(int n=0;n<16;++n){
+    for(int row=0;row<6;++row){
+      const auto name="GCell"+std::to_string(row)+"_"+std::to_string(n);
+      assert(viewTags.count(name)==1);
+      assert(counts.at(name)==500+row*16+n);
+    }
+    for(int row=0;row<3;++row){
+      const auto name="Drum"+std::to_string(row)+"_"+std::to_string(n);
+      assert(viewTags.count(name)==1);
+      assert(counts.at(name)==200+row*16+n);
+    }
+    assert(viewTags.count("GLock"+std::to_string(n))==1);
+    assert(viewTags.count("GDegree"+std::to_string(n))==1);
+  }
+  for(int tag=701;tag<=702;++tag)assert(viewTags.count("Action"+std::to_string(tag))==1);
+  for(int tag=710;tag<=720;++tag)assert(viewTags.count("Action"+std::to_string(tag))==1);
+  assert(xml.find("pending")==std::string::npos);
+  // The root editor is 695 pixels high and must not clip a direct child.
+  std::regex child(R"(<view[^>]*origin="([0-9]+), ([0-9]+)"[^>]*size="([0-9]+), ([0-9]+)")");
+  for(auto it=std::sregex_iterator(xml.begin(),xml.end(),child);it!=std::sregex_iterator();++it){
+    int x=std::stoi((*it)[1]),y=std::stoi((*it)[2]);
+    int w=std::stoi((*it)[3]),h=std::stoi((*it)[4]);
+    assert(x+w<=1120 && y+h<=695);
+  }
+}
