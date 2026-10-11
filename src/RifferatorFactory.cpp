@@ -27,7 +27,7 @@ public:
     const auto art=std::clamp(static_cast<int>(getParamNormalized(a125::rifferator::kGuitarArticulationBase+step)*5.+0.5),0,5);
     const bool enabled=getParamNormalized(a125::rifferator::kGuitarStepBase+step)>=0.5;
     for(int row=0;row<6;++row)if(auto* cell=guitarCells_[static_cast<std::size_t>(row)][static_cast<std::size_t>(step)]) {
-      cell->setValueNormalized(enabled && row==art?1.f:0.f);
+      cell->setValueNormalized(row==(enabled?art:0)?1.f:0.f);
       cell->invalid();
     }
   }
