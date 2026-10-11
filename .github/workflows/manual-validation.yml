@@ -23,7 +23,7 @@ jobs:
         run: |
           $validator = Get-ChildItem build -Recurse -Filter validator.exe | Where-Object { $_.FullName -match 'Release' } | Select-Object -First 1
           if (-not $validator) { throw 'Steinberg validator.exe not found' }
-          $plugin = Join-Path (Resolve-Path 'build/VST3/Release') 'Rifferator.vst3'
+          $plugin = Join-Path (Resolve-Path 'build/VST3/Release') '125A Rifferator.vst3'
           if (-not (Test-Path $plugin)) { throw 'Rifferator VST3 bundle missing' }
           & $validator.FullName -e $plugin
           if ($LASTEXITCODE -ne 0) { throw "Steinberg validator failed: $LASTEXITCODE" }
