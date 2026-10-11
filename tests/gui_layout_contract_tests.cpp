@@ -10,6 +10,8 @@ int main(){
   assert(file.good());
   const std::string xml((std::istreambuf_iterator<char>(file)),std::istreambuf_iterator<char>());
   assert(xml.find("size=\"1120, 696\"")!=std::string::npos);
+  // 150% must produce integral host window dimensions (1680 x 1044).
+  assert((1120*3)%2==0 && (696*3)%2==0);
   std::regex tagDef(R"RE(<control-tag name="([^"]+)" tag="([0-9]+)")RE");
   std::regex viewTag(R"RE(<view[^>]*control-tag="([^"]+)")RE");
   std::set<std::string> tags;
