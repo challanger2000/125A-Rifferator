@@ -21,6 +21,8 @@ class Controller final : public Steinberg::Vst::EditControllerEx1,
                          public VSTGUI::IControlListener {
 public:
   unsigned generateCount_{};
+  VSTGUI::VST3Editor* activeEditor_{};
+  double zoomFactor_{1.};
   std::array<std::array<VSTGUI::CControl*,16>,6> guitarCells_{};
   void refreshGuitarStep(int step) {
     if(step<0||step>=16)return;
@@ -39,7 +41,8 @@ public:
     }
     return result;
   }
-  void willClose(VSTGUI::VST3Editor*) override {
+  void willClose(VSTGUI::VST3Editor* editor) override {
+    if(activeEditor_==editor)activeEditor_=nullptr;
     // Clear all non-owning GUI pointers before the editor destroys its views.
     for(auto& row:guitarCells_)row.fill(nullptr);
   }
@@ -48,7 +51,7 @@ public:
                             const VSTGUI::IUIDescription*,
                             VSTGUI::VST3Editor*) override {
     if(auto* control=dynamic_cast<VSTGUI::CControl*>(view)) {
-      if((control->getTag()>=500 && control->getTag()<596) || control->getTag()==700)
+      if((control->getTag()>=500 && control->getTag()<596) || (control->getTag()>=700 && control->getTag()<=720))
         control->setListener(this);
       if(control->getTag()>=500 && control->getTag()<596) {
         const int tag=control->getTag()-500;
@@ -60,6 +63,41 @@ public:
   }
   void valueChanged(VSTGUI::CControl* control) override {
     if(!control || control->getValueNormalized()<=0.5f)return;
+    const int command=control->getTag();
+    if(command==701 || command==702) {
+      zoomFactor_=command==701?1.:1.5;
+      if(activeEditor_)activeEditor_->setZoomFactor(zoomFactor_);
+      return;
+    }
+    const auto send=[&](Steinberg::Vst::ParamID id,double value) {
+      beginEdit(id);
+      setParamNormalized(id,value);
+      performEdit(id,value);
+      endEdit(id);
+    };
+    if(command>=710 && command<=712) {
+      send(a125::rifferator::kBassMode,static_cast<double>(command-710)/2.);
+      return;
+    }
+    if(command>=713 && command<=717) {
+      send(a125::rifferator::kChordsQuality,static_cast<double>(command-713)/4.);
+      return;
+    }
+    if(command==718) {
+      const auto id=a125::rifferator::kChordsEnabled;
+      send(id,getParamNormalized(id)>=0.5?0.:1.);
+      return;
+    }
+    if(command==719) {
+      const auto id=a125::rifferator::kBassEnabled;
+      send(id,getParamNormalized(id)>=0.5?0.:1.);
+      return;
+    }
+    if(command==720) {
+      const auto id=a125::rifferator::kChordsMode;
+      send(id,getParamNormalized(id)>=0.5?0.:1.);
+      return;
+    }
     if(control->getTag()==700) {
       // Generate is a controller action, never an audio-thread allocation.
       const auto groove=a125::rifferator::makeIndustrialGuitarGroove(
@@ -102,7 +140,8 @@ public:
     if(name && std::strcmp(name,Steinberg::Vst::ViewType::kEditor)==0) {
       auto* editor=new VSTGUI::VST3Editor(this,"RifferatorView","rifferator.uidesc");
       editor->setDelegate(this);
-      editor->setZoomFactor(1.);
+      editor->setZoomFactor(zoomFactor_);
+      activeEditor_=editor;
       return editor;
     }
     return nullptr;
