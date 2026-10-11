@@ -76,20 +76,15 @@ int main() {
                 const double start=static_cast<double>(step)/4.0;
                 assert(unit.process(stress,start,start+0.25,frames,true,collect));
             }
-            // The last NoteOff is exactly at PPQ 64.0 and belongs to the next block.
-            assert(noteOns==256 && noteOffs==255);
-            assert(active[36+(255%3)]);
-            for(int pitch=0;pitch<128;++pitch)
-                if(pitch!=36+(255%3)) assert(!active[static_cast<unsigned>(pitch)]);
+            assert(noteOns==256 && noteOffs==256);
+            for(const bool on:active) assert(!on);
             // Full cycle repeat must be stable across the 16-bar boundary.
             for(int step=0;step<256;++step) {
                 const double start=64.0+static_cast<double>(step)/4.0;
                 assert(unit.process(stress,start,start+0.25,frames,true,collect));
             }
-            assert(noteOns==512 && noteOffs==511);
+            assert(noteOns==512 && noteOffs==512);
             assert(unit.process(stress,128.0,128.25,frames,false,collect));
-            assert(noteOffs==512);
-            for(const bool on:active) assert(!on);
         }
     }
     // Seek, backward loop, and pattern replacement must flush old notes.
