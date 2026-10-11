@@ -406,7 +406,7 @@ public:
     };
     uint32_t magic=0,version=0,count=0;
     if(!read32(magic)||!read32(version)||!read32(count) ||
-       magic!=0x31524641u || (version!=1 && version!=2 && version!=3 && version!=4 && version!=5 && version!=6 && version!=7) ||
+       magic!=0x31524641u || (version!=1 && version!=2 && version!=3 && version!=4 && version!=5 && version!=6 && version!=7 && version!=8) ||
        count<1 || count>32) return kResultFalse;
     std::array<uint32_t,7> values{};
     for(auto& v:values)if(!read32(v))return kResultFalse;
@@ -461,8 +461,11 @@ public:
          !read32(chordsMode)||chordsMode>1)return kResultFalse;
       for(auto& root:harmonyRoots)if(!read32(root)||root>128)return kResultFalse;
     }
+    uint32_t quality=0;
+    if(version>=8 && (!read32(quality)||quality>4))return kResultFalse;
     // The processor owns the pattern. The controller only synchronizes
     // the automatable parameter values presented to the host/GUI.
+    setParamNormalized(a125::rifferator::kChordsQuality,quality/4.);
     setParamNormalized(a125::rifferator::kChordsEnabled,chordsEnabled?1.:0.);
     setParamNormalized(a125::rifferator::kChordsMode,chordsMode?1.:0.);
     for(int i=0;i<16;++i)
