@@ -35,7 +35,6 @@ smtg_add_vst3plugin(Rifferator
  src/RifferatorProcessor.hpp
  src/RifferatorFactory.cpp
 )
-set_target_properties(Rifferator PROPERTIES OUTPUT_NAME "125A Rifferator")
 target_link_libraries(Rifferator PRIVATE sdk vstgui_support)
 smtg_target_add_plugin_resources(Rifferator RESOURCES resource/rifferator.uidesc)
 if(WIN32)
