@@ -148,3 +148,17 @@ if(MSVC)
 else()
   target_compile_options(rifferator_four_bus_transport_tests PRIVATE -UNDEBUG)
 endif()
+
+# Controller parameter synchronization with processor state and host automation.
+# Does not construct an editor or require a native window.
+add_executable(rifferator_controller_state_tests
+ tests/controller_component_state_tests.cpp src/RifferatorProcessor.cpp)
+target_sources(rifferator_controller_state_tests PRIVATE
+ ${vst3sdk_SOURCE_DIR}/public.sdk/source/common/memorystream.cpp)
+target_link_libraries(rifferator_controller_state_tests PRIVATE sdk vstgui_support)
+if(MSVC)
+  target_compile_options(rifferator_controller_state_tests PRIVATE "/FI${CMAKE_CURRENT_SOURCE_DIR}/tests/enable_asserts.h")
+else()
+  target_compile_options(rifferator_controller_state_tests PRIVATE -UNDEBUG)
+endif()
+add_test(NAME rifferator_controller_state COMMAND rifferator_controller_state_tests)
