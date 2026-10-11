@@ -91,3 +91,6 @@ add_test(NAME rifferator_ebm_guitar_coordination COMMAND rifferator_ebm_guitar_c
 
 add_executable(rifferator_industrial_guitar_tests tests/industrial_guitar_groove_tests.cpp)
 add_test(NAME rifferator_industrial_guitar COMMAND rifferator_industrial_guitar_tests)
+
+add_executable(rifferator_guitar_activation_tests tests/guitar_step_activation_regression_tests.cpp)
+add_test(NAME rifferator_guitar_activation COMMAND rifferator_guitar_activation_tests)
