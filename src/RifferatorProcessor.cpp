@@ -93,6 +93,12 @@ tresult PLUGIN_API Processor::process(ProcessData& data) {
         live_.chordsEnabled=on;
         continue;
       }
+      if(id==kChordsQuality) {
+        const int quality=std::clamp(static_cast<int>(std::lround(value*4.)),0,4);
+        if(live_.chordQuality!=quality)flushOnNextProcess_=true;
+        live_.chordQuality=quality;
+        continue;
+      }
       if(id==kChordsMode) {
         const bool root=value>=0.5;
         if(live_.chordsRootOnly!=root)flushOnNextProcess_=true;
