@@ -24,3 +24,4 @@
 2026-10-11 EBM integration compile correction
 2026-10-11 EBM bass exclusive routing regression with bus-only flush
 2026-10-11 EBM root gate velocity runtime regression
+2026-10-11 ebm gate-to-zero sustained note release regression
