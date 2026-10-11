@@ -6,6 +6,40 @@
 using namespace a125::rifferator;
 using namespace a125::rifferator::ebm_integration;
 int main() {
+    // At a full 100% gate, adjacent same-pitch notes share exact boundaries.
+    // Test the complete generator-to-scheduler path with irregular block sizes
+    // and a sampleOffset-independent MIDI lifetime assertion.
+    {
+        BassPlan full;
+        full.mode=BassMode::Ebm;
+        full.tension=Tension::Stable;
+        full.sequence.style=ebm::Style::Chromatic;
+        full.sequence.gatePermille=1000;
+        Arrangement arrangement;
+        prepare(arrangement,full);
+        assert(arrangement.midi.bass.size()==256);
+        EbmSchedulerAdapter scheduler;
+        bool sounding=false;
+        int noteOns=0,noteOffs=0;
+        auto sink=[&](const ScheduledMidiEvent& event) {
+            assert(event.bus==1 && event.pitch==24);
+            if(event.on) { assert(!sounding); sounding=true; ++noteOns; }
+            else { assert(sounding); sounding=false; ++noteOffs; }
+            return true;
+        };
+        // Deliberately split every sixteenth-note into unequal sub-blocks.
+        for(int cycle=0;cycle<2;++cycle)
+            for(int step=0;step<256;++step) {
+                const double tick=cycle*64.0+step*0.25;
+                assert(scheduler.process(arrangement,tick,tick+0.07,17,true,sink));
+                assert(scheduler.process(arrangement,tick+0.07,tick+0.25,43,true,sink));
+            }
+        assert(noteOns==512);
+        // Last NoteOff (PPQ 128) must be emitted at the next block start.
+        assert(noteOffs==511 && sounding);
+        assert(scheduler.process(arrangement,128.0,128.07,17,true,sink));
+        assert(noteOffs==512 && !sounding);
+    }
     for(auto mode : {BassMode::Ebm,BassMode::Hybrid}) {
       for(auto style : {ebm::Style::Classic,ebm::Style::Chromatic,
                         ebm::Style::Octave,ebm::Style::Industrial,
