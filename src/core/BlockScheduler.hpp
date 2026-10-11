@@ -16,11 +16,13 @@ struct LiveControls {
   int guitarGate{95}; int bassGate{95}; int rootSemitones{};
   int bassVelocity{100}; bool bassEnabled{true}; bool drumsEnabled{true};
   std::array<std::array<bool,16>,3> drumSteps{};
+  std::array<bool,16> guitarSteps{};
   LiveControls() noexcept {
     for(int i=0;i<16;++i) {
       drumSteps[0][i]=i%4==0;
       drumSteps[1][i]=i==4||i==12;
       drumSteps[2][i]=true;
+      guitarSteps[i]=(i%2)==0;
     }
   }
 };
@@ -53,6 +55,10 @@ public:
       if(bus==1 && !live.bassEnabled)return;
       if(bus==2 && !live.drumsEnabled)return;
       for(const auto& note:notes) {
+        if(bus==0 || bus==1) {
+          const int step=static_cast<int>((note.startTick/240)%16);
+          if(step<0 || !live.guitarSteps[static_cast<std::size_t>(step)])continue;
+        }
         if(bus==2) {
           const int row=note.note==36?0:note.note==38?1:note.note==42?2:-1;
           const int step=static_cast<int>((note.startTick/240)%16);
