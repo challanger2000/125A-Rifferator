@@ -56,7 +56,8 @@ public:
               on?(bus==1?live.bassVelocity:note.velocity):0,-1,on};
           };
           const int gate=std::clamp(bus==0?live.guitarGate:live.bassGate,0,100);
-          const int64_t endTick=note.startTick+(note.boundaryTick-note.startTick)*gate/100;
+          const int64_t scaled=note.startTick+(note.boundaryTick-note.startTick)*gate/100;
+          const int64_t endTick=std::max(note.startTick+1,scaled);
           if(gate<=0) continue;
           push(cycle+static_cast<double>(endTick)/960.0,false);
           push(cycle+phase,true);
