@@ -15,7 +15,7 @@ struct ScheduledMidiEvent {
 };
 struct LiveControls {
   int guitarGate{95}; int bassGate{95}; int rootSemitones{};
-  int bassVelocity{100}; bool bassEnabled{true}; bool drumsEnabled{true}; bool externalBassMode{false}; bool chordsEnabled{false}; bool chordsRootOnly{false};
+  int bassVelocity{100}; bool bassEnabled{true}; bool drumsEnabled{true}; bool externalBassMode{false}; bool chordsEnabled{false}; bool chordsRootOnly{false}; int chordQuality{0}; bool chordsAuto{true};
   HarmonyMap harmony{};
   std::array<std::array<bool,16>,3> drumSteps{};
   std::array<bool,16> guitarSteps{};
@@ -71,6 +71,7 @@ public:
           if(bus==1 && (live.guitarArticulation[static_cast<std::size_t>(step)]==1 ||
                         live.guitarArticulation[static_cast<std::size_t>(step)]==5))continue;
         }
+        if(bus==3 && (live.chordsRootOnly || live.chordQuality==2) && note.note==42)continue;
         if(bus==3 && live.chordsRootOnly && note.note!=40)continue;
         if(bus==2) {
           const int row=note.note==36?0:note.note==38?1:note.note==42?2:-1;
@@ -93,7 +94,9 @@ public:
             int velocity=note.velocity;
             if(bus==3) {
               const int bar=static_cast<int>(note.startTick/3840)%16;
-              pitch=chordOutputPitch(note.note,bar,live.harmony,40+live.rootSemitones);
+              const auto quality=static_cast<ChordQuality>(std::clamp(live.chordQuality,0,4));
+              const int interval=chordInterval(note.note-40,quality);
+              pitch=chordOutputPitch(40+interval,bar,live.harmony,40+live.rootSemitones);
             } else if(bus!=2) {
               const int step=static_cast<int>((note.startTick/240)%16);
               if(step>=0) {
