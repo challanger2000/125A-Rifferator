@@ -5,6 +5,10 @@
 using namespace a125::rifferator;
 int main(){
   const auto riff=makeIndustrialGuitarGroove();
+  assert(riff.enabled[0]&&riff.articulation[0]==4);
+  assert(riff.enabled[1]&&riff.articulation[1]==2);
+  assert(!riff.enabled[3]);
+  assert(makeIndustrialGuitarGroove(85).articulation[14]==4);
   for(int i=0;i<16;++i){
     assert(riff.degrees[i]==1);
     if(i%4==3)assert(!riff.enabled[i]);
