@@ -46,6 +46,14 @@ public:
         transpose=std::clamp(transpose,-127,127);
         gatePercent=std::clamp(gatePercent,0,100);
         if(frames<=0) return true;
+        // A gate of zero must release notes that were already sounding.
+        // Otherwise skipping note events suppresses their NoteOffs as well.
+        if(gatePercent==0) {
+            const bool ok=flush(sink,0);
+            if(ok)haveExpected_=false;
+            else recoveryPending_=true;
+            return ok;
+        }
         if(recoveryPending_) {
             if(!flush(sink,0)) return false;
             recoveryPending_=false;
