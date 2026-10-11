@@ -15,7 +15,7 @@ struct ScheduledMidiEvent {
   bool on{};
 };
 struct LiveControls {
-  int guitarGate{95}; int bassGate{95}; int rootSemitones{}; int absoluteRoot{-1}; int bassOffset{-12};
+  int guitarGate{95}; int bassGate{95}; int rootSemitones{}; int absoluteRoot{-1}; int bassOffset{-12}; int preparedRoot{40};
   int bassVelocity{100}; bool bassEnabled{true}; bool drumsEnabled{true}; bool externalBassMode{false}; bool chordsEnabled{false}; bool chordsRootOnly{false}; int chordQuality{0}; bool chordsAuto{true};
   HarmonyMap harmony{};
   std::array<std::array<bool,16>,3> drumSteps{};
@@ -108,7 +108,7 @@ public:
                 constexpr std::array<int,7> scale{0,2,3,5,7,8,10};
                 // Prepared riff notes already contain the scale degree.
                 // Live degree control is absolute, not an additional transpose.
-                pitch=(live.absoluteRoot>=0?live.absoluteRoot:40+live.rootSemitones)+degreeOffset(degree,scale)+(bus==1?live.bassOffset:0);
+                pitch=(live.absoluteRoot>=0?live.absoluteRoot:40+live.rootSemitones)+degreeOffset(degree,scale)+(note.note-live.preparedRoot)+(bus==1?live.bassOffset:0);
                 const int articulation=live.guitarArticulation[static_cast<std::size_t>(step)];
                 if(bus==0) {
                   constexpr std::array<int,6> velocities{0,20,50,95,115,127};
