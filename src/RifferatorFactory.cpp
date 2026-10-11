@@ -98,7 +98,10 @@ public:
     const int command=control->getTag();
     if(command==701 || command==702) {
       zoomFactor_=command==701?1.:1.5;
-      if(activeEditor_)activeEditor_->setZoomFactor(zoomFactor_);
+      // Use the attached view owner when available, not a potentially stale
+      // pointer left by a previously opened host editor.
+      auto* editor=viewOwner_?viewOwner_:activeEditor_;
+      if(editor)editor->setZoomFactor(zoomFactor_);
       refreshCommands();
       return;
     }
