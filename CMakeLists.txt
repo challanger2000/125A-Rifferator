@@ -94,3 +94,16 @@ add_test(NAME rifferator_industrial_guitar COMMAND rifferator_industrial_guitar_
 
 add_executable(rifferator_guitar_activation_tests tests/guitar_step_activation_regression_tests.cpp)
 add_test(NAME rifferator_guitar_activation COMMAND rifferator_guitar_activation_tests)
+
+# ASSERTION AUDIT: CI Release must not compile out regression checks.
+# /UNDEBUG is MSVC /U<macro>; -UNDEBUG is GCC/Clang equivalent.
+get_property(rifferator_targets DIRECTORY PROPERTY BUILDSYSTEM_TARGETS)
+foreach(test_target IN LISTS rifferator_targets)
+  if(test_target MATCHES "^rifferator_.*tests$")
+    if(MSVC)
+      target_compile_options(${test_target} PRIVATE /UNDEBUG)
+    else()
+      target_compile_options(${test_target} PRIVATE -UNDEBUG)
+    endif()
+  endif()
+endforeach()
