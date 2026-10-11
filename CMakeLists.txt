@@ -56,3 +56,21 @@ add_test(NAME rifferator_generation COMMAND rifferator_generation_tests)
 
 add_executable(rifferator_guitar_steps_tests tests/guitar_step_controls_tests.cpp)
 add_test(NAME rifferator_guitar_steps COMMAND rifferator_guitar_steps_tests)
+
+add_executable(rifferator_ebm_engine_tests tests/ebm_bass_engine_tests.cpp)
+add_test(NAME rifferator_ebm_engine COMMAND rifferator_ebm_engine_tests)
+
+add_executable(rifferator_ebm_arrangement_tests tests/ebm_bass_arrangement_tests.cpp)
+add_test(NAME rifferator_ebm_arrangement COMMAND rifferator_ebm_arrangement_tests)
+
+add_executable(rifferator_ebm_scheduler_tests tests/ebm_bass_scheduler_tests.cpp)
+add_test(NAME rifferator_ebm_scheduler COMMAND rifferator_ebm_scheduler_tests)
+
+add_executable(rifferator_ebm_end_to_end_tests tests/ebm_bass_end_to_end_tests.cpp)
+add_test(NAME rifferator_ebm_end_to_end COMMAND rifferator_ebm_end_to_end_tests)
+
+add_executable(rifferator_ebm_midi_audit_tests tests/ebm_bass_midi_audit_tests.cpp)
+add_test(NAME rifferator_ebm_midi_audit COMMAND rifferator_ebm_midi_audit_tests)
+
+add_executable(rifferator_ebm_realtime_tests tests/ebm_bass_realtime_tests.cpp)
+add_test(NAME rifferator_ebm_realtime COMMAND rifferator_ebm_realtime_tests)
