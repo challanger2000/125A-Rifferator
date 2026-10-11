@@ -9,6 +9,21 @@ int main(){
   assert(chordInterval(1,ChordQuality::Power)==7);
   assert(chordInterval(1,ChordQuality::Sus2)==2);
   assert(chordInterval(1,ChordQuality::Sus4)==5);
+  // Stable C stays harmonic anchor despite an offbeat chromatic C#.
+  std::array<bool,16> enabled{};
+  std::array<int,16> articulations{};
+  std::array<int,16> degrees{};
+  degrees.fill(1);
+  enabled[0]=enabled[2]=enabled[4]=enabled[8]=true;
+  articulations.fill(3);
+  // With a chromatic scale the offbeat degree 2 is C#.
+  const std::array<int,7> chromatic{0,1,2,3,4,5,6};
+  degrees[2]=2;
+  assert(inferredGuitarRoot(enabled,articulations,degrees,chromatic,40)==40);
+  enabled.fill(false);
+  enabled[0]=enabled[4]=true;
+  degrees[0]=degrees[4]=2;
+  assert(inferredGuitarRoot(enabled,articulations,degrees,chromatic,40)==41);
   auto notes=makeChordCandidates();
   assert(notes.size()==48);
   HarmonyMap h;
