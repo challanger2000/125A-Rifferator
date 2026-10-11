@@ -1,0 +1,63 @@
+#pragma once
+#include "EbmBassEngine.hpp"
+#include "RiffArrangement.hpp"
+#include <array>
+#include <algorithm>
+#include <cstdint>
+
+namespace a125::rifferator::ebm_integration {
+enum class BassMode : uint8_t { Follow, Ebm, Hybrid };
+enum class Tension : uint8_t { Stable, Tension, Aggressive };
+struct BassPlan {
+    BassMode mode{BassMode::Follow};   // Preserves existing bass by default
+    Tension tension{Tension::Tension};
+    ebm::Settings sequence{};
+    int ticksPerStep{240};             // 1/16 at 960 PPQ
+    int bars{16};
+    int bassOctaveOffset{-12};
+    // Explicit harmonic roots: absolute MIDI pitch, one per bar.
+    // EBM ignores later roots; Hybrid consults root at each bar.
+    std::array<uint8_t,16> harmonicRoots{};
+};
+inline int controlledInterval(int raw, Tension tension, uint32_t hash) noexcept {
+    if (raw==0 || raw==12 || raw==7) return raw;
+    if (tension==Tension::Stable) return 0;
+    if (tension==Tension::Tension)
+        return (hash%4u==0u) ? raw : 0; // sparse controlled chromatic motion
+    return raw;                         // deliberately pronounced friction
+}
+// Off-audio-thread only: builds the bass section of an existing Arrangement.
+// Guitar notes and FOLLOW bass remain unchanged. Pattern period is bars*16 steps.
+// VST3 host event scheduling continues through existing BlockScheduler.
+inline void prepare(Arrangement& arrangement, const BassPlan& p) {
+    if(p.mode==BassMode::Follow) return;
+    if(p.bars!=16 || p.ticksPerStep<=0) return;
+    std::vector<MidiNote> bass;
+    bass.reserve(16u*32u);
+    auto sequence=p.sequence;
+    const auto stepTicks=static_cast<int64_t>(p.ticksPerStep);
+    const auto barTicks=stepTicks*16;
+    for(int bar=0;bar<16;++bar) {
+        sequence.seed=p.sequence.seed+static_cast<uint32_t>(bar/4); // 4-bar motif family
+        sequence.root=static_cast<uint8_t>(std::clamp<int>(
+          p.mode==BassMode::Hybrid ? p.harmonicRoots[bar] : p.harmonicRoots[0],0,127));
+        sequence.steps=16;
+        const auto pattern=ebm::generate(sequence);
+        for(unsigned i=0;i<pattern.count;++i) {
+            const auto& n=pattern.notes[i];
+            const auto hash=ebm::mix32(sequence.seed ^ (static_cast<uint32_t>(bar)*17u+n.step));
+            const auto raw=static_cast<int>(n.pitch)-sequence.root;
+            const auto interval=controlledInterval(raw,p.tension,hash);
+            const auto note=clampMidi(static_cast<int>(sequence.root)+interval+p.bassOctaveOffset);
+            const auto start=barTicks*bar+stepTicks*n.step;
+            const auto boundary=start+stepTicks;
+            if(n.gatePermille==0) continue;
+            // Nominal end is informational; BlockScheduler uses boundaryTick
+            // and LiveControls.bassGate. Do not silently apply two gates.
+            bass.push_back({start,boundary,note,n.velocity,boundary});
+        }
+    }
+    arrangement.midi.bass=std::move(bass);
+    arrangement.periodTicks=barTicks*16;
+}
+} // namespace a125::rifferator::ebm_integration
