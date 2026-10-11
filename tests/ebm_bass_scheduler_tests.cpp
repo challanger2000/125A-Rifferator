@@ -90,6 +90,20 @@ int main() {
         assert(!unit.process(sounding,0.2,0.3,480,true,collect));
         assert(got.empty());
     }
+    // Extreme host PPQ must be rejected after flushing the sounding note.
+    {
+        EbmSchedulerAdapter unit;
+        Arrangement one;
+        one.periodTicks=3840;
+        one.midi.bass={{0,240,40,99,240}};
+        std::vector<ScheduledMidiEvent> got;
+        auto collect=[&](const ScheduledMidiEvent& e){got.push_back(e);return true;};
+        assert(unit.process(one,0.0,0.1,64,true,collect));
+        assert(got.size()==1 && got[0].on);
+        got.clear();
+        assert(!unit.process(one,1.0e20,1.0e20+1.0e10,64,true,collect));
+        assert(got.size()==1 && !got[0].on);
+    }
     // Stress: varying block lengths, repeated 16-bar loop and stop recovery.
     {
         Arrangement stress;

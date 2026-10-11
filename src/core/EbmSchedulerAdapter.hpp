@@ -43,6 +43,10 @@ public:
         }
         if(haveExpected_ && std::abs(startPpq-expectedPpq_)>0.002)
             if(!flush(sink)) return false;
+        // Avoid undefined integer conversions on corrupt host transport positions.
+        if(std::abs(startPpq)>1.0e12 || std::abs(endPpq)>1.0e12) {
+            flush(sink,0); haveExpected_=false; return false;
+        }
         expectedPpq_=endPpq; haveExpected_=true;
         struct Event { int offset,pitch,velocity; bool on; double ppq; };
         std::array<Event,512> events{};

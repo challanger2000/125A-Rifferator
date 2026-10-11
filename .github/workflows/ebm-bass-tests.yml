@@ -7,6 +7,7 @@ on:
       - feature/ebm-bass-engine
     paths:
       - 'src/core/EbmBass*.hpp'
+      - 'src/core/EbmSchedulerAdapter.hpp'
       - 'tests/ebm_bass_*.cpp'
       - '.github/workflows/ebm-bass-tests.yml'
 
