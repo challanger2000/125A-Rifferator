@@ -38,7 +38,11 @@ int main() {
         // Last NoteOff (PPQ 128) must be emitted at the next block start.
         assert(noteOffs==511 && sounding);
         assert(scheduler.process(arrangement,128.0,128.07,17,true,sink));
-        assert(noteOffs==512 && !sounding);
+        // A looping sequencer retriggers step zero at PPQ 128.
+        assert(noteOffs==512 && noteOns==513 && sounding);
+        // Stop must flush the new note without leaving a hanging voice.
+        assert(scheduler.process(arrangement,128.07,128.14,17,false,sink));
+        assert(noteOffs==513 && !sounding);
     }
     for(auto mode : {BassMode::Ebm,BassMode::Hybrid}) {
       for(auto style : {ebm::Style::Classic,ebm::Style::Chromatic,
