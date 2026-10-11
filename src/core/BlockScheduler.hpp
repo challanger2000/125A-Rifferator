@@ -131,7 +131,20 @@ public:
           const int64_t scaled=note.startTick+(note.boundaryTick-note.startTick)*gate/100;
           const int64_t endTick=std::max(note.startTick+1,scaled);
           if(gate<=0) continue;
-          push(cycle+static_cast<double>(endTick)/960.0,false);
+          if(bus==3) {
+            // Sustain a chord voice across bars when its next pitch is
+            // unchanged. A new transport start still emits the required On
+            // because the runtime active-note state is initially empty.
+            const int bar=static_cast<int>(note.startTick/3840)%16;
+            const auto quality=static_cast<ChordQuality>(std::clamp(live.chordQuality,0,4));
+            const int interval=chordInterval(note.note-40,quality);
+            const int current=chordOutputPitch(40+interval,bar,live.harmony,40+live.rootSemitones);
+            const int next=chordOutputPitch(40+interval,(bar+1)%16,live.harmony,40+live.rootSemitones);
+            if(bar==15 || current!=next)
+              push(cycle+static_cast<double>(endTick)/960.0,false);
+          } else {
+            push(cycle+static_cast<double>(endTick)/960.0,false);
+          }
           push(cycle+phase,true);
           if(bus==0 && live.guitarArticulation[static_cast<std::size_t>((note.startTick/240)%16)]==4) {
             push(cycle+static_cast<double>(endTick)/960.0,false,7);
@@ -164,6 +177,7 @@ public:
     for(int i=0;i<count;++i) {
       const auto e=events[static_cast<std::size_t>(i)];
       if(!e.on && !active_[static_cast<std::size_t>(e.bus)][static_cast<std::size_t>(e.pitch)]) continue;
+      if(e.on && e.bus==3 && active_[3][static_cast<std::size_t>(e.pitch)])continue;
       if(e.on && active_[static_cast<std::size_t>(e.bus)][static_cast<std::size_t>(e.pitch)]) {
         if(!flushBus(e.bus,sink,e.sampleOffset))return;
       }
