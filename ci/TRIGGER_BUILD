@@ -12,3 +12,4 @@
 2026-10-11 GM drum companion core tests and branding
 2026-10-11 first three-event-bus GM drum integration
 2026-10-11 drum pattern state v3 integrity build
+2026-10-11 deterministic offline generate variate lock regression
