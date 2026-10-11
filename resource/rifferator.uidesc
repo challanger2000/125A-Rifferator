@@ -3,6 +3,22 @@
  <colors><color name="Bg" rgba="#0D1115FF"/><color name="Panel" rgba="#182229FF"/><color name="Text" rgba="#E7ECEFFF"/><color name="Accent" rgba="#62C7B3FF"/><color name="Line" rgba="#364750FF"/></colors>
  <fonts><font name="Title" font-name="Arial" size="26" bold="true"/><font name="Normal" font-name="Arial" size="15"/><font name="Small" font-name="Arial" size="12"/></fonts>
  <control-tags>
+  <control-tag name="GuitarActive0" tag="300"/>
+  <control-tag name="GuitarActive1" tag="301"/>
+  <control-tag name="GuitarActive2" tag="302"/>
+  <control-tag name="GuitarActive3" tag="303"/>
+  <control-tag name="GuitarActive4" tag="304"/>
+  <control-tag name="GuitarActive5" tag="305"/>
+  <control-tag name="GuitarActive6" tag="306"/>
+  <control-tag name="GuitarActive7" tag="307"/>
+  <control-tag name="GuitarActive8" tag="308"/>
+  <control-tag name="GuitarActive9" tag="309"/>
+  <control-tag name="GuitarActive10" tag="310"/>
+  <control-tag name="GuitarActive11" tag="311"/>
+  <control-tag name="GuitarActive12" tag="312"/>
+  <control-tag name="GuitarActive13" tag="313"/>
+  <control-tag name="GuitarActive14" tag="314"/>
+  <control-tag name="GuitarActive15" tag="315"/>
   <control-tag name="Drum0_0" tag="200"/>
   <control-tag name="Drum0_1" tag="201"/>
   <control-tag name="Drum0_2" tag="202"/>
@@ -60,7 +76,7 @@
  <view class="CViewContainer" origin="22, 90" size="1076, 345" background-color="Panel" transparent="false">
   <view class="CTextLabel" origin="16, 12" size="500, 24" title="GUITAR  |  16-STEP RIFF MATRIX" font="Normal" font-color="Accent" transparent="true"/>
   <view class="CTextLabel" origin="16, 44" size="116, 25" title="STEP" font="Small" font-color="Text" transparent="true"/>
-  <view class="CTextLabel" origin="16, 75" size="116, 25" title="REST" font="Small" font-color="Text" transparent="true"/>
+  <view class="CTextLabel" origin="16, 75" size="116, 25" title="ACTIVE" font="Small" font-color="Text" transparent="true"/>
   <view class="CTextLabel" origin="16, 106" size="116, 25" title="NOISE" font="Small" font-color="Text" transparent="true"/>
   <view class="CTextLabel" origin="16, 137" size="116, 25" title="PALM MUTE" font="Small" font-color="Text" transparent="true"/>
   <view class="CTextLabel" origin="16, 168" size="116, 25" title="SOFT" font="Small" font-color="Text" transparent="true"/>
@@ -84,6 +100,22 @@
   <view class="CTextLabel" origin="879, 44" size="45, 25" title="14" font="Small" font-color="Accent" text-alignment="center" transparent="true"/>
   <view class="CTextLabel" origin="935, 44" size="45, 25" title="15" font="Small" font-color="Accent" text-alignment="center" transparent="true"/>
   <view class="CTextLabel" origin="991, 44" size="45, 25" title="16" font="Small" font-color="Accent" text-alignment="center" transparent="true"/>
+  <view class="CTextButton" control-tag="GuitarActive0" origin="151, 75" size="43, 23" title="&#x2022;" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false"/>
+  <view class="CTextButton" control-tag="GuitarActive1" origin="207, 75" size="43, 23" title="&#x2022;" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false"/>
+  <view class="CTextButton" control-tag="GuitarActive2" origin="263, 75" size="43, 23" title="&#x2022;" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false"/>
+  <view class="CTextButton" control-tag="GuitarActive3" origin="319, 75" size="43, 23" title="&#x2022;" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false"/>
+  <view class="CTextButton" control-tag="GuitarActive4" origin="375, 75" size="43, 23" title="&#x2022;" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false"/>
+  <view class="CTextButton" control-tag="GuitarActive5" origin="431, 75" size="43, 23" title="&#x2022;" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false"/>
+  <view class="CTextButton" control-tag="GuitarActive6" origin="487, 75" size="43, 23" title="&#x2022;" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false"/>
+  <view class="CTextButton" control-tag="GuitarActive7" origin="543, 75" size="43, 23" title="&#x2022;" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false"/>
+  <view class="CTextButton" control-tag="GuitarActive8" origin="599, 75" size="43, 23" title="&#x2022;" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false"/>
+  <view class="CTextButton" control-tag="GuitarActive9" origin="655, 75" size="43, 23" title="&#x2022;" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false"/>
+  <view class="CTextButton" control-tag="GuitarActive10" origin="711, 75" size="43, 23" title="&#x2022;" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false"/>
+  <view class="CTextButton" control-tag="GuitarActive11" origin="767, 75" size="43, 23" title="&#x2022;" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false"/>
+  <view class="CTextButton" control-tag="GuitarActive12" origin="823, 75" size="43, 23" title="&#x2022;" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false"/>
+  <view class="CTextButton" control-tag="GuitarActive13" origin="879, 75" size="43, 23" title="&#x2022;" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false"/>
+  <view class="CTextButton" control-tag="GuitarActive14" origin="935, 75" size="43, 23" title="&#x2022;" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false"/>
+  <view class="CTextButton" control-tag="GuitarActive15" origin="991, 75" size="43, 23" title="&#x2022;" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false"/>
  </view>
  <view class="CTextLabel" origin="34, 450" size="980, 26" title="GUITAR GENERATE / VARIATE / LOCK: controller commands pending" font="Normal" font-color="Text" transparent="true"/>
  <view class="CTextLabel" origin="34, 503" size="1030, 25" title="BASS     FOLLOW / EBM / HYBRID     |     DETAILS (pending)" font="Normal" font-color="Text" transparent="true"/>
