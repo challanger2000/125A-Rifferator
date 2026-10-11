@@ -21,6 +21,24 @@ class Controller final : public Steinberg::Vst::EditControllerEx1,
                          public VSTGUI::IControlListener {
 public:
   unsigned generateCount_{};
+  std::array<std::array<VSTGUI::CControl*,16>,6> guitarCells_{};
+  void refreshGuitarStep(int step) {
+    if(step<0||step>=16)return;
+    const auto art=std::clamp(static_cast<int>(getParamNormalized(a125::rifferator::kGuitarArticulationBase+step)*5.+0.5),0,5);
+    const bool enabled=getParamNormalized(a125::rifferator::kGuitarStepBase+step)>=0.5;
+    for(int row=0;row<6;++row)if(auto* cell=guitarCells_[static_cast<std::size_t>(row)][static_cast<std::size_t>(step)]) {
+      cell->setValueNormalized(enabled && row==art?1.f:0.f);
+      cell->invalid();
+    }
+  }
+  Steinberg::tresult PLUGIN_API setParamNormalized(Steinberg::Vst::ParamID id,Steinberg::Vst::ParamValue value) override {
+    const auto result=EditControllerEx1::setParamNormalized(id,value);
+    if(result==Steinberg::kResultOk) {
+      if(id>=a125::rifferator::kGuitarStepBase && id<a125::rifferator::kGuitarStepBase+16)refreshGuitarStep(static_cast<int>(id-a125::rifferator::kGuitarStepBase));
+      if(id>=a125::rifferator::kGuitarArticulationBase && id<a125::rifferator::kGuitarArticulationBase+16)refreshGuitarStep(static_cast<int>(id-a125::rifferator::kGuitarArticulationBase));
+    }
+    return result;
+  }
   VSTGUI::CView* verifyView(VSTGUI::CView* view,
                             const VSTGUI::UIAttributes&,
                             const VSTGUI::IUIDescription*,
@@ -28,6 +46,11 @@ public:
     if(auto* control=dynamic_cast<VSTGUI::CControl*>(view)) {
       if((control->getTag()>=500 && control->getTag()<596) || control->getTag()==700)
         control->setListener(this);
+      if(control->getTag()>=500 && control->getTag()<596) {
+        const int tag=control->getTag()-500;
+        guitarCells_[static_cast<std::size_t>(tag/16)][static_cast<std::size_t>(tag%16)]=control;
+        refreshGuitarStep(tag%16);
+      }
     }
     return view;
   }
@@ -59,6 +82,7 @@ public:
     beginEdit(id);
     performEdit(id,static_cast<double>(art)/5.);
     endEdit(id);
+    refreshGuitarStep(step);
   }
   Steinberg::IPlugView* PLUGIN_API createView(Steinberg::FIDString name) override {
     if(name && std::strcmp(name,Steinberg::Vst::ViewType::kEditor)==0) {
