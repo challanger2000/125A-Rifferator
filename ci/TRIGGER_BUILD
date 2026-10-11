@@ -69,3 +69,4 @@
 2026-10-11 align Rifferator editor construction to validated Midiator
 2026-10-11 release audit legacy automation OOB correction and baseline
 2026-10-11 legacy one-step state real processor parameter automation regression
+2026-10-11 verified VSTGUI template root hierarchy bugfix
