@@ -1,4 +1,5 @@
 #include "../src/core/DrumCompanion.hpp"
+#include "../src/core/BlockScheduler.hpp"
 #include <cassert>
 using namespace a125::rifferator;
 int main() {
@@ -18,4 +19,28 @@ int main() {
   p.kick[0]=false;p.hat[0]=false;
   assert(renderDrums(p,1).size()==20);
   p.enabled=false;assert(renderDrums(p,16).empty());
+  DrumPattern candidates;
+  candidates.kick.fill(true);candidates.snare.fill(true);candidates.hat.fill(true);
+  auto all=renderDrums(candidates,16);
+  BlockScheduler scheduler;scheduler.setDrums(&all);
+  Pair noGuitar;
+  LiveControls live;
+  int hits=0;
+  scheduler.process(noGuitar,0.,0.24,9600,16*16*240,
+    [&](const ScheduledMidiEvent& e) {if(e.on && e.bus==2)++hits;return true;},
+    true,live);
+  assert(hits>0);
+  scheduler.reset();hits=0;
+  live.drumsEnabled=false;
+  scheduler.process(noGuitar,0.,0.24,9600,16*16*240,
+    [&](const ScheduledMidiEvent& e) {if(e.on && e.bus==2)++hits;return true;},
+    true,live);
+  assert(hits==0);
+  scheduler.reset();hits=0;
+  live.drumsEnabled=true;
+  for(auto& row:live.drumSteps)row.fill(false);
+  scheduler.process(noGuitar,0.,0.24,9600,16*16*240,
+    [&](const ScheduledMidiEvent& e) {if(e.on && e.bus==2)++hits;return true;},
+    true,live);
+  assert(hits==0);
 }
