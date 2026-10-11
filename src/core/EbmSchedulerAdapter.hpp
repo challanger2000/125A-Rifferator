@@ -41,7 +41,10 @@ public:
     }
     template<class Sink>
     bool process(const Arrangement& arrangement,double startPpq,double endPpq,
-                 int frames,bool playing,Sink&& sink) noexcept {
+                 int frames,bool playing,Sink&& sink,
+                 int transpose=0,int gatePercent=100) noexcept {
+        transpose=std::clamp(transpose,-127,127);
+        gatePercent=std::clamp(gatePercent,0,100);
         if(frames<=0) return true;
         if(recoveryPending_) {
             if(!flush(sink,0)) return false;
@@ -71,6 +74,10 @@ public:
             if(n.startTick<0 || n.endTick<=n.startTick || n.endTick>arrangement.periodTicks
                || n.note<0 || n.note>127 || n.velocity<1 || n.velocity>127)
                 { return failClosed(sink,0); }
+            if(gatePercent==0)continue;
+            const int outPitch=std::clamp(n.note+transpose,0,127);
+            const auto duration=n.endTick-n.startTick;
+            const auto gatedEnd=n.startTick+std::max<int64_t>(1,duration*gatePercent/100);
             const double phase=static_cast<double>(n.startTick)/960.0;
             const auto first=static_cast<int64_t>(std::floor((startPpq-phase)/period))-1;
             const auto last=static_cast<int64_t>(std::ceil((endPpq-phase)/period))+1;
@@ -82,10 +89,10 @@ public:
                     if(size==static_cast<int>(events.size())) return false;
                     const double fraction=(at-startPpq)/(endPpq-startPpq);
                     const int offset=std::clamp(static_cast<int>(fraction*frames),0,frames-1);
-                    events[size++]={offset,n.note,on?n.velocity:0,on,at};
+                    events[size++]={offset,outPitch,on?n.velocity:0,on,at};
                     return true;
                 };
-                if(!add(base+static_cast<double>(n.endTick)/960.0,false) ||
+                if(!add(base+static_cast<double>(gatedEnd)/960.0,false) ||
                    !add(base+phase,true)) return failClosed(sink,0);
             }
         }
