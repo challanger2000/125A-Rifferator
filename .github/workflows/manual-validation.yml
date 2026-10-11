@@ -16,6 +16,15 @@ jobs:
         run: cmake -S . -B build -G "Visual Studio 17 2022" -A x64 -DCMAKE_CXX_STANDARD=23
       - name: Build
         run: cmake --build build --config Release --parallel 4
+      - name: Brand complete VST3 delivery bundle
+        shell: pwsh
+        run: |
+          $dir = (Resolve-Path 'build/VST3/Release').Path
+          $source = Join-Path $dir 'Rifferator.vst3'
+          $target = Join-Path $dir '125A Rifferator.vst3'
+          if (-not (Test-Path $source -PathType Container)) { throw "SDK package missing: $source" }
+          if (Test-Path $target) { throw "Duplicate target bundle exists: $target" }
+          Move-Item -LiteralPath $source -Destination $target
       - name: Core regression tests
         run: ctest --test-dir build -C Release --output-on-failure
       - name: VST3 delivery and GUI resource audit
