@@ -2,13 +2,21 @@
 
 **THE INDUSTRIAL RIFF MACHINE**
 
-Development V1 — guitar-first MIDI riff creator with separate bass accompaniment and a deliberately simple GM Drum Companion.
+Development V1.0.0 on `develop/v1.0.0` — guitar-first Windows VST3 MIDI generator with **four separate event outputs** (Guitar, Bass, Drums, Chords), each using MIDI channel 1.
 
-- **GUITAR** is the primary editor: GENERATE / VARIATE / LOCK, 16/32-step riffs and articulations.
-- **BASS** provides FOLLOW; EBM and HYBRID engines are being developed separately for later integration.
-- **DRUMS** provide a basic editable 16-step beat (GM: Kick 36, Snare 38, Closed Hat 42); future third MIDI output.
-- GUI concept: main guitar editor, compact Bass and Drums panels with DETAILS views.
+- **GUITAR:** 16-step articulation matrix, live pitch/step controls, per-step LOCK and GENERATE. 100%/150% GUI zoom.
+- **BASS:** FOLLOW, EBM and HYBRID modes with enable controls.
+- **DRUMS:** Editable 16-step GM Kick 36 / Snare 38 / Closed Hat 42.
+- **CHORDS:** Guitar-following output with chord-quality and root-only modes.
 
-**Development status:** The drum sequence renderer and its tests are added, but the third VST3 event bus, host routing and GUI are **not yet implemented or verified**. Do not consider this a release.
+## Development and verification status
+
+The Windows CI compiles the plugin, runs deterministic core/GUI-layout regression tests and the Steinberg validator. A green CI run does **not** establish a host-attached GUI lifecycle PASS or visual approval.
+
+The earlier standalone editor create/release test was **removed from CTest** because it produced a segmentation fault outside a correctly initialized native VST3 host. It is **not** evidence of a verified GUI lifecycle and must not be restored as an equivalent test.
+
+**Real host acceptance protocol:** [Studio One GUI/lifecycle QA](docs/HOST-GUI-QA.md).
+
+Development build artifacts are attached to successful GitHub Actions runs. Do not ship a Final or Gumroad package before the host protocol and 125A release QA pass.
 
 See [bass integration contract](docs/BASS-INTEGRATION-CONTRACT.md).
