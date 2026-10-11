@@ -41,3 +41,4 @@
 2026-10-11 re-audit release tests enforce asserts and bass octave
 2026-10-11 release assert canary and all audit fixes final rerun
 2026-10-11 corrected asserted power chord note-off timing check
+2026-10-11 asserted guitar fill routing audit final
