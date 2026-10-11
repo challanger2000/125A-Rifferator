@@ -207,6 +207,28 @@ int main() {
         assert(!unit.process(invalid,0.0,0.25,256,true,count));
         assert(delivered==0);
     }
+    // Overlapping NoteOns for one pitch are rejected and the sounding note
+    // gets an explicit NoteOff. We cannot track concurrent MIDI voices by pitch.
+    {
+        EbmSchedulerAdapter unit;
+        Arrangement overlap;
+        overlap.periodTicks=3840;
+        overlap.midi.bass={{0,480,36,100,480},{240,600,36,110,600}};
+        std::vector<ScheduledMidiEvent> got;
+        auto collect=[&](const ScheduledMidiEvent& e){got.push_back(e);return true;};
+        assert(!unit.process(overlap,0.0,0.7,672,true,collect));
+        assert(got.size()==2);
+        assert(got[0].on && got[0].pitch==36);
+        assert(!got[1].on && got[1].pitch==36);
+        got.clear();
+        assert(!unit.process(overlap,0.7,0.8,96,true,collect));
+        assert(got.empty());
+        Arrangement safe;
+        safe.periodTicks=3840;
+        safe.midi.bass={{0,240,36,100,240}};
+        assert(unit.process(safe,0.0,0.1,96,true,collect));
+        assert(got.size()==1 && got[0].on);
+    }
     // Stress: varying block lengths, repeated 16-bar loop and stop recovery.
     {
         Arrangement stress;

@@ -103,6 +103,9 @@ public:
         }
         for(int i=0;i<size;++i) {
             const auto& e=events[i];
+            // One MIDI note per pitch is tracked: overlapping same-pitch NoteOns
+            // cannot be represented safely and must never be silently accepted.
+            if(e.on && active_[e.pitch]) return failClosed(sink,e.offset);
             if(!e.on && !active_[e.pitch]) continue;
             if(!sink(ScheduledMidiEvent{1,e.offset,e.pitch,e.velocity,-1,e.on}))
                 { recoveryPending_=true; flush(sink,e.offset); return false; }
