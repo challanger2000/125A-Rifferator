@@ -118,3 +118,7 @@ foreach(test_target IN LISTS rifferator_targets)
     endif()
   endif()
 endforeach()
+
+add_executable(rifferator_gui_layout_tests tests/gui_layout_contract_tests.cpp)
+add_test(NAME rifferator_gui_layout COMMAND rifferator_gui_layout_tests)
+set_tests_properties(rifferator_gui_layout PROPERTIES WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
