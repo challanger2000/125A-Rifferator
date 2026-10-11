@@ -53,3 +53,4 @@
 2026-10-11 real VSTGUI create/release lifecycle CTest
 2026-10-11 lifecycle test MSVC NDEBUG correction
 2026-10-11 MSVC Release assertion forced include lifecycle QA
+2026-10-11 editor lifecycle NDEBUG source-level correction
