@@ -25,7 +25,11 @@ Processor::Processor() {
   setControllerClass(controllerId);
   steps_.resize(16);
   for(int i=0;i<16;++i) steps_[i].articulation=Articulation::PalmMute;
-  for(int i=0;i<16;++i) live_.guitarSteps[static_cast<std::size_t>(i)]=(i%2)==0;
+  for(int i=0;i<16;++i) {
+    live_.guitarSteps[static_cast<std::size_t>(i)]=(i%2)==0;
+    live_.guitarArticulation[static_cast<std::size_t>(i)]=3;
+    live_.guitarDegree[static_cast<std::size_t>(i)]=1;
+  }
   prepareFillVariants();
   DrumPattern candidates;
   candidates.kick.fill(true);candidates.snare.fill(true);candidates.hat.fill(true);
@@ -72,9 +76,36 @@ tresult PLUGIN_API Processor::process(ProcessData& data) {
       value=std::clamp(value,0.,1.);
       const int v=static_cast<int>(std::lround(value*100.));
       const auto id=queue->getParameterId();
+      if(id>=kGuitarLockBase && id<kGuitarLockBase+16) {
+        const auto index=static_cast<std::size_t>(id-kGuitarLockBase);
+        live_.guitarLocks[index]=value>=0.5;
+        steps_[index].locked=live_.guitarLocks[index];
+        continue;
+      }
+      if(id>=kGuitarArticulationBase && id<kGuitarArticulationBase+16) {
+        const auto index=static_cast<std::size_t>(id-kGuitarArticulationBase);
+        const int articulation=std::clamp(static_cast<int>(std::lround(value*5.)),0,5);
+        if(!live_.guitarLocks[index] && live_.guitarArticulation[index]!=articulation) {
+          live_.guitarArticulation[index]=articulation;
+          steps_[index].articulation=static_cast<Articulation>(articulation);
+          flushOnNextProcess_=true;
+        }
+        continue;
+      }
+      if(id>=kGuitarDegreeBase && id<kGuitarDegreeBase+16) {
+        const auto index=static_cast<std::size_t>(id-kGuitarDegreeBase);
+        const int degree=std::clamp(static_cast<int>(std::lround(value*28.))-13,-13,15);
+        if(!live_.guitarLocks[index] && live_.guitarDegree[index]!=degree) {
+          live_.guitarDegree[index]=degree;
+          steps_[index].degree=degree;
+          flushOnNextProcess_=true;
+        }
+        continue;
+      }
       if(id>=kGuitarStepBase && id<kGuitarStepBase+16) {
         const int step=static_cast<int>(id-kGuitarStepBase);
         const bool enabled=value>=0.5;
+        if(live_.guitarLocks[static_cast<std::size_t>(step)])continue;
         if(live_.guitarSteps[static_cast<std::size_t>(step)]!=enabled)
           flushOnNextProcess_=true;
         live_.guitarSteps[static_cast<std::size_t>(step)]=enabled;
@@ -182,7 +213,7 @@ template<class T> bool readExact(Steinberg::IBStream* stream,T& value) {
 }
 tresult PLUGIN_API Processor::getState(IBStream* stream) {
   const uint32_t magic=0x31524641u; // AFR1
-  const uint32_t version=4;
+  const uint32_t version=5;
   const int32 count=static_cast<int32>(steps_.size());
   if(!writeExact(stream,magic)||!writeExact(stream,version)||!writeExact(stream,count))
     return kResultFalse;
@@ -204,13 +235,19 @@ tresult PLUGIN_API Processor::getState(IBStream* stream) {
     for(bool hit:*row)if(!writeExact(stream,static_cast<int32>(hit?1:0)))return kResultFalse;
   for(bool active:live_.guitarSteps)
     if(!writeExact(stream,static_cast<int32>(active?1:0)))return kResultFalse;
+  for(int value:live_.guitarArticulation)
+    if(!writeExact(stream,static_cast<int32>(value)))return kResultFalse;
+  for(int value:live_.guitarDegree)
+    if(!writeExact(stream,static_cast<int32>(value)))return kResultFalse;
+  for(bool locked:live_.guitarLocks)
+    if(!writeExact(stream,static_cast<int32>(locked?1:0)))return kResultFalse;
   return kResultOk;
 }
 tresult PLUGIN_API Processor::setState(IBStream* stream) {
   uint32_t magic=0,version=0;
   int32 count=0;
   if(!readExact(stream,magic)||!readExact(stream,version)||
-     !readExact(stream,count)||magic!=0x31524641u||(version!=1&&version!=2&&version!=3&&version!=4)||
+     !readExact(stream,count)||magic!=0x31524641u||(version!=1&&version!=2&&version!=3&&version!=4&&version!=5)||
      count<1||count>32)return kResultFalse;
   std::array<int32,7> settings{};
   for(auto& v:settings)if(!readExact(stream,v))return kResultFalse;
@@ -259,6 +296,33 @@ tresult PLUGIN_API Processor::setState(IBStream* stream) {
         i<static_cast<int>(parsed.size()) &&
         parsed[static_cast<std::size_t>(i)].articulation!=Articulation::Off;
   }
+  std::array<int,16> restoredArt{};
+  std::array<int,16> restoredDegree{};
+  std::array<bool,16> restoredLocks{};
+  if(version>=5) {
+    for(auto& v:restoredArt) {
+      int32 read=0;
+      if(!readExact(stream,read)||read<0||read>5)return kResultFalse;
+      v=read;
+    }
+    for(auto& v:restoredDegree) {
+      int32 read=0;
+      if(!readExact(stream,read)||read<-13||read>15)return kResultFalse;
+      v=read;
+    }
+    for(auto& v:restoredLocks) {
+      int32 read=0;
+      if(!readExact(stream,read)||read<0||read>1)return kResultFalse;
+      v=read!=0;
+    }
+  } else {
+    for(int i=0;i<16;++i) {
+      const auto& step=parsed[static_cast<std::size_t>(i%parsed.size())];
+      restoredArt[static_cast<std::size_t>(i)]=static_cast<int>(step.articulation);
+      restoredDegree[static_cast<std::size_t>(i)]=step.degree;
+      restoredLocks[static_cast<std::size_t>(i)]=step.locked;
+    }
+  }
   Config next=config_;
   next.rootMidi=settings[0];
   next.bassVelocity=settings[1];
@@ -278,6 +342,9 @@ tresult PLUGIN_API Processor::setState(IBStream* stream) {
   fillIndex_=std::clamp((restoredFill+5)/10,0,10);
   prepareFillVariants();
   live_.guitarSteps=restoredGuitar;
+  live_.guitarArticulation=restoredArt;
+  live_.guitarDegree=restoredDegree;
+  live_.guitarLocks=restoredLocks;
   live_.guitarGate=config_.guitarGate;
   live_.bassGate=config_.bassGate;
   live_.bassEnabled=config_.bassOn;
