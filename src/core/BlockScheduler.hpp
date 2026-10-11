@@ -135,6 +135,18 @@ public:
       else { flush(sink,e.sampleOffset); return; }
     }
   }
+  template<class Sink> bool flushBus(int bus,Sink&& sink,int offset) noexcept {
+    if(bus<0 || bus>=3)return false;
+    bool complete=true;
+    for(int pitch=0;pitch<128;++pitch) {
+      auto& active=active_[static_cast<std::size_t>(bus)][static_cast<std::size_t>(pitch)];
+      if(active) {
+        if(sink(ScheduledMidiEvent{bus,offset,pitch,0,-1,false}))active=false;
+        else complete=false;
+      }
+    }
+    return complete;
+  }
   template<class Sink> bool flush(Sink&& sink,int offset) noexcept {
     bool complete=true;
     for(int bus=0;bus<3;++bus) for(int pitch=0;pitch<128;++pitch) {
