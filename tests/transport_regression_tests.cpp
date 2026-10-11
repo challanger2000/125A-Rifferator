@@ -1,4 +1,5 @@
 #include "../src/core/BlockScheduler.hpp"
+#include "../src/core/DrumCompanion.hpp"
 #include <cassert>
 #include <vector>
 using namespace a125::rifferator;
@@ -43,4 +44,23 @@ int main() {
   assert(scheduler.flush(rejectSink,0));
   assert(emitted.size()==2);
   for(const auto& e:emitted)assert(!e.on);
+  // Three-bus integration: drum pitches must not transpose and must panic.
+  BlockScheduler threeBus;
+  auto drumNotes=renderDrums(DrumPattern::standard(),16);
+  threeBus.setDrums(&drumNotes);
+  LiveControls shifted;
+  shifted.rootSemitones=7;
+  emitted.clear();
+  threeBus.process(pair,0.,0.1,4800,16*16*240,sink,true,shifted);
+  bool foundKick=false,foundHat=false;
+  for(const auto& e:emitted) if(e.bus==2 && e.on) {
+    assert(e.pitch==36 || e.pitch==38 || e.pitch==42);
+    if(e.pitch==36)foundKick=true;
+    if(e.pitch==42)foundHat=true;
+  }
+  assert(foundKick && foundHat);
+  emitted.clear();
+  threeBus.process(pair,0.1,0.2,4800,16*16*240,sink,false,shifted);
+  for(const auto& e:emitted)assert(!e.on);
+
 }
