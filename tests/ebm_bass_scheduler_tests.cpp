@@ -96,6 +96,28 @@ int main() {
         assert(unit.process(one,0.1,0.2,96,false,accept));
         assert(offs==2);
     }
+    // Invalid host transport + refused flush must inhibit all new NoteOns.
+    {
+        EbmSchedulerAdapter unit;
+        Arrangement one;
+        one.periodTicks=3840;
+        one.midi.bass={{0,240,40,98,240}};
+        int noteOns=0, noteOffs=0;
+        auto ok=[&](const ScheduledMidiEvent& e){
+            if(e.on) ++noteOns; else ++noteOffs;
+            return true;
+        };
+        assert(unit.process(one,0.0,0.1,96,true,ok));
+        assert(noteOns==1);
+        auto refuseOff=[&](const ScheduledMidiEvent& e){return e.on;};
+        assert(!unit.process(one,1.0e20,1.0e20+1.0e10,96,true,refuseOff));
+        assert(!unit.process(one,0.0,0.1,96,true,refuseOff));
+        assert(noteOns==1);
+        assert(!unit.process(one,0.0,0.1,96,true,ok));
+        assert(noteOffs==1 && noteOns==1);
+        assert(unit.process(one,0.0,0.1,96,true,ok));
+        assert(noteOns==2);
+    }
     // Empty pattern emits no NoteOns and does not retain a previously active note.
     {
         EbmSchedulerAdapter unit;

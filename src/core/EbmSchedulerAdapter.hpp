@@ -33,6 +33,13 @@ public:
         return ok;
     }
     template<class Sink>
+    bool failClosed(Sink&& sink,int offset=0) noexcept {
+        recoveryPending_=true;
+        flush(sink,offset);
+        haveExpected_=false;
+        return false;
+    }
+    template<class Sink>
     bool process(const Arrangement& arrangement,double startPpq,double endPpq,
                  int frames,bool playing,Sink&& sink) noexcept {
         if(frames<=0) return true;
@@ -46,13 +53,14 @@ public:
            || endPpq<=startPpq || arrangement.periodTicks<=0) {
             const bool ok=flush(sink);
             if(ok) haveExpected_=false;
+            else recoveryPending_=true;
             return ok;
         }
         if(haveExpected_ && std::abs(startPpq-expectedPpq_)>0.002)
-            if(!flush(sink)) return false;
+            if(!flush(sink)) { recoveryPending_=true; return false; }
         // Avoid undefined integer conversions on corrupt host transport positions.
         if(std::abs(startPpq)>1.0e12 || std::abs(endPpq)>1.0e12) {
-            flush(sink,0); haveExpected_=false; return false;
+            return failClosed(sink,0);
         }
         expectedPpq_=endPpq; haveExpected_=true;
         struct Event { int offset,pitch,velocity; bool on; double ppq; };
@@ -62,7 +70,7 @@ public:
         for(const auto& n:arrangement.midi.bass) {
             if(n.startTick<0 || n.endTick<=n.startTick || n.endTick>arrangement.periodTicks
                || n.note<0 || n.note>127 || n.velocity<1 || n.velocity>127)
-                { flush(sink,0); return false; }
+                { return failClosed(sink,0); }
             const double phase=static_cast<double>(n.startTick)/960.0;
             const auto first=static_cast<int64_t>(std::floor((startPpq-phase)/period))-1;
             const auto last=static_cast<int64_t>(std::ceil((endPpq-phase)/period))+1;
