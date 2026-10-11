@@ -43,6 +43,10 @@ int main(){
   for(int tag=701;tag<=702;++tag)assert(viewTags.count("Action"+std::to_string(tag))==1);
   for(int tag=710;tag<=720;++tag)assert(viewTags.count("Action"+std::to_string(tag))==1);
   assert(xml.find("pending")==std::string::npos);
+  // The 100/150 controls must be actually registered and present exactly once.
+  assert(counts.at("Action701")==701 && counts.at("Action702")==702);
+  assert(counts.at("GuitarGenerate")==700);
+
   // The root editor is 695 pixels high and must not clip a direct child.
   std::regex child(R"RE(<view[^>]*origin="([0-9]+), ([0-9]+)"[^>]*size="([0-9]+), ([0-9]+)")RE");
   for(auto it=std::sregex_iterator(xml.begin(),xml.end(),child);it!=std::sregex_iterator();++it){
