@@ -74,3 +74,6 @@ add_test(NAME rifferator_ebm_midi_audit COMMAND rifferator_ebm_midi_audit_tests)
 
 add_executable(rifferator_ebm_realtime_tests tests/ebm_bass_realtime_tests.cpp)
 add_test(NAME rifferator_ebm_realtime COMMAND rifferator_ebm_realtime_tests)
+
+add_executable(rifferator_ebm_shared_routing_tests tests/ebm_shared_routing_tests.cpp)
+add_test(NAME rifferator_ebm_shared_routing COMMAND rifferator_ebm_shared_routing_tests)
