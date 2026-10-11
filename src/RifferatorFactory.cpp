@@ -171,7 +171,9 @@ public:
   }
   Steinberg::IPlugView* PLUGIN_API createView(Steinberg::FIDString name) override {
     if(name && std::strcmp(name,Steinberg::Vst::ViewType::kEditor)==0) {
-      auto* editor=new VSTGUI::VST3Editor(this,"RifferatorView","rifferator.uidesc");
+      auto* editor=new VSTGUI::AspectRatioVST3Editor(this,"RifferatorView","rifferator.uidesc");
+      editor->setMinZoomFactor(1.0);
+      editor->setAllowedZoomFactors({1.0,1.5});
       editor->setDelegate(this);
       editor->setZoomFactor(zoomFactor_);
       activeEditor_=editor;
