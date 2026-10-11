@@ -31,3 +31,9 @@ The 16-bar assumption is intentional here, to match the product brief; revisit b
 - With phraseVariation=0, four-bar motifs remain locked throughout 16 bars.
 - When enabled, controlled variations occur per four-bar block with deterministic seed changes.
 - Gate 0 intentionally silences EBM/HYBRID bass without changing guitar events.
+
+## 16-bar turnaround fills
+- fillIntensity=0 disables fills. fillEveryBars 4/8/16 places fills only in the last quarter of the selected bar.
+- Fills keep MIDI note count, starts, durations and rests unchanged. Only velocity accent and a deterministic optional octave lift change; guitar is unaffected.
+- Invalid fillEveryBars values disable fills safely.
+- BassPlan defaults preserve prior sound, fillIntensity=0 and phraseVariation=0.

@@ -67,4 +67,42 @@ int main() {
     prepare(source,plan);
     for(const auto& n:source.midi.bass) assert(n.endTick-n.startTick==1);
 
+    // Fills never alter note timing, rhythm or guitar notes.
+    plan.sequence.gatePermille=850;
+    plan.sequence.variation=0;
+    plan.phraseVariation=0;
+    plan.fillIntensity=0;
+    prepare(source,plan);
+    const auto unfilled=source.midi.bass;
+    plan.fillIntensity=100;
+    plan.fillEveryBars=4;
+    prepare(source,plan);
+    assert(source.midi.bass.size()==unfilled.size());
+    bool accented=false;
+    for (unsigned i=0;i<unfilled.size();++i) {
+      const auto& before=unfilled[i];
+      const auto& after=source.midi.bass[i];
+      assert(before.startTick==after.startTick);
+      assert(before.endTick==after.endTick);
+      const auto bar=static_cast<int>(before.startTick/3840);
+      if(bar%4!=3 || before.startTick%3840 < 2880) {
+        assert(before.note==after.note);
+        assert(before.velocity==after.velocity);
+      } else if(after.velocity>before.velocity) accented=true;
+    }
+    assert(accented);
+    assert(source.midi.guitar.size()==1);
+    // Identical seed, same output; invalid fill division disables fills.
+    const auto withFill=source.midi.bass;
+    prepare(source,plan);
+    for(unsigned i=0;i<withFill.size();++i) {
+      assert(withFill[i].note==source.midi.bass[i].note);
+      assert(withFill[i].velocity==source.midi.bass[i].velocity);
+    }
+    plan.fillEveryBars=5;
+    prepare(source,plan);
+    for(unsigned i=0;i<unfilled.size();++i) {
+      assert(unfilled[i].note==source.midi.bass[i].note);
+      assert(unfilled[i].velocity==source.midi.bass[i].velocity);
+    }
 }
