@@ -261,10 +261,17 @@ tresult PLUGIN_API Processor::process(ProcessData& data) {
   if(activeBassMode_!=0 && live_.bassEnabled) {
     // HYBRID falls back to explicit constant root until song-map input exists.
     const auto& prepared=ebmPrepared_[static_cast<std::size_t>(ebmStyle_)];
+    ebm_integration::GuitarGuide guide;
+    guide.enabled=&live_.guitarSteps;
+    guide.articulation=&live_.guitarArticulation;
+    guide.degrees=&live_.guitarDegree;
+    guide.scale=config_.scale;
+    guide.guitarRoot=config_.rootMidi;
     if(!ebmScheduler_.process(prepared,start,end,data.numSamples,
          running&&havePosition&&haveTempo,sink,
          config_.rootMidi-40,config_.bassGate,
-         activeBassMode_==2?&resolvedHarmony:nullptr,config_.rootMidi))
+         activeBassMode_==2?&resolvedHarmony:nullptr,config_.rootMidi,
+         &guide))
       flushOnNextProcess_=true;
   } else if(!ebmScheduler_.flush(sink,0)) {
     flushOnNextProcess_=true;
