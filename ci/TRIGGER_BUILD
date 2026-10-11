@@ -79,3 +79,4 @@
 2026-10-12 verify dark CTextButton gradients and attached-editor zoom controls
 2026-10-12 verify integer editor geometry for 150 percent zoom
 2026-10-12 verify guitar matrix state persistence and 96-articulation layout contract
+2026-10-12 audit correction guitar articulation velocity mapping across all 16 steps
