@@ -2,6 +2,13 @@ name: EBM Bass Engine - isolated tests
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - feature/ebm-bass-engine
+    paths:
+      - 'src/core/EbmBass*.hpp'
+      - 'tests/ebm_bass_*.cpp'
+      - '.github/workflows/ebm-bass-tests.yml'
 
 permissions:
   contents: read
