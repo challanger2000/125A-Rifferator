@@ -31,7 +31,6 @@ FetchContent_Declare(vst3sdk
 FetchContent_MakeAvailable(vst3sdk)
 smtg_add_vst3plugin(Rifferator
  PACKAGE_NAME "125A Rifferator"
- SOURCES_LIST
  src/RifferatorProcessor.cpp
  src/RifferatorProcessor.hpp
  src/RifferatorFactory.cpp
