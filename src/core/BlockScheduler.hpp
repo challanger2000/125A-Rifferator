@@ -1,5 +1,6 @@
 #pragma once
 #include "RiffEngine.hpp"
+#include "ChordCompanion.hpp"
 #include <array>
 #include <cmath>
 #include <cstdint>
@@ -14,7 +15,8 @@ struct ScheduledMidiEvent {
 };
 struct LiveControls {
   int guitarGate{95}; int bassGate{95}; int rootSemitones{};
-  int bassVelocity{100}; bool bassEnabled{true}; bool drumsEnabled{true}; bool externalBassMode{false};
+  int bassVelocity{100}; bool bassEnabled{true}; bool drumsEnabled{true}; bool externalBassMode{false}; bool chordsEnabled{false}; bool chordsRootOnly{false};
+  HarmonyMap harmony{};
   std::array<std::array<bool,16>,3> drumSteps{};
   std::array<bool,16> guitarSteps{};
   std::array<int,16> guitarArticulation{};
@@ -36,6 +38,7 @@ public:
   static constexpr int kCapacity=1024;
   void reset() noexcept { active_={}; haveExpected_=false; }
   void setDrums(const std::vector<MidiNote>* notes) noexcept { drums_=notes; }
+  void setChords(const std::vector<MidiNote>* notes) noexcept { chords_=notes; }
   template<class Sink>
   void process(const Pair& pattern, double startPpq, double endPpq,
                int blockSize, int64_t patternTicks, Sink&& sink, bool playing,
@@ -59,6 +62,7 @@ public:
     auto collect=[&](const std::vector<MidiNote>& notes,int bus) {
       if(bus==1 && (!live.bassEnabled || live.externalBassMode))return;
       if(bus==2 && !live.drumsEnabled)return;
+      if(bus==3 && !live.chordsEnabled)return;
       for(const auto& note:notes) {
         if(bus==0 || bus==1) {
           const int step=static_cast<int>((note.startTick/240)%16);
@@ -67,6 +71,7 @@ public:
           if(bus==1 && (live.guitarArticulation[static_cast<std::size_t>(step)]==1 ||
                         live.guitarArticulation[static_cast<std::size_t>(step)]==5))continue;
         }
+        if(bus==3 && live.chordsRootOnly && note.note!=40)continue;
         if(bus==2) {
           const int row=note.note==36?0:note.note==38?1:note.note==42?2:-1;
           const int step=static_cast<int>((note.startTick/240)%16);
@@ -86,7 +91,10 @@ public:
               (t-startPpq)/(endPpq-startPpq)*blockSize));
             int pitch=note.note+live.rootSemitones;
             int velocity=note.velocity;
-            if(bus!=2) {
+            if(bus==3) {
+              const int bar=static_cast<int>(note.startTick/3840)%16;
+              pitch=chordOutputPitch(note.note,bar,live.harmony,40+live.rootSemitones);
+            } else if(bus!=2) {
               const int step=static_cast<int>((note.startTick/240)%16);
               if(step>=0) {
                 const int degree=live.guitarDegree[static_cast<std::size_t>(step)];
@@ -105,7 +113,7 @@ public:
             events[static_cast<std::size_t>(count++)]={
               bus,offset,std::clamp(pitch,0,127),on?velocity:0,-1,on};
           };
-          const int gate=bus==2?100:std::clamp(bus==0?live.guitarGate:live.bassGate,0,100);
+          const int gate=(bus==2 || bus==3)?100:std::clamp(bus==0?live.guitarGate:live.bassGate,0,100);
           const int64_t scaled=note.startTick+(note.boundaryTick-note.startTick)*gate/100;
           const int64_t endTick=std::max(note.startTick+1,scaled);
           if(gate<=0) continue;
@@ -116,6 +124,7 @@ public:
     };
     collect(pattern.guitar,0); collect(pattern.bass,1);
     if(drums_)collect(*drums_,2);
+    if(chords_)collect(*chords_,3);
     // Fail closed on capacity overflow rather than silently losing Note-Offs.
     // The processor should retain a pending recovery flag when a host rejects events.
     // Stable tie order: NoteOff before NoteOn at the same sample and pitch.
@@ -136,7 +145,7 @@ public:
     }
   }
   template<class Sink> bool flushBus(int bus,Sink&& sink,int offset) noexcept {
-    if(bus<0 || bus>=3)return false;
+    if(bus<0 || bus>=4)return false;
     bool complete=true;
     for(int pitch=0;pitch<128;++pitch) {
       auto& active=active_[static_cast<std::size_t>(bus)][static_cast<std::size_t>(pitch)];
@@ -149,7 +158,7 @@ public:
   }
   template<class Sink> bool flush(Sink&& sink,int offset) noexcept {
     bool complete=true;
-    for(int bus=0;bus<3;++bus) for(int pitch=0;pitch<128;++pitch) {
+    for(int bus=0;bus<4;++bus) for(int pitch=0;pitch<128;++pitch) {
       auto& active=active_[static_cast<std::size_t>(bus)][static_cast<std::size_t>(pitch)];
       if(active) {
         if(sink(ScheduledMidiEvent{bus,offset,pitch,0,-1,false}))active=false;
@@ -159,8 +168,9 @@ public:
     return complete;
   }
 private:
-  std::array<std::array<bool,128>,3> active_{};
+  std::array<std::array<bool,128>,4> active_{};
   const std::vector<MidiNote>* drums_{};
+  const std::vector<MidiNote>* chords_{};
   bool haveExpected_{};
   double expectedPpq_{};
 };
