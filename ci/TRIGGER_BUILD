@@ -51,3 +51,4 @@
 2026-10-11 GUI layout tags bounds contract audit
 2026-10-11 editor view ownership lifecycle and GUI command QA
 2026-10-11 real VSTGUI create/release lifecycle CTest
+2026-10-11 lifecycle test MSVC NDEBUG correction
