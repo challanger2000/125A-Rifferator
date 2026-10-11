@@ -12,13 +12,14 @@ namespace a125::rifferator::ebm_integration {
 class EbmSchedulerAdapter {
 public:
     // reset() is safe only before playback or after a successful flush.
-    void reset() noexcept { active_.fill(false); haveExpected_=false; }
+    void reset() noexcept { active_.fill(false); haveExpected_=false; recoveryPending_=false; }
     // Call before replacing a prepared arrangement while transport is running.
     // If the host rejects a NoteOff, retain state and retry on next callback.
     template<class Sink>
     bool patternChanged(Sink&& sink) noexcept {
         if(!flush(sink,0)) return false;
         haveExpected_=false;
+        recoveryPending_=false;
         return true;
     }
     template<class Sink>
@@ -35,6 +36,12 @@ public:
     bool process(const Arrangement& arrangement,double startPpq,double endPpq,
                  int frames,bool playing,Sink&& sink) noexcept {
         if(frames<=0) return true;
+        if(recoveryPending_) {
+            if(!flush(sink,0)) return false;
+            recoveryPending_=false;
+            haveExpected_=false;
+            return false; // Recovery callback emits no new NoteOns.
+        }
         if(!playing || !std::isfinite(startPpq) || !std::isfinite(endPpq)
            || endPpq<=startPpq || arrangement.periodTicks<=0) {
             const bool ok=flush(sink);
@@ -90,7 +97,7 @@ public:
             const auto& e=events[i];
             if(!e.on && !active_[e.pitch]) continue;
             if(!sink(ScheduledMidiEvent{1,e.offset,e.pitch,e.velocity,-1,e.on}))
-                { flush(sink,e.offset); return false; }
+                { recoveryPending_=true; flush(sink,e.offset); return false; }
             active_[e.pitch]=e.on;
         }
         return true;
@@ -98,6 +105,7 @@ public:
 private:
     std::array<bool,128> active_{};
     bool haveExpected_{};
+    bool recoveryPending_{};
     double expectedPpq_{};
 };
 } // namespace a125::rifferator::ebm_integration

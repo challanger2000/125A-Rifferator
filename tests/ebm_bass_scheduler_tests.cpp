@@ -68,6 +68,34 @@ int main() {
     int recovered=0;
     assert(adapter.flush([&](const ScheduledMidiEvent& e){if(!e.on)++recovered;return true;}));
     assert(recovered==1);
+    // Rejected NoteOff must block subsequent NoteOns until recovery succeeds.
+    {
+        EbmSchedulerAdapter unit;
+        Arrangement one;
+        one.periodTicks=3840;
+        one.midi.bass={{0,240,36,95,240},{240,480,36,105,480}};
+        int ons=0,offs=0;
+        auto broken=[&](const ScheduledMidiEvent& e) {
+            if(!e.on) return false;
+            ++ons; return true;
+        };
+        assert(!unit.process(one,0.0,0.6,576,true,broken));
+        assert(ons==1);
+        // Still rejected: no further note-on is allowed.
+        assert(!unit.process(one,0.6,1.0,384,true,broken));
+        assert(ons==1);
+        auto accept=[&](const ScheduledMidiEvent& e) {
+            if(e.on) ++ons; else ++offs;
+            return true;
+        };
+        assert(!unit.process(one,0.6,1.0,384,true,accept));
+        assert(ons==1 && offs==1);
+        // Playback can resume from a new valid block with no stuck notes.
+        assert(unit.process(one,0.0,0.1,96,true,accept));
+        assert(ons==2);
+        assert(unit.process(one,0.1,0.2,96,false,accept));
+        assert(offs==2);
+    }
     // Empty pattern emits no NoteOns and does not retain a previously active note.
     {
         EbmSchedulerAdapter unit;

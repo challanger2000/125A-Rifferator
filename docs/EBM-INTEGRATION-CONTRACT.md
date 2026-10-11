@@ -67,3 +67,7 @@ The 16-bar assumption is intentional here, to match the product brief; revisit b
 ## Optional four-stage arrangement evolution
 - BassPlan.arrangementEvolution (0..100) applies deterministic rhythmic contrast across four 4-bar sections. The first four bars preserve the existing motif; bars 5–8 introduce some offbeat rests; bars 9–12 create the sparsest break; bars 13–16 restore the driving rhythm.
 - All quarter-note anchors remain; fill and dynamics controls stay independently usable. Value 0 is fully backward-compatible and adds no rhythmic change. This is a bass-only, off-thread precomputation feature; not wired to shared parameter IDs or VST3 state.
+
+## Host rejection recovery interlock
+- When a NoteOn/NoteOff sink rejects an event in the emission stage, the adapter enters recoveryPending. The next processing callback retries active NoteOffs only and emits no NoteOns; if any NoteOff is still refused, recoveryPending remains set. Once all are accepted, that callback returns false and transport continuity resets; new NoteOns can resume on the following callback.
+- This is an isolated EBM scheduler policy, not a modification of the shared guitar scheduler. The VST3 host adapter must respect process() returning false.
