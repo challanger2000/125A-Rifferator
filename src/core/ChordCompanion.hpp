@@ -23,6 +23,26 @@ inline int chordInterval(int voice,ChordQuality quality) noexcept {
   }
   return 7;
 }
+// Infer the stable harmonic anchor from the programmed guitar step grid.
+// Short offbeat chromatic decorations carry less weight than downbeats.
+// Fixed-size, allocation-free: safe for the audio callback.
+inline int inferredGuitarRoot(const std::array<bool,16>& enabled,
+                              const std::array<int,16>& articulation,
+                              const std::array<int,16>& degrees,
+                              const std::array<int,7>& scale,
+                              int rootMidi) noexcept {
+  std::array<int,128> scores{};
+  for(int i=0;i<16;++i) {
+    if(!enabled[i] || articulation[i]==0 || articulation[i]==1)continue;
+    const int pitch=std::clamp(rootMidi+degreeOffset(degrees[i],scale),0,127);
+    // A quarter-note downbeat is harmonically stronger than a passing 16th.
+    const int weight=(i%4==0?5:i%2==0?2:1);
+    scores[static_cast<std::size_t>(pitch)]+=weight;
+  }
+  int best=std::clamp(rootMidi,0,127),weight=0;
+  for(int i=0;i<128;++i)if(scores[i]>weight) {weight=scores[i];best=i;}
+  return best;
+}
 inline std::vector<MidiNote> makeChordCandidates() {
   std::vector<MidiNote> notes;
   notes.reserve(48);
