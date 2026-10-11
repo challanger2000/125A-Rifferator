@@ -1,6 +1,7 @@
 #pragma once
 #include "RiffEngine.hpp"
 #include "ChordCompanion.hpp"
+#include "IndustrialGuitarGroove.hpp"
 #include <array>
 #include <cmath>
 #include <cstdint>
@@ -86,7 +87,7 @@ public:
         if(last-first>64) { flush(sink,0); return; }
         for(int64_t n=first;n<=last;++n) {
           const double cycle=periodPpq*static_cast<double>(n);
-          auto push=[&](double t,bool on) {
+          auto push=[&](double t,bool on,int fifth=0) {
             if(t<startPpq || t>=endPpq || count>=kCapacity) return;
             const auto offset=static_cast<int>(std::floor(
               (t-startPpq)/(endPpq-startPpq)*blockSize));
@@ -111,6 +112,10 @@ public:
                 }
               }
             }
+            if(bus==0) {
+              velocity=guitarStepVelocity(static_cast<int>((note.startTick/240)%16),live.guitarArticulation[static_cast<std::size_t>((note.startTick/240)%16)]);
+              pitch+=fifth;
+            }
             if(bus==1)velocity=live.bassVelocity;
             if(bus==2)pitch=note.note;
             events[static_cast<std::size_t>(count++)]={
@@ -122,6 +127,10 @@ public:
           if(gate<=0) continue;
           push(cycle+static_cast<double>(endTick)/960.0,false);
           push(cycle+phase,true);
+          if(bus==0 && live.guitarArticulation[static_cast<std::size_t>((note.startTick/240)%16)]==4) {
+            push(cycle+static_cast<double>(endTick)/960.0,false,7);
+            push(cycle+phase,true,7);
+          }
         }
       }
     };
