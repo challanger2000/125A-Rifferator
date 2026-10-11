@@ -17,7 +17,7 @@ public:
     // If the host rejects a NoteOff, retain state and retry on next callback.
     template<class Sink>
     bool patternChanged(Sink&& sink) noexcept {
-        if(!flush(sink,0)) return false;
+        if(!flush(sink,0)) { recoveryPending_=true; return false; }
         haveExpected_=false;
         recoveryPending_=false;
         return true;
@@ -74,7 +74,7 @@ public:
             const double phase=static_cast<double>(n.startTick)/960.0;
             const auto first=static_cast<int64_t>(std::floor((startPpq-phase)/period))-1;
             const auto last=static_cast<int64_t>(std::ceil((endPpq-phase)/period))+1;
-            if(last<first || last-first>8) { flush(sink,0); return false; }
+            if(last<first || last-first>8) return failClosed(sink,0);
             for(int64_t cycle=first;cycle<=last;++cycle) {
                 const double base=static_cast<double>(cycle)*period;
                 auto add=[&](double at,bool on) noexcept {
@@ -86,7 +86,7 @@ public:
                     return true;
                 };
                 if(!add(base+static_cast<double>(n.endTick)/960.0,false) ||
-                   !add(base+phase,true)) { flush(sink,0); return false; }
+                   !add(base+phase,true)) return failClosed(sink,0);
             }
         }
         // Small fixed buffer; off events always before simultaneous ons.

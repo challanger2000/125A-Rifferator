@@ -118,6 +118,27 @@ int main() {
         assert(unit.process(one,0.0,0.1,96,true,ok));
         assert(noteOns==2);
     }
+    // Pattern change rejection must enter the same recovery interlock.
+    {
+        EbmSchedulerAdapter unit;
+        Arrangement one;
+        one.periodTicks=3840;
+        one.midi.bass={{0,240,45,88,240}};
+        int ons=0,offs=0;
+        auto good=[&](const ScheduledMidiEvent& e){
+            if(e.on) ++ons; else ++offs;
+            return true;
+        };
+        assert(unit.process(one,0.0,0.1,96,true,good));
+        const auto reject=[&](const ScheduledMidiEvent& e){return e.on;};
+        assert(!unit.patternChanged(reject));
+        assert(!unit.process(one,0.0,0.1,96,true,reject));
+        assert(ons==1);
+        assert(!unit.process(one,0.0,0.1,96,true,good));
+        assert(offs==1);
+        assert(unit.process(one,0.0,0.1,96,true,good));
+        assert(ons==2);
+    }
     // Empty pattern emits no NoteOns and does not retain a previously active note.
     {
         EbmSchedulerAdapter unit;
