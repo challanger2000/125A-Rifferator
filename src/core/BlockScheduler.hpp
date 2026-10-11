@@ -60,6 +60,7 @@ public:
     if(period<=0) return;
     std::array<ScheduledMidiEvent,kCapacity> events{};
     int count=0;
+    bool eventOverflow=false;
     auto collect=[&](const std::vector<MidiNote>& notes,int bus) {
       if(bus==1 && (!live.bassEnabled || live.externalBassMode))return;
       if(bus==2 && !live.drumsEnabled)return;
@@ -88,7 +89,8 @@ public:
         for(int64_t n=first;n<=last;++n) {
           const double cycle=periodPpq*static_cast<double>(n);
           auto push=[&](double t,bool on,int fifth=0) {
-            if(t<startPpq || t>=endPpq || count>=kCapacity) return;
+            if(t<startPpq || t>=endPpq)return;
+            if(count>=kCapacity) {eventOverflow=true;return;}
             const auto offset=static_cast<int>(std::floor(
               (t-startPpq)/(endPpq-startPpq)*blockSize));
             int pitch=note.note+live.rootSemitones;
@@ -139,6 +141,12 @@ public:
     collect(pattern.guitar,0); collect(pattern.bass,1);
     if(drums_)collect(*drums_,2);
     if(chords_)collect(*chords_,3);
+    if(eventOverflow) {
+      // Do not deliver a partial batch that may have omitted NoteOff events.
+      flush(sink,0);
+      haveExpected_=false;
+      return;
+    }
     // Fail closed on capacity overflow rather than silently losing Note-Offs.
     // The processor should retain a pending recovery flag when a host rejects events.
     // Stable tie order: NoteOff before NoteOn at the same sample and pitch.
