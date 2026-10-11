@@ -49,3 +49,6 @@ add_test(NAME rifferator_transport COMMAND rifferator_transport_tests)
 
 add_executable(rifferator_drum_tests tests/drum_companion_tests.cpp)
 add_test(NAME rifferator_drums COMMAND rifferator_drum_tests)
+
+add_executable(rifferator_generation_tests tests/riff_generation_tests.cpp)
+add_test(NAME rifferator_generation COMMAND rifferator_generation_tests)
