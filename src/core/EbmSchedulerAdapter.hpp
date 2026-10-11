@@ -7,6 +7,15 @@
 #include <cstdint>
 
 namespace a125::rifferator::ebm_integration {
+// Optional guitar-led harmony guide: only suppress bass chromatic friction
+// where an unchanged guitar root is actively sounding on the same step.
+struct GuitarGuide {
+    const std::array<bool,16>* enabled{};
+    const std::array<int,16>* articulation{};
+    const std::array<int,16>* degrees{};
+    std::array<int,7> scale{0,2,3,5,7,8,10};
+    int guitarRoot{40};
+};
 // Standalone bass-only event adapter; does not alter shared guitar scheduler.
 // Prepared Arrangement must remain immutable during process(). No allocations.
 class EbmSchedulerAdapter {
@@ -43,7 +52,8 @@ public:
     bool process(const Arrangement& arrangement,double startPpq,double endPpq,
                  int frames,bool playing,Sink&& sink,
                  int transpose=0,int gatePercent=100,
-                 const HarmonyMap* harmony=nullptr,int harmonyRoot=40) noexcept {
+                 const HarmonyMap* harmony=nullptr,int harmonyRoot=40,
+                 const GuitarGuide* guitar=nullptr) noexcept {
         transpose=std::clamp(transpose,-127,127);
         gatePercent=std::clamp(gatePercent,0,100);
         if(frames<=0) return true;
@@ -87,7 +97,23 @@ public:
             const int bar=static_cast<int>(n.startTick/3840)%16;
             const int outputRoot=harmony?chordOutputPitch(40,bar,*harmony,harmonyRoot):harmonyRoot;
             const int extra=harmony?outputRoot-harmonyRoot:0;
-            const int outPitch=std::clamp(n.note+transpose+extra,0,127);
+            int candidate=n.note+transpose+extra;
+            if(guitar && guitar->enabled && guitar->articulation && guitar->degrees) {
+                const int step=static_cast<int>((n.startTick/240)%16);
+                if(step>=0 && (*guitar->enabled)[static_cast<std::size_t>(step)] &&
+                   (*guitar->articulation)[static_cast<std::size_t>(step)]!=0) {
+                    const int guitarPitch=std::clamp(guitar->guitarRoot+
+                      degreeOffset((*guitar->degrees)[static_cast<std::size_t>(step)],
+                                   guitar->scale),0,127);
+                    const int bassRoot=std::clamp(harmonyRoot+transpose-
+                      (guitar->guitarRoot-40)+extra,0,127);
+                    // Only a semitone neighbor against a root guitar note is
+                    // normalized. Octaves and intentional harmonic movement stay.
+                    if(guitarPitch==guitar->guitarRoot &&
+                       candidate==bassRoot+1)candidate=bassRoot;
+                }
+            }
+            const int outPitch=std::clamp(candidate,0,127);
             const auto duration=n.endTick-n.startTick;
             const auto gatedEnd=n.startTick+std::max<int64_t>(1,duration*gatePercent/100);
             const double phase=static_cast<double>(n.startTick)/960.0;
