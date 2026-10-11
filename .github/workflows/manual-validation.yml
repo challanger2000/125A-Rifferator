@@ -18,6 +18,18 @@ jobs:
         run: cmake --build build --config Release --parallel 4
       - name: Core regression tests
         run: ctest --test-dir build -C Release --output-on-failure
+      - name: VST3 delivery and GUI resource audit
+        shell: pwsh
+        run: |
+          $root = Join-Path (Resolve-Path 'build/VST3/Release') '125A Rifferator.vst3'
+          if (-not (Test-Path $root -PathType Container)) { throw "Incorrect VST3 bundle name or missing bundle: $root" }
+          $uidesc = Join-Path $root 'Contents/Resources/rifferator.uidesc'
+          if (-not (Test-Path $uidesc -PathType Leaf)) { throw "Missing installed GUI resource: $uidesc" }
+          $xml = Get-Content -Raw -LiteralPath $uidesc
+          if ($xml -notmatch '<template name="RifferatorView"') { throw 'GUI template RifferatorView not found in deployed bundle' }
+          $binaries = @(Get-ChildItem -Path (Join-Path $root 'Contents') -Recurse -File -Filter '*.vst3')
+          if ($binaries.Count -ne 1) { throw "Expected one VST3 module binary, found $($binaries.Count)" }
+          if (Test-Path (Join-Path (Resolve-Path 'build/VST3/Release') 'Rifferator.vst3')) { throw 'Unbranded VST3 bundle present' }
       - name: Steinberg Validator
         shell: pwsh
         run: |
