@@ -19,7 +19,7 @@ Branch: feature/ebm-bass-engine; owner of develop/v1.0.0 is unaffected.
 - Host transport and lifecycle handling remain responsibilities of the existing scheduler and VST3 adapter.
 - Sequence generation deterministic from seed. Fill behavior and richer 16-bar phrase evolution still need dedicated design and tests.
 - Realtime safety: prepare allocates, therefore must NEVER be called from process() or the audio thread. Use prepared snapshot handoff and existing lifecycle safeguards during integration.
-- Existing scheduler applies a global bass gate. The preliminary engine gatePermille is NOT connected yet, to prevent accidental double-gating: full per-note gate requires a deliberate scheduler contract update.
+- Existing scheduler applies a global bass gate. The engine gatePermille now defines a MIDI note's boundaryTick. Integration must set LiveControls.bassGate=100 for EBM/HYBRID to avoid applying both percentages. FOLLOW retains the original global bassGate. No processor integration has yet been made.
 - Unlike pattern event independence, MIDI bus host routing is not proven by this adapter; DAW host acceptance needs tests.
 
 ## Integration stop lines
