@@ -43,8 +43,11 @@ inline IndustrialGuitarGroove makeIndustrialGuitarGroove(unsigned variation=0) n
   return g;
 }
 inline int guitarStepVelocity(int step,int articulation) noexcept {
-  if(articulation<=0)return 0;
-  constexpr std::array<int,16> velocities{127,68,104,90,127,72,108,90,127,65,100,90,127,80,112,90};
-  return velocities[static_cast<std::size_t>(std::clamp(step,0,15))];
+  (void)step;
+  // Heavier7Strings V1 velocity-articulation profile:
+  // REST=off, NOISE=1..29, PM=30..83, SOFT=84..111,
+  // OPEN=112..126, HARMONIC=127.
+  constexpr std::array<int,6> velocities{0,20,50,95,115,127};
+  return velocities[static_cast<std::size_t>(std::clamp(articulation,0,5))];
 }
 } // namespace a125::rifferator
