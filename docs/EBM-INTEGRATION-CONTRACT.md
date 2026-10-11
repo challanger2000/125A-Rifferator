@@ -1,6 +1,6 @@
 # 125A Rifferator – EBM integration contract
 
-Status: EXPERIMENTAL ADAPTER COMMITTED; NO VST3 INTEGRATION OR DAW QA YET.
+Status: ISOLATED EBM MODULE READY FOR COORDINATED INTEGRATION; NO MERGE, VST3 INTEGRATION OR DAW QA YET.
 Branch: feature/ebm-bass-engine; owner of develop/v1.0.0 is unaffected.
 
 ## Modes
@@ -14,12 +14,12 @@ Branch: feature/ebm-bass-engine; owner of develop/v1.0.0 is unaffected.
 - AGGRESSIVE: chromatic notes intentionally retained.
 
 ## Shared architectural assumptions
-- Arrangement is prepared OFF the audio thread, owns separate guitar/bass MidiNote vectors, and is scheduled by BlockScheduler on logical buses 0 and 1.
+- Arrangement is prepared OFF the audio thread and retains independent guitar/bass MidiNote vectors. The isolated EbmSchedulerAdapter sends EBM/HYBRID bass notes on logical bus 1; guitar scheduling remains under the existing host path. Do NOT schedule the same bass notes through both adapters.
 - 16 bars, sixteen 1/16 slots per bar, 960 PPQ, default step ticks=240.
 - Host transport and lifecycle handling remain responsibilities of the existing scheduler and VST3 adapter.
-- Sequence generation deterministic from seed. Fill behavior and richer 16-bar phrase evolution still need dedicated design and tests.
+- Sequence generation is deterministic from seed. Fill accents and four-stage 16-bar rhythmic development are implemented and covered by isolated regression tests.
 - Realtime safety: prepare allocates, therefore must NEVER be called from process() or the audio thread. Use prepared snapshot handoff and existing lifecycle safeguards during integration.
-- Existing scheduler applies a global bass gate. The engine gatePermille now defines a MIDI note's boundaryTick. Integration must set LiveControls.bassGate=100 for EBM/HYBRID to avoid applying both percentages. FOLLOW retains the original global bassGate. No processor integration has yet been made.
+- Existing BlockScheduler applies a global bass gate and replaces bass velocity. EBM/HYBRID must route through EbmSchedulerAdapter or an equivalent verified mode-aware path that preserves both per-note gate and velocity; FOLLOW retains its existing global controls. Do not feed EBM bass into both schedulers. No processor integration has yet been made.
 - Unlike pattern event independence, MIDI bus host routing is not proven by this adapter; DAW host acceptance needs tests.
 
 ## Integration stop lines
@@ -49,7 +49,7 @@ The 16-bar assumption is intentional here, to match the product brief; revisit b
 - This does not replace listening evaluation or host-level MIDI QA.
 
 ## MIDI scheduler audit – integration blockers
-- The current BlockScheduler forwards LiveControls.bassVelocity for every bass NoteOn, overriding MidiNote.velocity. Therefore the EBM accent, fill and 16-bar dynamics data is currently LOST at the final MIDI output. During coordinated integration, route per-note velocity for EBM/HYBRID while preserving FOLLOW semantics. Do not claim audible bass dynamics before this change.
+- The current shared BlockScheduler forwards LiveControls.bassVelocity for every bass NoteOn, overriding MidiNote.velocity. EbmSchedulerAdapter preserves the generated per-note velocity, so integration must select the independent adapter for EBM/HYBRID (or implement a tested equivalent) and must not run shared bass scheduling simultaneously. Do not claim host-audible bass dynamics before this routing change.
 - The scheduler currently treats active pitches as booleans; test repeated same-pitch steps at 100% gate, NoteOff-before-NoteOn ordering, transport stop/seek/loop flush and host event rejection at integration.
 - The EBM per-note duration is already encoded in boundaryTick, and must be combined with LiveControls.bassGate=100 only for EBM/HYBRID.
 - Standalone midi-audit tests cover all five styles, three tension modes, six roots including MIDI 0/127, four gates, phrase variation, fills, dynamics and deterministic regeneration. This is an offline invariants audit, NOT an operational host MIDI-output test.
@@ -71,3 +71,15 @@ The 16-bar assumption is intentional here, to match the product brief; revisit b
 ## Host rejection recovery interlock
 - When a NoteOn/NoteOff sink rejects an event in the emission stage, the adapter enters recoveryPending. The next processing callback retries active NoteOffs only and emits no NoteOns; if any NoteOff is still refused, recoveryPending remains set. Once all are accepted, that callback returns false and transport continuity resets; new NoteOns can resume on the following callback.
 - This is an isolated EBM scheduler policy, not a modification of the shared guitar scheduler. The VST3 host adapter must respect process() returning false.
+
+## Coordinated integration handoff — isolated module accepted
+- **Source branch:** `feature/ebm-bass-engine` only. This handoff authorizes review and planned integration, NOT a merge or changes to `develop/v1.0.0` without the user's explicit permission.
+- **Core:** `src/core/EbmBassEngine.hpp`; **offline composition:** `src/core/EbmBassArrangement.hpp`; **realtime MIDI:** `src/core/EbmSchedulerAdapter.hpp`.
+- **Validation:** six compiled C++23 test programs in `.github/workflows/ebm-bass-tests.yml`; latest verified successful head `3392dcbb9e0fff4ee7c5b4a47dd75181ef9d3905`. Documentation changes do not themselves constitute a new runtime validation.
+- **Audio callback:** call only `EbmSchedulerAdapter::process()` on an immutable, safely published prepared snapshot. NEVER call `prepare()` there. Verify actual VST3 processor and host callbacks for allocations/locks; isolated tests do not cover them.
+- **Hot swap:** call `patternChanged(sink)` while the previous snapshot remains valid; on rejection retain the old snapshot and retry. A failed `process()` must not be treated as successful emission. Do not call `reset()` while notes may be sounding.
+- **MIDI mode selection:** FOLLOW retains existing scheduling; EBM/HYBRID use exactly one bass output path on logical bus 1. Preserve `MidiNote.velocity` and precomputed gate. Guitar bus 0 must remain unchanged.
+- **Song harmony:** HYBRID needs explicit per-bar harmonic roots from a separately agreed song source; do not infer them from arbitrary guitar pitches. EBM holds its selected root.
+- **Parameter/state:** allocate new IDs, defaults and versioned serialization only in the coordinated integrating branch, preserving old project recall and FOLLOW defaults. Design mode GUI only after the implementation owner confirms layout.
+- **Host acceptance gates:** VST3 compilation; Steinberg Validator; Studio One routing on all declared event outputs; actual repeated note at 100% gate; loop/seek/stop/hot-swap; dynamic velocity/gate; tempo changes; buffer sizes; plugin reload/project restore; regression against guitar and FOLLOW bass; offline and real-time behavior. Cubase must be tested separately before declaring support.
+- **Performance caveat:** isolated process callback had zero heap allocations in instrumented tests, not a full WCET bound or host-level realtime certification. MIDI event collection uses a bounded 512-event local buffer, and over-capacity input deliberately fails closed.
