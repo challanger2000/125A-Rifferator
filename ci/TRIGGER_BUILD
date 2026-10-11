@@ -64,3 +64,4 @@
 2026-10-11 branded 125A Rifferator package and workflow validator path
 2026-10-11 fix branded package resource copy target name mismatch
 2026-10-11 real VST3 delivery package & GUI resource release-gate audit
+2026-10-11 branded VST3 binary and bundle validator fix
