@@ -45,7 +45,7 @@ int main() {
   shared.process(follow,0.125,0.5,512,3840,sink,true,live);
   for(const auto& e:out)assert(e.bus!=1);
   out.clear();
-  assert(independent.process(ebm,0.,0.25,512,true,sink));
+  assert(independent.process(ebm,0.,0.125,512,true,sink));
   int ebmOns=0;
   for(const auto& e:out) {
     assert(e.bus==1);
