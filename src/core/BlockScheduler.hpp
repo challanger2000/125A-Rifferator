@@ -53,7 +53,7 @@ public:
     }
     if(!playing || !std::isfinite(startPpq) || !std::isfinite(endPpq) ||
        endPpq<=startPpq) {
-      if(!flush(sink,0)) return;
+      if(!flush(sink,0)) { recoveryPending_=true; return; }
       haveExpected_=false;
       return;
     }
@@ -67,7 +67,7 @@ public:
       return;
     }
     if(haveExpected_ && std::abs(startPpq-expectedPpq_)>0.002) {
-      if(!flush(sink,0)) return;
+      if(!flush(sink,0)) { recoveryPending_=true; return; }
     }
     expectedPpq_=endPpq; haveExpected_=true;
     std::array<ScheduledMidiEvent,kCapacity> events{};
@@ -192,7 +192,7 @@ public:
       if(!e.on && !active_[static_cast<std::size_t>(e.bus)][static_cast<std::size_t>(e.pitch)]) continue;
       if(e.on && e.bus==3 && active_[3][static_cast<std::size_t>(e.pitch)])continue;
       if(e.on && active_[static_cast<std::size_t>(e.bus)][static_cast<std::size_t>(e.pitch)]) {
-        if(!flushBus(e.bus,sink,e.sampleOffset))return;
+        if(!flushBus(e.bus,sink,e.sampleOffset)) { recoveryPending_=true; return; }
       }
       if(sink(e)) active_[static_cast<std::size_t>(e.bus)][static_cast<std::size_t>(e.pitch)]=e.on;
       else {
