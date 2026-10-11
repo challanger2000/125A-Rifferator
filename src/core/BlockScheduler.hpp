@@ -3,6 +3,7 @@
 #include <array>
 #include <cmath>
 #include <cstdint>
+#include <algorithm>
 
 // Zero-allocation block scheduler: render() is used only off the audio callback.
 // The VST3 adapter supplies the authoritative host PPQ and sample rate.
@@ -14,8 +15,9 @@ struct ScheduledMidiEvent {
 struct LiveControls { int guitarGate{95}; int bassGate{95}; int rootSemitones{}; int bassVelocity{100}; bool bassEnabled{true}; };
 class BlockScheduler {
 public:
-  static constexpr int kCapacity=256;
+  static constexpr int kCapacity=1024;
   void reset() noexcept { active_={}; haveExpected_=false; }
+  void setDrums(const std::vector<MidiNote>* notes) noexcept { drums_=notes; }
   template<class Sink>
   void process(const Pair& pattern, double startPpq, double endPpq,
                int blockSize, int64_t patternTicks, Sink&& sink, bool playing,
@@ -52,10 +54,10 @@ public:
             const auto offset=static_cast<int>(std::floor(
               (t-startPpq)/(endPpq-startPpq)*blockSize));
             events[static_cast<std::size_t>(count++)]={
-              bus,offset,std::clamp(note.note+live.rootSemitones,0,127),
+              bus,offset,std::clamp(note.note+(bus==2?0:live.rootSemitones),0,127),
               on?(bus==1?live.bassVelocity:note.velocity):0,-1,on};
           };
-          const int gate=std::clamp(bus==0?live.guitarGate:live.bassGate,0,100);
+          const int gate=bus==2?100:std::clamp(bus==0?live.guitarGate:live.bassGate,0,100);
           const int64_t scaled=note.startTick+(note.boundaryTick-note.startTick)*gate/100;
           const int64_t endTick=std::max(note.startTick+1,scaled);
           if(gate<=0) continue;
@@ -65,6 +67,7 @@ public:
       }
     };
     collect(pattern.guitar,0); collect(pattern.bass,1);
+    if(drums_)collect(*drums_,2);
     // Fail closed on capacity overflow rather than silently losing Note-Offs.
     // The processor should retain a pending recovery flag when a host rejects events.
     // Stable tie order: NoteOff before NoteOn at the same sample and pitch.
@@ -86,7 +89,7 @@ public:
   }
   template<class Sink> bool flush(Sink&& sink,int offset) noexcept {
     bool complete=true;
-    for(int bus=0;bus<2;++bus) for(int pitch=0;pitch<128;++pitch) {
+    for(int bus=0;bus<3;++bus) for(int pitch=0;pitch<128;++pitch) {
       auto& active=active_[static_cast<std::size_t>(bus)][static_cast<std::size_t>(pitch)];
       if(active) {
         if(sink(ScheduledMidiEvent{bus,offset,pitch,0,-1,false}))active=false;
@@ -96,7 +99,8 @@ public:
     return complete;
   }
 private:
-  std::array<std::array<bool,128>,2> active_{};
+  std::array<std::array<bool,128>,3> active_{};
+  const std::vector<MidiNote>* drums_{};
   bool haveExpected_{};
   double expectedPpq_{};
 };
