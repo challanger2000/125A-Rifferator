@@ -104,7 +104,8 @@ add_test(NAME rifferator_guitar_fill_routing COMMAND rifferator_guitar_fill_rout
 
 add_executable(rifferator_processor_state_tests tests/processor_state_roundtrip_tests.cpp src/RifferatorProcessor.cpp)
 target_sources(rifferator_processor_state_tests PRIVATE ${vst3sdk_SOURCE_DIR}/public.sdk/source/common/memorystream.cpp
- ${vst3sdk_SOURCE_DIR}/public.sdk/source/vst/hosting/parameterchanges.cpp)
+ ${vst3sdk_SOURCE_DIR}/public.sdk/source/vst/hosting/parameterchanges.cpp
+ ${vst3sdk_SOURCE_DIR}/public.sdk/source/vst/hosting/eventlist.cpp)
 target_link_libraries(rifferator_processor_state_tests PRIVATE sdk)
 add_test(NAME rifferator_processor_state COMMAND rifferator_processor_state_tests)
 
