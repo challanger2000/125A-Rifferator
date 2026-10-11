@@ -27,6 +27,7 @@ struct BassPlan {
     uint8_t fillIntensity{0};   // 0: no fills; 100: strongest turnaround
     uint8_t dynamics{0}; // four-phrase velocity arc
     uint8_t fillEveryBars{4};  // 4, 8 or 16; other values disable fills
+    uint8_t arrangementEvolution{0}; // 0=legacy, 1..100=16-bar rhythm development
 };
 inline int controlledInterval(int raw, Tension tension, uint32_t hash) noexcept {
     if (raw==0 || raw==12 || raw==7) return raw;
@@ -56,6 +57,14 @@ inline void prepare(Arrangement& arrangement, const BassPlan& p) {
             && ((bar+1)%p.fillEveryBars==0) && p.fillIntensity>0;
         sequence.seed=p.sequence.seed+(p.phraseVariation ? static_cast<uint32_t>(bar/4) : 0u);
         sequence.variation=static_cast<uint8_t>(std::min<unsigned>(p.sequence.variation,p.phraseVariation));
+        // Four-stage EBM arc: locked opening, building contrast, sparse break,
+        // final return. Downbeats remain anchored by EbmBassEngine.
+        const unsigned evolution=std::min<unsigned>(p.arrangementEvolution,100u);
+        const unsigned baseRhythm=std::min<unsigned>(p.sequence.rhythmVariation,100u);
+        const unsigned stage=static_cast<unsigned>(bar/4);
+        const unsigned arcRhythm=stage==0 ? 0u : stage==1 ? evolution/3u
+            : stage==2 ? evolution : evolution/5u;
+        sequence.rhythmVariation=static_cast<uint8_t>(std::min(100u,baseRhythm+arcRhythm));
         const auto suppliedRoot=p.harmonicRoots[p.mode==BassMode::Hybrid ? bar : 0];
         sequence.root=suppliedRoot<=127 ? suppliedRoot : p.sequence.root;
         sequence.steps=16;

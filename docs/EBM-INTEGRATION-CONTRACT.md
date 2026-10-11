@@ -63,3 +63,7 @@ The 16-bar assumption is intentional here, to match the product brief; revisit b
 ## Silent-mode lifecycle
 - For a valid 16-bar EBM/HYBRID plan with gatePermille=0, prepare() must clear bass notes AND retain the intended 16-bar period. Invalid geometry must leave the entire Arrangement unchanged.
 - Runtime transitions to a silent prepared snapshot require patternChanged() before publication; silence alone does not deliver NoteOffs for previously sounding notes.
+
+## Optional four-stage arrangement evolution
+- BassPlan.arrangementEvolution (0..100) applies deterministic rhythmic contrast across four 4-bar sections. The first four bars preserve the existing motif; bars 5–8 introduce some offbeat rests; bars 9–12 create the sparsest break; bars 13–16 restore the driving rhythm.
+- All quarter-note anchors remain; fill and dynamics controls stay independently usable. Value 0 is fully backward-compatible and adds no rhythmic change. This is a bass-only, off-thread precomputation feature; not wired to shared parameter IDs or VST3 state.

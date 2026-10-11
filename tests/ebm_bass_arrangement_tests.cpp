@@ -155,6 +155,47 @@ int main() {
     prepare(silence,silent);
     assert(silence.periodTicks==30720);
 
+    // Optional arrangement arc: opening locked, bridge sparse, final groove returns.
+    BassPlan evolve;
+    evolve.mode=BassMode::Ebm;
+    evolve.sequence.style=ebm::Style::Chromatic;
+    evolve.tension=Tension::Stable;
+    evolve.arrangementEvolution=100;
+    evolve.sequence.seed=17;
+    evolve.sequence.rhythmVariation=0;
+    Arrangement evolved;
+    prepare(evolved,evolve);
+    std::array<int,4> stageNotes{};
+    for(const auto& n:evolved.midi.bass) {
+        const int bar=static_cast<int>(n.startTick/3840);
+        ++stageNotes[static_cast<unsigned>(bar/4)];
+    }
+    assert(stageNotes[0]==64);
+    assert(stageNotes[2]<stageNotes[0]);
+    assert(stageNotes[2]<stageNotes[1]);
+    assert(stageNotes[2]<stageNotes[3]);
+    for(int bar=0;bar<16;++bar)
+        for(int beat=0;beat<4;++beat) {
+            const auto tick=static_cast<int64_t>(bar)*3840+beat*960;
+            bool present=false;
+            for(const auto& n:evolved.midi.bass) if(n.startTick==tick) present=true;
+            assert(present);
+        }
+    const auto evolvedNotes=evolved.midi.bass;
+    prepare(evolved,evolve);
+    assert(evolved.midi.bass.size()==evolvedNotes.size());
+    for(unsigned i=0;i<evolvedNotes.size();++i)
+        assert(evolved.midi.bass[i].startTick==evolvedNotes[i].startTick);
+    evolve.arrangementEvolution=0;
+    prepare(evolved,evolve);
+    assert(evolved.midi.bass.size()==256);
+    // Existing guitar and FOLLOW data are never touched by the evolution feature.
+    evolve.mode=BassMode::Follow;
+    evolve.arrangementEvolution=100;
+    const auto original=evolved.midi.bass;
+    prepare(evolved,evolve);
+    assert(evolved.midi.bass.size()==original.size());
+
     BassPlan arc;
     arc.mode=BassMode::Ebm;
     arc.tension=Tension::Stable;
