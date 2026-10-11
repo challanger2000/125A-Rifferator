@@ -36,3 +36,4 @@
 2026-10-11 GUI matrix parameter highlight refresh build
 2026-10-11 editor willClose matrix safe lifecycle validation
 2026-10-11 audit guitar absolute pitch fix and scheduler overlap
+2026-10-11 audit EBM velocity regression
