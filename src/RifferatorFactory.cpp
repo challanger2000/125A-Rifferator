@@ -69,6 +69,15 @@ public:
       style->appendString(STR16("ROLLING"));
       parameters.addParameter(style);
     }
+    {
+      auto* quality=new StringListParameter(STR16("Chord Quality"),a125::rifferator::kChordsQuality);
+      quality->appendString(STR16("MINOR"));
+      quality->appendString(STR16("MAJOR"));
+      quality->appendString(STR16("POWER"));
+      quality->appendString(STR16("SUS2"));
+      quality->appendString(STR16("SUS4"));
+      parameters.addParameter(quality);
+    }
     parameters.addParameter(STR16("Chords Enabled"),nullptr,1,0.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kChordsEnabled);
     {
       auto* mode=new StringListParameter(STR16("Chords Output"),a125::rifferator::kChordsMode);
