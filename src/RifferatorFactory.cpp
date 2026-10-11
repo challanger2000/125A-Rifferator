@@ -69,6 +69,29 @@ public:
       style->appendString(STR16("ROLLING"));
       parameters.addParameter(style);
     }
+    parameters.addParameter(STR16("Chords Enabled"),nullptr,1,0.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kChordsEnabled);
+    {
+      auto* mode=new StringListParameter(STR16("Chords Output"),a125::rifferator::kChordsMode);
+      mode->appendString(STR16("CHORD"));
+      mode->appendString(STR16("ROOT"));
+      parameters.addParameter(mode);
+    }
+    parameters.addParameter(STR16("Harmony Bar 01"),nullptr,128,1.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kHybridRootBase+0);
+    parameters.addParameter(STR16("Harmony Bar 02"),nullptr,128,1.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kHybridRootBase+1);
+    parameters.addParameter(STR16("Harmony Bar 03"),nullptr,128,1.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kHybridRootBase+2);
+    parameters.addParameter(STR16("Harmony Bar 04"),nullptr,128,1.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kHybridRootBase+3);
+    parameters.addParameter(STR16("Harmony Bar 05"),nullptr,128,1.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kHybridRootBase+4);
+    parameters.addParameter(STR16("Harmony Bar 06"),nullptr,128,1.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kHybridRootBase+5);
+    parameters.addParameter(STR16("Harmony Bar 07"),nullptr,128,1.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kHybridRootBase+6);
+    parameters.addParameter(STR16("Harmony Bar 08"),nullptr,128,1.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kHybridRootBase+7);
+    parameters.addParameter(STR16("Harmony Bar 09"),nullptr,128,1.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kHybridRootBase+8);
+    parameters.addParameter(STR16("Harmony Bar 10"),nullptr,128,1.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kHybridRootBase+9);
+    parameters.addParameter(STR16("Harmony Bar 11"),nullptr,128,1.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kHybridRootBase+10);
+    parameters.addParameter(STR16("Harmony Bar 12"),nullptr,128,1.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kHybridRootBase+11);
+    parameters.addParameter(STR16("Harmony Bar 13"),nullptr,128,1.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kHybridRootBase+12);
+    parameters.addParameter(STR16("Harmony Bar 14"),nullptr,128,1.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kHybridRootBase+13);
+    parameters.addParameter(STR16("Harmony Bar 15"),nullptr,128,1.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kHybridRootBase+14);
+    parameters.addParameter(STR16("Harmony Bar 16"),nullptr,128,1.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kHybridRootBase+15);
     parameters.addParameter(STR16("Bass Enabled"),nullptr,1,1.0,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kBassEnabled);
     parameters.addParameter(STR16("Root MIDI"),nullptr,127,40.0/127.0,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kRootPitch);
     parameters.addParameter(STR16("Bass Velocity"),nullptr,126,99.0/126.0,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kBassVelocity);
@@ -374,7 +397,7 @@ public:
     };
     uint32_t magic=0,version=0,count=0;
     if(!read32(magic)||!read32(version)||!read32(count) ||
-       magic!=0x31524641u || (version!=1 && version!=2 && version!=3 && version!=4 && version!=5 && version!=6) ||
+       magic!=0x31524641u || (version!=1 && version!=2 && version!=3 && version!=4 && version!=5 && version!=6 && version!=7) ||
        count<1 || count>32) return kResultFalse;
     std::array<uint32_t,7> values{};
     for(auto& v:values)if(!read32(v))return kResultFalse;
@@ -421,8 +444,20 @@ public:
     if(version>=6 && (!read32(restoredMode)||restoredMode>2||
                       !read32(restoredStyle)||restoredStyle>4))
       return kResultFalse;
+    uint32_t chordsEnabled=0,chordsMode=0;
+    std::array<uint32_t,16> harmonyRoots{};
+    harmonyRoots.fill(128);
+    if(version>=7) {
+      if(!read32(chordsEnabled)||chordsEnabled>1||
+         !read32(chordsMode)||chordsMode>1)return kResultFalse;
+      for(auto& root:harmonyRoots)if(!read32(root)||root>128)return kResultFalse;
+    }
     // The processor owns the pattern. The controller only synchronizes
     // the automatable parameter values presented to the host/GUI.
+    setParamNormalized(a125::rifferator::kChordsEnabled,chordsEnabled?1.:0.);
+    setParamNormalized(a125::rifferator::kChordsMode,chordsMode?1.:0.);
+    for(int i=0;i<16;++i)
+      setParamNormalized(a125::rifferator::kHybridRootBase+i,harmonyRoots[static_cast<std::size_t>(i)]/128.);
     setParamNormalized(a125::rifferator::kBassMode,restoredMode/2.);
     setParamNormalized(a125::rifferator::kEbmStyle,restoredStyle/4.);
     setParamNormalized(a125::rifferator::kRootPitch,double(values[0])/127.);
