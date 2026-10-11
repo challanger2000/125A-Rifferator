@@ -6,6 +6,7 @@
 #include <cstdint>
 
 namespace a125::rifferator::ebm_integration {
+namespace ebm = ::rifferator::ebm;
 enum class BassMode : uint8_t { Follow, Ebm, Hybrid };
 enum class Tension : uint8_t { Stable, Tension, Aggressive };
 struct BassPlan {
