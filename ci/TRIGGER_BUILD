@@ -62,3 +62,4 @@
 2026-10-11 controller restore and automation release-gate test
 2026-10-11 fix MSVC controller state test byte pointer type
 2026-10-11 branded 125A Rifferator package and workflow validator path
+2026-10-11 fix branded package resource copy target name mismatch
