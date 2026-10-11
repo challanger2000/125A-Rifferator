@@ -105,8 +105,11 @@ int main(){
     std::int32_t originalCount=0;
     std::memcpy(&originalCount,small.data()+8,4);
     assert(originalCount==16);
-    // V1 ends directly after the serialized step array.
-    small.resize((11u+4u)*sizeof(std::int32_t));
+    // V1: magic/version/count + 7 settings + 1 step (four words).
+    // V2 introduced the fill word, so remove it before extracting V1 step.
+    small.erase(small.begin()+10u*sizeof(std::int32_t),
+                small.begin()+11u*sizeof(std::int32_t));
+    small.resize(14u*sizeof(std::int32_t));
     w(1,1);w(2,1);
     MemoryStream oneStep(small.data(),static_cast<Steinberg::TSize>(small.size()));
     Processor shortPattern;
