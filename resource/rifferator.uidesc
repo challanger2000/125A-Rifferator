@@ -239,7 +239,7 @@
   <control-tag name="Drum2_15" tag="247"/>
 <control-tag name="DrumsEnabled" tag="106"/>
 </control-tags>
-<template name="RifferatorView" class="CViewContainer" origin="0, 0" size="1120, 695" transparent="false" background-color="Bg">
+<template name="RifferatorView" class="CViewContainer" origin="0, 0" size="1120, 696" transparent="false" background-color="Bg">
  <view class="CTextLabel" origin="912, 20" size="55, 18" title="ZOOM" font="Small" font-color="Text" transparent="true"/>
  <view class="CTextButton" control-tag="Action701" origin="967, 17" size="58, 28" title="100%" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
  <view class="CTextButton" control-tag="Action702" origin="1030, 17" size="58, 28" title="150%" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
