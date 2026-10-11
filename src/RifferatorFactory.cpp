@@ -22,6 +22,7 @@ class Controller final : public Steinberg::Vst::EditControllerEx1,
 public:
   unsigned generateCount_{};
   VSTGUI::VST3Editor* activeEditor_{};
+  VSTGUI::VST3Editor* viewOwner_{};
   std::array<VSTGUI::CControl*,21> commandButtons_{};
   void refreshCommands() {
     const auto selected=[&](int tag) -> bool {
@@ -61,14 +62,22 @@ public:
   }
   void willClose(VSTGUI::VST3Editor* editor) override {
     if(activeEditor_==editor)activeEditor_=nullptr;
-    // Clear all non-owning GUI pointers before the editor destroys its views.
-    for(auto& row:guitarCells_)row.fill(nullptr);
-    commandButtons_.fill(nullptr);
+    if(viewOwner_==editor) {
+      viewOwner_=nullptr;
+      // Never retain pointers after this editor destroys its views.
+      for(auto& row:guitarCells_)row.fill(nullptr);
+      commandButtons_.fill(nullptr);
+    }
   }
   VSTGUI::CView* verifyView(VSTGUI::CView* view,
                             const VSTGUI::UIAttributes&,
                             const VSTGUI::IUIDescription*,
-                            VSTGUI::VST3Editor*) override {
+                            VSTGUI::VST3Editor* editor) override {
+    if(viewOwner_!=editor) {
+      for(auto& row:guitarCells_)row.fill(nullptr);
+      commandButtons_.fill(nullptr);
+      viewOwner_=editor;
+    }
     if(auto* control=dynamic_cast<VSTGUI::CControl*>(view)) {
       if((control->getTag()>=500 && control->getTag()<596) || (control->getTag()>=700 && control->getTag()<=720))
         control->setListener(this);
