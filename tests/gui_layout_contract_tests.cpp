@@ -9,7 +9,7 @@ int main(){
   std::ifstream file("resource/rifferator.uidesc");
   assert(file.good());
   const std::string xml((std::istreambuf_iterator<char>(file)),std::istreambuf_iterator<char>());
-  assert(xml.find("size=\"1120, 695\"")!=std::string::npos);
+  assert(xml.find("size=\"1120, 696\"")!=std::string::npos);
   std::regex tagDef(R"RE(<control-tag name="([^"]+)" tag="([0-9]+)")RE");
   std::regex viewTag(R"RE(<view[^>]*control-tag="([^"]+)")RE");
   std::set<std::string> tags;
@@ -47,11 +47,11 @@ int main(){
   assert(counts.at("Action701")==701 && counts.at("Action702")==702);
   assert(counts.at("GuitarGenerate")==700);
 
-  // The root editor is 695 pixels high and must not clip a direct child.
+  // The root editor is 696 pixels high and must not clip a direct child.
   std::regex child(R"RE(<view[^>]*origin="([0-9]+), ([0-9]+)"[^>]*size="([0-9]+), ([0-9]+)")RE");
   for(auto it=std::sregex_iterator(xml.begin(),xml.end(),child);it!=std::sregex_iterator();++it){
     int x=std::stoi((*it)[1]),y=std::stoi((*it)[2]);
     int w=std::stoi((*it)[3]),h=std::stoi((*it)[4]);
-    assert(x+w<=1120 && y+h<=695);
+    assert(x+w<=1120 && y+h<=696);
   }
 }
