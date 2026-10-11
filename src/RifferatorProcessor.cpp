@@ -226,7 +226,8 @@ tresult PLUGIN_API Processor::process(ProcessData& data) {
     // HYBRID falls back to explicit constant root until song-map input exists.
     const auto& prepared=ebmPrepared_[static_cast<std::size_t>(ebmStyle_)];
     if(!ebmScheduler_.process(prepared,start,end,data.numSamples,
-         running&&havePosition&&haveTempo,sink))
+         running&&havePosition&&haveTempo,sink,
+         config_.rootMidi-40,config_.bassGate))
       flushOnNextProcess_=true;
   } else if(!ebmScheduler_.flush(sink,0)) {
     flushOnNextProcess_=true;
