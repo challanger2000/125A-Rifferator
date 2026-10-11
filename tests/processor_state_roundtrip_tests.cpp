@@ -153,6 +153,46 @@ int main(){
     assert(wordAt(base+48u+15u)==1);
   }
 
+  // Fast host automation contract: this V1 processor applies the last valid
+  // point in each parameter queue once per block, including zero-sample flushes.
+  // Lock/step interleaving must not corrupt serialized state.
+  {
+    Processor automated;
+    Steinberg::Vst::ParameterChanges changes(5);
+    auto push=[&](Steinberg::Vst::ParamID id,int offset,double value){
+      Steinberg::int32 queueIndex=0,pointIndex=0;
+      auto* q=changes.addParameterData(id,queueIndex);
+      assert(q && q->addPoint(offset,value,pointIndex)==Steinberg::kResultOk);
+    };
+    push(kGuitarGate,0,.10);push(kGuitarGate,16,.75);
+    push(kBassGate,0,.05);push(kBassGate,16,.63);
+    push(kGuitarStepBase,0,0.);push(kGuitarStepBase,16,1.);
+    push(kGuitarArticulationBase,0,.2);push(kGuitarArticulationBase,16,.8);
+    push(kGuitarLockBase,16,1.);
+    Steinberg::Vst::ProcessData block{};
+    block.numSamples=0;block.inputParameterChanges=&changes;
+    assert(automated.process(block)==Steinberg::kResultOk);
+    MemoryStream saved;
+    assert(automated.getState(&saved)==Steinberg::kResultOk);
+    const auto* bytes=static_cast<const char*>(saved.getData());
+    auto getWord=[&](std::size_t index){
+      assert((index+1)*4<=static_cast<std::size_t>(saved.getSize()));
+      std::int32_t value=0;std::memcpy(&value,bytes+index*4,4);return value;
+    };
+    assert(getWord(6)==75 && getWord(7)==63);
+    const std::size_t base=11u+16u*4u+49u;
+    assert(getWord(base)==1);               // final step enabled
+    assert(getWord(base+16u)==4);           // final articulation
+    assert(getWord(base+48u)==1);           // final lock
+    Processor replay;
+    assert(saved.seek(0,Steinberg::IBStream::kIBSeekSet,nullptr)==Steinberg::kResultOk);
+    assert(replay.setState(&saved)==Steinberg::kResultOk);
+    MemoryStream again;
+    assert(replay.getState(&again)==Steinberg::kResultOk);
+    assert(saved.getSize()==again.getSize());
+    assert(std::memcmp(saved.getData(),again.getData(),saved.getSize())==0);
+  }
+
   // Regression: project recall must apply every stored drum step to the LIVE
   // MIDI masks. A byte-identical getState roundtrip alone missed this defect.
   {
