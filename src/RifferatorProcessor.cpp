@@ -151,7 +151,7 @@ template<class T> bool readExact(Steinberg::IBStream* stream,T& value) {
 }
 tresult PLUGIN_API Processor::getState(IBStream* stream) {
   const uint32_t magic=0x31524641u; // AFR1
-  const uint32_t version=2;
+  const uint32_t version=3;
   const int32 count=static_cast<int32>(steps_.size());
   if(!writeExact(stream,magic)||!writeExact(stream,version)||!writeExact(stream,count))
     return kResultFalse;
@@ -167,13 +167,17 @@ tresult PLUGIN_API Processor::getState(IBStream* stream) {
       step.doubled?1:0,step.locked?1:0};
     for(auto v:values)if(!writeExact(stream,v))return kResultFalse;
   }
+  // V3: three 16-step GM rows and enabled flag.
+  if(!writeExact(stream,static_cast<int32>(drumPattern_.enabled?1:0)))return kResultFalse;
+  for(const auto& row:{&drumPattern_.kick,&drumPattern_.snare,&drumPattern_.hat})
+    for(bool hit:*row)if(!writeExact(stream,static_cast<int32>(hit?1:0)))return kResultFalse;
   return kResultOk;
 }
 tresult PLUGIN_API Processor::setState(IBStream* stream) {
   uint32_t magic=0,version=0;
   int32 count=0;
   if(!readExact(stream,magic)||!readExact(stream,version)||
-     !readExact(stream,count)||magic!=0x31524641u||(version!=1&&version!=2)||
+     !readExact(stream,count)||magic!=0x31524641u||(version!=1&&version!=2&&version!=3)||
      count<1||count>32)return kResultFalse;
   std::array<int32,7> settings{};
   for(auto& v:settings)if(!readExact(stream,v))return kResultFalse;
@@ -197,6 +201,18 @@ tresult PLUGIN_API Processor::setState(IBStream* stream) {
     step.doubled=values[2]!=0;
     step.locked=values[3]!=0;
   }
+  DrumPattern parsedDrums=DrumPattern::standard();
+  if(version>=3) {
+    int32 enabled=0;
+    if(!readExact(stream,enabled)||enabled<0||enabled>1)return kResultFalse;
+    parsedDrums.enabled=enabled!=0;
+    for(auto* row:{&parsedDrums.kick,&parsedDrums.snare,&parsedDrums.hat})
+      for(auto& hit:*row) {
+        int32 value=0;
+        if(!readExact(stream,value)||value<0||value>1)return kResultFalse;
+        hit=value!=0;
+      }
+  }
   Config next=config_;
   next.rootMidi=settings[0];
   next.bassVelocity=settings[1];
@@ -209,6 +225,9 @@ tresult PLUGIN_API Processor::setState(IBStream* stream) {
   // Construct fill variants outside the audio process callback.
   steps_=std::move(parsed);
   config_=next;
+  drumPattern_=parsedDrums;
+  drumNotes_=renderDrums(drumPattern_,16);
+  scheduler_.setDrums(&drumNotes_);
   fill_.intensityPercent=restoredFill;
   fillIndex_=std::clamp((restoredFill+5)/10,0,10);
   prepareFillVariants();
