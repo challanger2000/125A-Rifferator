@@ -17,12 +17,17 @@ struct LiveControls {
   int bassVelocity{100}; bool bassEnabled{true}; bool drumsEnabled{true};
   std::array<std::array<bool,16>,3> drumSteps{};
   std::array<bool,16> guitarSteps{};
+  std::array<int,16> guitarArticulation{};
+  std::array<int,16> guitarDegree{};
+  std::array<bool,16> guitarLocks{};
   LiveControls() noexcept {
     for(int i=0;i<16;++i) {
       drumSteps[0][i]=i%4==0;
       drumSteps[1][i]=i==4||i==12;
       drumSteps[2][i]=true;
       guitarSteps[i]=true;
+      guitarArticulation[i]=3;
+      guitarDegree[i]=1;
     }
   }
 };
@@ -57,7 +62,10 @@ public:
       for(const auto& note:notes) {
         if(bus==0 || bus==1) {
           const int step=static_cast<int>((note.startTick/240)%16);
-          if(step<0 || !live.guitarSteps[static_cast<std::size_t>(step)])continue;
+          if(step<0 || !live.guitarSteps[static_cast<std::size_t>(step)] ||
+             live.guitarArticulation[static_cast<std::size_t>(step)]==0)continue;
+          if(bus==1 && (live.guitarArticulation[static_cast<std::size_t>(step)]==1 ||
+                        live.guitarArticulation[static_cast<std::size_t>(step)]==5))continue;
         }
         if(bus==2) {
           const int row=note.note==36?0:note.note==38?1:note.note==42?2:-1;
@@ -76,9 +84,26 @@ public:
             if(t<startPpq || t>=endPpq || count>=kCapacity) return;
             const auto offset=static_cast<int>(std::floor(
               (t-startPpq)/(endPpq-startPpq)*blockSize));
+            int pitch=note.note+live.rootSemitones;
+            int velocity=note.velocity;
+            if(bus!=2) {
+              const int step=static_cast<int>((note.startTick/240)%16);
+              if(step>=0) {
+                const int degree=live.guitarDegree[static_cast<std::size_t>(step)];
+                // Currently natural-minor scale. Base arrangement is root degree 1.
+                constexpr std::array<int,7> scale{0,2,3,5,7,8,10};
+                pitch+=degreeOffset(degree,scale);
+                const int articulation=live.guitarArticulation[static_cast<std::size_t>(step)];
+                if(bus==0) {
+                  constexpr std::array<int,6> velocities{0,20,50,95,115,127};
+                  velocity=velocities[static_cast<std::size_t>(articulation)];
+                }
+              }
+            }
+            if(bus==1)velocity=live.bassVelocity;
+            if(bus==2)pitch=note.note;
             events[static_cast<std::size_t>(count++)]={
-              bus,offset,std::clamp(note.note+(bus==2?0:live.rootSemitones),0,127),
-              on?(bus==1?live.bassVelocity:note.velocity):0,-1,on};
+              bus,offset,std::clamp(pitch,0,127),on?velocity:0,-1,on};
           };
           const int gate=bus==2?100:std::clamp(bus==0?live.guitarGate:live.bassGate,0,100);
           const int64_t scaled=note.startTick+(note.boundaryTick-note.startTick)*gate/100;
