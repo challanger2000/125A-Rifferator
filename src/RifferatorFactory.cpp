@@ -1,5 +1,6 @@
 #include "RifferatorProcessor.hpp"
 #include "RifferatorParameters.hpp"
+#include "core/IndustrialGuitarGroove.hpp"
 #include "pluginterfaces/base/ibstream.h"
 #include <array>
 #include <algorithm>
@@ -19,18 +20,36 @@ class Controller final : public Steinberg::Vst::EditControllerEx1,
                          public VSTGUI::VST3EditorDelegate,
                          public VSTGUI::IControlListener {
 public:
+  unsigned generateCount_{};
   VSTGUI::CView* verifyView(VSTGUI::CView* view,
                             const VSTGUI::UIAttributes&,
                             const VSTGUI::IUIDescription*,
                             VSTGUI::VST3Editor*) override {
     if(auto* control=dynamic_cast<VSTGUI::CControl*>(view)) {
-      if(control->getTag()>=500 && control->getTag()<596)
+      if((control->getTag()>=500 && control->getTag()<596) || control->getTag()==700)
         control->setListener(this);
     }
     return view;
   }
   void valueChanged(VSTGUI::CControl* control) override {
     if(!control || control->getValueNormalized()<=0.5f)return;
+    if(control->getTag()==700) {
+      // Generate is a controller action, never an audio-thread allocation.
+      const auto groove=a125::rifferator::makeIndustrialGuitarGroove(
+          (++generateCount_%3==0)?85u:(generateCount_%2==0?50u:0u));
+      for(int i=0;i<16;++i) {
+        using namespace a125::rifferator;
+        if(getParamNormalized(kGuitarLockBase+i)>=0.5)continue;
+        const auto j=static_cast<std::size_t>(i);
+        const auto edit=[&](Steinberg::Vst::ParamID id,double v) {
+          beginEdit(id);performEdit(id,v);endEdit(id);
+        };
+        edit(kGuitarStepBase+i,groove.enabled[j]?1.:0.);
+        edit(kGuitarArticulationBase+i,groove.articulation[j]/5.);
+        edit(kGuitarDegreeBase+i,(groove.degrees[j]+13)/28.);
+      }
+      return;
+    }
     const int tag=control->getTag();
     if(tag<500||tag>=596)return;
     const int step=(tag-500)%16;
