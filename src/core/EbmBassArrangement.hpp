@@ -55,7 +55,6 @@ inline void prepare(Arrangement& arrangement, const BassPlan& p) {
             const auto interval=controlledInterval(raw,p.tension,hash);
             const auto note=clampMidi(static_cast<int>(sequence.root)+interval+p.bassOctaveOffset);
             const auto start=barTicks*bar+stepTicks*n.step;
-            const auto boundary=start+stepTicks;
             if(n.gatePermille==0) continue;
             // Per-note gate maps to the MIDI lifetime. During integration,
             // set the scheduler's live bassGate to 100% in EBM/HYBRID.
