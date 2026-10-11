@@ -24,7 +24,7 @@ void Processor::prepareFillVariants() {
 Processor::Processor() {
   setControllerClass(controllerId);
   steps_.resize(16);
-  for(int i=0;i<16;i+=2) steps_[i].articulation=Articulation::PalmMute;
+  for(int i=0;i<16;++i) steps_[i].articulation=Articulation::PalmMute;
   prepareFillVariants();
   DrumPattern candidates;
   candidates.kick.fill(true);candidates.snare.fill(true);candidates.hat.fill(true);
@@ -71,6 +71,14 @@ tresult PLUGIN_API Processor::process(ProcessData& data) {
       value=std::clamp(value,0.,1.);
       const int v=static_cast<int>(std::lround(value*100.));
       const auto id=queue->getParameterId();
+      if(id>=kGuitarStepBase && id<kGuitarStepBase+16) {
+        const int step=static_cast<int>(id-kGuitarStepBase);
+        const bool enabled=value>=0.5;
+        if(live_.guitarSteps[static_cast<std::size_t>(step)]!=enabled)
+          flushOnNextProcess_=true;
+        live_.guitarSteps[static_cast<std::size_t>(step)]=enabled;
+        continue;
+      }
       if(id>=kDrumStepBase && id<kDrumStepBase+48) {
         const int index=static_cast<int>(id-kDrumStepBase);
         const bool active=value>=0.5;
