@@ -39,6 +39,10 @@ public:
     }
     return result;
   }
+  void willClose(VSTGUI::VST3Editor*) override {
+    // Clear all non-owning GUI pointers before the editor destroys its views.
+    for(auto& row:guitarCells_)row.fill(nullptr);
+  }
   VSTGUI::CView* verifyView(VSTGUI::CView* view,
                             const VSTGUI::UIAttributes&,
                             const VSTGUI::IUIDescription*,
@@ -65,7 +69,7 @@ public:
         if(getParamNormalized(kGuitarLockBase+i)>=0.5)continue;
         const auto j=static_cast<std::size_t>(i);
         const auto edit=[&](Steinberg::Vst::ParamID id,double v) {
-          beginEdit(id);performEdit(id,v);endEdit(id);
+          beginEdit(id);setParamNormalized(id,v);performEdit(id,v);endEdit(id);
         };
         edit(kGuitarStepBase+i,groove.enabled[j]?1.:0.);
         edit(kGuitarArticulationBase+i,groove.articulation[j]/5.);
@@ -80,6 +84,7 @@ public:
     const auto id=a125::rifferator::kGuitarArticulationBase+step;
     if(getParamNormalized(a125::rifferator::kGuitarLockBase+step)>=0.5)return;
     beginEdit(id);
+    setParamNormalized(id,static_cast<double>(art)/5.);
     performEdit(id,static_cast<double>(art)/5.);
     endEdit(id);
     refreshGuitarStep(step);
