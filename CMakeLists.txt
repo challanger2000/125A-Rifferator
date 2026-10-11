@@ -85,3 +85,6 @@ add_executable(rifferator_chord_tests tests/chord_companion_tests.cpp)
 add_test(NAME rifferator_chords COMMAND rifferator_chord_tests)
 add_executable(rifferator_hybrid_harmony_tests tests/ebm_hybrid_harmony_tests.cpp)
 add_test(NAME rifferator_hybrid_harmony COMMAND rifferator_hybrid_harmony_tests)
+
+add_executable(rifferator_ebm_guitar_coordination_tests tests/ebm_guitar_coordination_tests.cpp)
+add_test(NAME rifferator_ebm_guitar_coordination COMMAND rifferator_ebm_guitar_coordination_tests)
