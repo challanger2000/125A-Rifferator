@@ -94,8 +94,16 @@ public:
     return view;
   }
   void valueChanged(VSTGUI::CControl* control) override {
-    if(!control || control->getValueNormalized()<=0.5f)return;
+    if(!control)return;
     const int command=control->getTag();
+    // A radio-like matrix cell can emit OFF when its selected button is
+    // clicked again. Never leave the visual selection deactivated: the
+    // processor articulation remains selected until another row is chosen.
+    if(command>=500 && command<596 && control->getValueNormalized()<=0.5f) {
+      refreshGuitarStep((command-500)%16);
+      return;
+    }
+    if(control->getValueNormalized()<=0.5f)return;
     if(command==701 || command==702) {
       zoomFactor_=command==701?1.:1.5;
       // Use the attached view owner when available, not a potentially stale
