@@ -104,7 +104,9 @@ public:
                 const int degree=live.guitarDegree[static_cast<std::size_t>(step)];
                 // Currently natural-minor scale. Base arrangement is root degree 1.
                 constexpr std::array<int,7> scale{0,2,3,5,7,8,10};
-                pitch+=degreeOffset(degree,scale);
+                // Prepared riff notes already contain the scale degree.
+                // Live degree control is absolute, not an additional transpose.
+                pitch+=degreeOffset(degree,scale)-degreeOffset(1,scale);
                 const int articulation=live.guitarArticulation[static_cast<std::size_t>(step)];
                 if(bus==0) {
                   constexpr std::array<int,6> velocities{0,20,50,95,115,127};
@@ -152,6 +154,9 @@ public:
     for(int i=0;i<count;++i) {
       const auto e=events[static_cast<std::size_t>(i)];
       if(!e.on && !active_[static_cast<std::size_t>(e.bus)][static_cast<std::size_t>(e.pitch)]) continue;
+      if(e.on && active_[static_cast<std::size_t>(e.bus)][static_cast<std::size_t>(e.pitch)]) {
+        if(!flushBus(e.bus,sink,e.sampleOffset))return;
+      }
       if(sink(e)) active_[static_cast<std::size_t>(e.bus)][static_cast<std::size_t>(e.pitch)]=e.on;
       else { flush(sink,e.sampleOffset); return; }
     }
