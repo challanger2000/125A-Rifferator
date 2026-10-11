@@ -94,4 +94,28 @@ int main(){
     assert(std::memcmp(afterReject.getData(),customSaved.getData(),customSaved.getSize())==0);
   }
 
+// Legacy V1 snapshot with ONE step must restore safely and survive subsequent
+// VST3 parameter processing for the highest addressed guitar step (index 15).
+  {
+    std::vector<unsigned char> small(data,data+full.getSize());
+    auto w=[&](std::size_t word,std::int32_t value) {
+      assert((word+1)*4<=small.size());
+      std::memcpy(small.data()+word*4,&value,4);
+    };
+    std::int32_t originalCount=0;
+    std::memcpy(&originalCount,small.data()+8,4);
+    assert(originalCount==16);
+    // V1 ends directly after the serialized step array.
+    small.resize((11u+4u)*sizeof(std::int32_t));
+    w(1,1);w(2,1);
+    MemoryStream oneStep(small.data(),static_cast<Steinberg::TSize>(small.size()));
+    Processor shortPattern;
+    assert(shortPattern.setState(&oneStep)==Steinberg::kResultOk);
+    MemoryStream saved;
+    assert(shortPattern.getState(&saved)==Steinberg::kResultOk);
+    std::int32_t savedCount=0;
+    std::memcpy(&savedCount,static_cast<const char*>(saved.getData())+8,4);
+    assert(savedCount==1);
+  }
+
 }
