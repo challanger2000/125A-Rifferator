@@ -53,3 +53,9 @@ The 16-bar assumption is intentional here, to match the product brief; revisit b
 - The scheduler currently treats active pitches as booleans; test repeated same-pitch steps at 100% gate, NoteOff-before-NoteOn ordering, transport stop/seek/loop flush and host event rejection at integration.
 - The EBM per-note duration is already encoded in boundaryTick, and must be combined with LiveControls.bassGate=100 only for EBM/HYBRID.
 - Standalone midi-audit tests cover all five styles, three tension modes, six roots including MIDI 0/127, four gates, phrase variation, fills, dynamics and deterministic regeneration. This is an offline invariants audit, NOT an operational host MIDI-output test.
+
+## Hot arrangement replacement protocol
+- Before replacing the immutable prepared Arrangement during continuous playback, call EbmSchedulerAdapter::patternChanged(sink) to flush active Bass NoteOffs (bus 1) and reset expected PPQ tracking.
+- If the host rejects a NoteOff, patternChanged returns false; retry before switching patterns. Do not use reset() on sounding notes, because reset() deliberately clears tracking without outputting MIDI.
+- Do not mutate/swap the arrangement while process() is reading it; coordinate immutable snapshot publication off the audio thread.
+- Host DAW lifecycle and VST3 output-bus integration still require separate end-to-end validation.

@@ -34,6 +34,30 @@ int main() {
     events.clear();
     assert(adapter.process(a,4.0,4.1,480,true,sink));
     assert(events.size()>=2 && !events[0].on && events[1].on);
+    // Hot swap with uninterrupted DAW transport: flush old note first.
+    adapter.reset(); events.clear();
+    assert(adapter.process(a,0.0,0.1,480,true,sink));
+    events.clear();
+    Arrangement replacement;
+    replacement.periodTicks=3840;
+    replacement.midi.bass={{0,240,48,118,240}};
+    assert(adapter.patternChanged(sink));
+    assert(events.size()==1 && !events[0].on && events[0].pitch==36);
+    events.clear();
+    assert(adapter.process(replacement,0.0,0.1,480,true,sink));
+    assert(events.size()==1 && events[0].on && events[0].pitch==48);
+    events.clear();
+    assert(adapter.patternChanged(sink));
+    assert(events.size()==1 && !events[0].on && events[0].pitch==48);
+    // A refused NoteOff during swap must be retriable, not forgotten.
+    events.clear(); adapter.reset();
+    assert(adapter.process(a,0.0,0.1,480,true,sink));
+    const auto refuseSwap=[&](const ScheduledMidiEvent& e){return e.on;};
+    assert(!adapter.patternChanged(refuseSwap));
+    events.clear();
+    assert(adapter.patternChanged(sink));
+    assert(events.size()==1 && !events[0].on && events[0].pitch==36);
+    events.clear();
     // Host rejection does not falsely clear the active note; flush can retry.
     adapter.reset(); events.clear();
     assert(adapter.process(a,0.0,0.1,480,true,sink));
@@ -87,7 +111,7 @@ int main() {
             assert(unit.process(stress,128.0,128.25,frames,false,collect));
         }
     }
-    // Seek, backward loop, and pattern replacement must flush old notes.
+    // Seek and backward loop must flush old notes.
     {
         Arrangement single;
         single.periodTicks=3840;

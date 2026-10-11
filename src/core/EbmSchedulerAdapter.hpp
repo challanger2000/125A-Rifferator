@@ -11,7 +11,16 @@ namespace a125::rifferator::ebm_integration {
 // Prepared Arrangement must remain immutable during process(). No allocations.
 class EbmSchedulerAdapter {
 public:
+    // reset() is safe only before playback or after a successful flush.
     void reset() noexcept { active_.fill(false); haveExpected_=false; }
+    // Call before replacing a prepared arrangement while transport is running.
+    // If the host rejects a NoteOff, retain state and retry on next callback.
+    template<class Sink>
+    bool patternChanged(Sink&& sink) noexcept {
+        if(!flush(sink,0)) return false;
+        haveExpected_=false;
+        return true;
+    }
     template<class Sink>
     bool flush(Sink&& sink,int sampleOffset=0) noexcept {
         bool ok=true;
