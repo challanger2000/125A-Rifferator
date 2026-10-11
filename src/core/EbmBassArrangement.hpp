@@ -4,6 +4,7 @@
 #include <array>
 #include <algorithm>
 #include <cstdint>
+#include <utility>
 
 namespace a125::rifferator::ebm_integration {
 namespace ebm = ::rifferator::ebm;
@@ -19,6 +20,7 @@ struct BassPlan {
     // Explicit harmonic roots: absolute MIDI pitch, one per bar.
     // EBM ignores later roots; Hybrid consults root at each bar.
     std::array<uint8_t,16> harmonicRoots{};
+    uint8_t phraseVariation{0}; // 0: locked four-bar motifs
 };
 inline int controlledInterval(int raw, Tension tension, uint32_t hash) noexcept {
     if (raw==0 || raw==12 || raw==7) return raw;
@@ -33,13 +35,15 @@ inline int controlledInterval(int raw, Tension tension, uint32_t hash) noexcept 
 inline void prepare(Arrangement& arrangement, const BassPlan& p) {
     if(p.mode==BassMode::Follow) return;
     if(p.bars!=16 || p.ticksPerStep<=0) return;
+    if(p.sequence.gatePermille==0) { arrangement.midi.bass.clear(); return; }
     std::vector<MidiNote> bass;
     bass.reserve(16u*32u);
     auto sequence=p.sequence;
     const auto stepTicks=static_cast<int64_t>(p.ticksPerStep);
     const auto barTicks=stepTicks*16;
     for(int bar=0;bar<16;++bar) {
-        sequence.seed=p.sequence.seed+static_cast<uint32_t>(bar/4); // 4-bar motif family
+        sequence.seed=p.sequence.seed+(p.phraseVariation ? static_cast<uint32_t>(bar/4) : 0u);
+        sequence.variation=static_cast<uint8_t>(std::min<unsigned>(p.sequence.variation,p.phraseVariation));
         sequence.root=static_cast<uint8_t>(std::clamp<int>(
           p.mode==BassMode::Hybrid ? p.harmonicRoots[bar] : p.harmonicRoots[0],0,127));
         sequence.steps=16;

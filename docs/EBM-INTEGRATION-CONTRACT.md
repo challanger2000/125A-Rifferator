@@ -26,3 +26,8 @@ Branch: feature/ebm-bass-engine; owner of develop/v1.0.0 is unaffected.
 Do not touch guitar core, scheduler, processor, factory, GUI, shared parameter IDs or plugin state until merging is explicitly coordinated and compatibility tests are designed.
 The harmony array must be constructed from explicit song harmonic roots or an agreed chord-root source; do NOT derive harmonic function from arbitrary guitar note pitches.
 The 16-bar assumption is intentional here, to match the product brief; revisit before changing time-signatures or step division.
+
+## Four-bar phrase handling
+- With phraseVariation=0, four-bar motifs remain locked throughout 16 bars.
+- When enabled, controlled variations occur per four-bar block with deterministic seed changes.
+- Gate 0 intentionally silences EBM/HYBRID bass without changing guitar events.
