@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<vstgui-ui-description version="1">
+ <colors><color name="Bg" rgba="#0D1115FF"/><color name="Panel" rgba="#182229FF"/><color name="Text" rgba="#E7ECEFFF"/><color name="Accent" rgba="#62C7B3FF"/><color name="Line" rgba="#364750FF"/></colors>
+ <fonts><font name="Title" font-name="Arial" size="26" bold="true"/><font name="Normal" font-name="Arial" size="15"/><font name="Small" font-name="Arial" size="12"/></fonts>
+ <control-tags>
+  <control-tag name="Drum0_0" tag="200"/>
+  <control-tag name="Drum0_1" tag="201"/>
+  <control-tag name="Drum0_2" tag="202"/>
+  <control-tag name="Drum0_3" tag="203"/>
+  <control-tag name="Drum0_4" tag="204"/>
+  <control-tag name="Drum0_5" tag="205"/>
+  <control-tag name="Drum0_6" tag="206"/>
+  <control-tag name="Drum0_7" tag="207"/>
+  <control-tag name="Drum0_8" tag="208"/>
+  <control-tag name="Drum0_9" tag="209"/>
+  <control-tag name="Drum0_10" tag="210"/>
+  <control-tag name="Drum0_11" tag="211"/>
+  <control-tag name="Drum0_12" tag="212"/>
+  <control-tag name="Drum0_13" tag="213"/>
+  <control-tag name="Drum0_14" tag="214"/>
+  <control-tag name="Drum0_15" tag="215"/>
+  <control-tag name="Drum1_0" tag="216"/>
+  <control-tag name="Drum1_1" tag="217"/>
+  <control-tag name="Drum1_2" tag="218"/>
+  <control-tag name="Drum1_3" tag="219"/>
+  <control-tag name="Drum1_4" tag="220"/>
+  <control-tag name="Drum1_5" tag="221"/>
+  <control-tag name="Drum1_6" tag="222"/>
+  <control-tag name="Drum1_7" tag="223"/>
+  <control-tag name="Drum1_8" tag="224"/>
+  <control-tag name="Drum1_9" tag="225"/>
+  <control-tag name="Drum1_10" tag="226"/>
+  <control-tag name="Drum1_11" tag="227"/>
+  <control-tag name="Drum1_12" tag="228"/>
+  <control-tag name="Drum1_13" tag="229"/>
+  <control-tag name="Drum1_14" tag="230"/>
+  <control-tag name="Drum1_15" tag="231"/>
+  <control-tag name="Drum2_0" tag="232"/>
+  <control-tag name="Drum2_1" tag="233"/>
+  <control-tag name="Drum2_2" tag="234"/>
+  <control-tag name="Drum2_3" tag="235"/>
+  <control-tag name="Drum2_4" tag="236"/>
+  <control-tag name="Drum2_5" tag="237"/>
+  <control-tag name="Drum2_6" tag="238"/>
+  <control-tag name="Drum2_7" tag="239"/>
+  <control-tag name="Drum2_8" tag="240"/>
+  <control-tag name="Drum2_9" tag="241"/>
+  <control-tag name="Drum2_10" tag="242"/>
+  <control-tag name="Drum2_11" tag="243"/>
+  <control-tag name="Drum2_12" tag="244"/>
+  <control-tag name="Drum2_13" tag="245"/>
+  <control-tag name="Drum2_14" tag="246"/>
+  <control-tag name="Drum2_15" tag="247"/>
+<control-tag name="DrumsEnabled" tag="106"/>
+</control-tags>
+<templates>
+<template name="RifferatorView" class="CViewContainer" origin="0, 0" size="1120, 670" transparent="false" background-color="Bg">
+ <view class="CTextLabel" origin="360, 14" size="400, 38" title="125A RIFFERATOR" font="Title" font-color="Text" text-alignment="center" transparent="true"/>
+ <view class="CTextLabel" origin="360, 49" size="400, 20" title="THE INDUSTRIAL RIFF MACHINE" font="Small" font-color="Accent" text-alignment="center" transparent="true"/>
+ <view class="CViewContainer" origin="22, 90" size="1076, 345" background-color="Panel" transparent="false">
+  <view class="CTextLabel" origin="16, 12" size="500, 24" title="GUITAR  |  16-STEP RIFF MATRIX" font="Normal" font-color="Accent" transparent="true"/>
+  <view class="CTextLabel" origin="16, 44" size="116, 25" title="STEP" font="Small" font-color="Text" transparent="true"/>
+  <view class="CTextLabel" origin="16, 75" size="116, 25" title="REST" font="Small" font-color="Text" transparent="true"/>
+  <view class="CTextLabel" origin="16, 106" size="116, 25" title="NOISE" font="Small" font-color="Text" transparent="true"/>
+  <view class="CTextLabel" origin="16, 137" size="116, 25" title="PALM MUTE" font="Small" font-color="Text" transparent="true"/>
+  <view class="CTextLabel" origin="16, 168" size="116, 25" title="SOFT" font="Small" font-color="Text" transparent="true"/>
+  <view class="CTextLabel" origin="16, 199" size="116, 25" title="OPEN" font="Small" font-color="Text" transparent="true"/>
+  <view class="CTextLabel" origin="16, 230" size="116, 25" title="HARMONIC" font="Small" font-color="Text" transparent="true"/>
+  <view class="CTextLabel" origin="16, 261" size="116, 25" title="PITCH" font="Small" font-color="Text" transparent="true"/>
+  <view class="CTextLabel" origin="16, 292" size="116, 25" title="LOCK" font="Small" font-color="Text" transparent="true"/>
+  <view class="CTextLabel" origin="151, 44" size="45, 25" title="01" font="Small" font-color="Accent" text-alignment="center" transparent="true"/>
+  <view class="CTextLabel" origin="207, 44" size="45, 25" title="02" font="Small" font-color="Accent" text-alignment="center" transparent="true"/>
+  <view class="CTextLabel" origin="263, 44" size="45, 25" title="03" font="Small" font-color="Accent" text-alignment="center" transparent="true"/>
+  <view class="CTextLabel" origin="319, 44" size="45, 25" title="04" font="Small" font-color="Accent" text-alignment="center" transparent="true"/>
+  <view class="CTextLabel" origin="375, 44" size="45, 25" title="05" font="Small" font-color="Accent" text-alignment="center" transparent="true"/>
+  <view class="CTextLabel" origin="431, 44" size="45, 25" title="06" font="Small" font-color="Accent" text-alignment="center" transparent="true"/>
+  <view class="CTextLabel" origin="487, 44" size="45, 25" title="07" font="Small" font-color="Accent" text-alignment="center" transparent="true"/>
+  <view class="CTextLabel" origin="543, 44" size="45, 25" title="08" font="Small" font-color="Accent" text-alignment="center" transparent="true"/>
+  <view class="CTextLabel" origin="599, 44" size="45, 25" title="09" font="Small" font-color="Accent" text-alignment="center" transparent="true"/>
+  <view class="CTextLabel" origin="655, 44" size="45, 25" title="10" font="Small" font-color="Accent" text-alignment="center" transparent="true"/>
+  <view class="CTextLabel" origin="711, 44" size="45, 25" title="11" font="Small" font-color="Accent" text-alignment="center" transparent="true"/>
+  <view class="CTextLabel" origin="767, 44" size="45, 25" title="12" font="Small" font-color="Accent" text-alignment="center" transparent="true"/>
+  <view class="CTextLabel" origin="823, 44" size="45, 25" title="13" font="Small" font-color="Accent" text-alignment="center" transparent="true"/>
+  <view class="CTextLabel" origin="879, 44" size="45, 25" title="14" font="Small" font-color="Accent" text-alignment="center" transparent="true"/>
+  <view class="CTextLabel" origin="935, 44" size="45, 25" title="15" font="Small" font-color="Accent" text-alignment="center" transparent="true"/>
+  <view class="CTextLabel" origin="991, 44" size="45, 25" title="16" font="Small" font-color="Accent" text-alignment="center" transparent="true"/>
+ </view>
+ <view class="CTextLabel" origin="34, 450" size="980, 26" title="GUITAR GENERATE / VARIATE / LOCK: controller commands pending" font="Normal" font-color="Text" transparent="true"/>
+ <view class="CTextLabel" origin="34, 503" size="1030, 25" title="BASS     FOLLOW / EBM / HYBRID     |     DETAILS (pending)" font="Normal" font-color="Text" transparent="true"/>
+ <view class="CTextLabel" origin="34, 553" size="1030, 25" title="DRUMS     GM 36 / 38 / 42   |   16-STEP EDITOR" font="Normal" font-color="Accent" transparent="true"/>
+ <view class="CTextLabel" origin="34, 582" size="76, 20" title="KICK" font="Small" font-color="Text" transparent="true"/>
+ <view class="CTextLabel" origin="34, 605" size="76, 20" title="SNARE" font="Small" font-color="Text" transparent="true"/>
+ <view class="CTextLabel" origin="34, 628" size="76, 20" title="HAT" font="Small" font-color="Text" transparent="true"/>
+ <view class="CTextButton" control-tag="Drum0_0" origin="130, 582" size="43, 19" title="&#x2022;" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false"/>
+ <view class="CTextButton" control-tag="Drum0_1" origin="186, 582" size="43, 19" title="&#x2022;" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false"/>
+ <view class="CTextButton" control-tag="Drum0_2" origin="242, 582" size="43, 19" title="&#x2022;" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false"/>
+ <view class="CTextButton" control-tag="Drum0_3" origin="298, 582" size="43, 19" title="&#x2022;" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false"/>
+ <view class="CTextButton" control-tag="Drum0_4" origin="354, 582" size="43, 19" title="&#x2022;" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false"/>
+ <view class="CTextButton" control-tag="Drum0_5" origin="410, 582" size="43, 19" title="&#x2022;" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false"/>
+ <view class="CTextButton" control-tag="Drum0_6" origin="466, 582" size="43, 19" title="&#x2022;" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false"/>
+ <view class="CTextButton" control-tag="Drum0_7" origin="522, 582" size="43, 19" title="&#x2022;" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false"/>
+ <view class="CTextButton" control-tag="Drum0_8" origin="578, 582" size="43, 19" title="&#x2022;" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false"/>
+ <view class="CTextButton" control-tag="Drum0_9" origin="634, 582" size="43, 19" title="&#x2022;" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false"/>
+ <view class="CTextButton" control-tag="Drum0_10" origin="690, 582" size="43, 19" title="&#x2022;" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false"/>
+ <view class="CTextButton" control-tag="Drum0_11" origin="746, 582" size="43, 19" title="&#x2022;" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false"/>
+ <view class="CTextButton" control-tag="Drum0_12" origin="802, 582" size="43, 19" title="&#x2022;" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false"/>
+ <view class="CTextButton" control-tag="Drum0_13" origin="858, 582" size="43, 19" title="&#x2022;" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false"/>
+ <view class="CTextButton" control-tag="Drum0_14" origin="914, 582" size="43, 19" title="&#x2022;" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false"/>
+ <view class="CTextButton" control-tag="Drum0_15" origin="970, 582" size="43, 19" title="&#x2022;" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false"/>
+ <view class="CTextButton" control-tag="Drum1_0" origin="130, 605" size="43, 19" title="&#x2022;" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false"/>
+ <view class="CTextButton" control-tag="Drum1_1" origin="186, 605" size="43, 19" title="&#x2022;" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false"/>
+ <view class="CTextButton" control-tag="Drum1_2" origin="242, 605" size="43, 19" title="&#x2022;" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false"/>
+ <view class="CTextButton" control-tag="Drum1_3" origin="298, 605" size="43, 19" title="&#x2022;" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false"/>
+ <view class="CTextButton" control-tag="Drum1_4" origin="354, 605" size="43, 19" title="&#x2022;" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false"/>
+ <view class="CTextButton" control-tag="Drum1_5" origin="410, 605" size="43, 19" title="&#x2022;" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false"/>
+ <view class="CTextButton" control-tag="Drum1_6" origin="466, 605" size="43, 19" title="&#x2022;" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false"/>
+ <view class="CTextButton" control-tag="Drum1_7" origin="522, 605" size="43, 19" title="&#x2022;" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false"/>
+ <view class="CTextButton" control-tag="Drum1_8" origin="578, 605" size="43, 19" title="&#x2022;" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false"/>
+ <view class="CTextButton" control-tag="Drum1_9" origin="634, 605" size="43, 19" title="&#x2022;" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false"/>
+ <view class="CTextButton" control-tag="Drum1_10" origin="690, 605" size="43, 19" title="&#x2022;" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false"/>
+ <view class="CTextButton" control-tag="Drum1_11" origin="746, 605" size="43, 19" title="&#x2022;" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false"/>
+ <view class="CTextButton" control-tag="Drum1_12" origin="802, 605" size="43, 19" title="&#x2022;" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false"/>
+ <view class="CTextButton" control-tag="Drum1_13" origin="858, 605" size="43, 19" title="&#x2022;" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false"/>
+ <view class="CTextButton" control-tag="Drum1_14" origin="914, 605" size="43, 19" title="&#x2022;" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false"/>
+ <view class="CTextButton" control-tag="Drum1_15" origin="970, 605" size="43, 19" title="&#x2022;" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false"/>
+ <view class="CTextButton" control-tag="Drum2_0" origin="130, 628" size="43, 19" title="&#x2022;" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false"/>
+ <view class="CTextButton" control-tag="Drum2_1" origin="186, 628" size="43, 19" title="&#x2022;" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false"/>
+ <view class="CTextButton" control-tag="Drum2_2" origin="242, 628" size="43, 19" title="&#x2022;" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false"/>
+ <view class="CTextButton" control-tag="Drum2_3" origin="298, 628" size="43, 19" title="&#x2022;" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false"/>
+ <view class="CTextButton" control-tag="Drum2_4" origin="354, 628" size="43, 19" title="&#x2022;" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false"/>
+ <view class="CTextButton" control-tag="Drum2_5" origin="410, 628" size="43, 19" title="&#x2022;" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false"/>
+ <view class="CTextButton" control-tag="Drum2_6" origin="466, 628" size="43, 19" title="&#x2022;" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false"/>
+ <view class="CTextButton" control-tag="Drum2_7" origin="522, 628" size="43, 19" title="&#x2022;" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false"/>
+ <view class="CTextButton" control-tag="Drum2_8" origin="578, 628" size="43, 19" title="&#x2022;" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false"/>
+ <view class="CTextButton" control-tag="Drum2_9" origin="634, 628" size="43, 19" title="&#x2022;" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false"/>
+ <view class="CTextButton" control-tag="Drum2_10" origin="690, 628" size="43, 19" title="&#x2022;" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false"/>
+ <view class="CTextButton" control-tag="Drum2_11" origin="746, 628" size="43, 19" title="&#x2022;" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false"/>
+ <view class="CTextButton" control-tag="Drum2_12" origin="802, 628" size="43, 19" title="&#x2022;" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false"/>
+ <view class="CTextButton" control-tag="Drum2_13" origin="858, 628" size="43, 19" title="&#x2022;" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false"/>
+ <view class="CTextButton" control-tag="Drum2_14" origin="914, 628" size="43, 19" title="&#x2022;" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false"/>
+ <view class="CTextButton" control-tag="Drum2_15" origin="970, 628" size="43, 19" title="&#x2022;" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false"/>
+</template>
+</templates>
+</vstgui-ui-description>
