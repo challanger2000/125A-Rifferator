@@ -186,8 +186,8 @@ public:
       art->appendString(STR16("SOFT"));
       art->appendString(STR16("OPEN"));
       art->appendString(STR16("HARM"));
-      art->getInfo().defaultNormalizedValue=3./5.;
-      art->setNormalized(3./5.);
+      art->getInfo().defaultNormalizedValue=2./5.;
+      art->setNormalized(2./5.);
       parameters.addParameter(art);
     }
     parameters.addParameter(STR16("Guitar Degree 01"),nullptr,28,14./28.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kGuitarDegreeBase+0);
@@ -200,8 +200,8 @@ public:
       art->appendString(STR16("SOFT"));
       art->appendString(STR16("OPEN"));
       art->appendString(STR16("HARM"));
-      art->getInfo().defaultNormalizedValue=3./5.;
-      art->setNormalized(3./5.);
+      art->getInfo().defaultNormalizedValue=2./5.;
+      art->setNormalized(2./5.);
       parameters.addParameter(art);
     }
     parameters.addParameter(STR16("Guitar Degree 02"),nullptr,28,14./28.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kGuitarDegreeBase+1);
@@ -214,8 +214,8 @@ public:
       art->appendString(STR16("SOFT"));
       art->appendString(STR16("OPEN"));
       art->appendString(STR16("HARM"));
-      art->getInfo().defaultNormalizedValue=3./5.;
-      art->setNormalized(3./5.);
+      art->getInfo().defaultNormalizedValue=2./5.;
+      art->setNormalized(2./5.);
       parameters.addParameter(art);
     }
     parameters.addParameter(STR16("Guitar Degree 03"),nullptr,28,14./28.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kGuitarDegreeBase+2);
@@ -228,8 +228,8 @@ public:
       art->appendString(STR16("SOFT"));
       art->appendString(STR16("OPEN"));
       art->appendString(STR16("HARM"));
-      art->getInfo().defaultNormalizedValue=3./5.;
-      art->setNormalized(3./5.);
+      art->getInfo().defaultNormalizedValue=2./5.;
+      art->setNormalized(2./5.);
       parameters.addParameter(art);
     }
     parameters.addParameter(STR16("Guitar Degree 04"),nullptr,28,14./28.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kGuitarDegreeBase+3);
@@ -242,8 +242,8 @@ public:
       art->appendString(STR16("SOFT"));
       art->appendString(STR16("OPEN"));
       art->appendString(STR16("HARM"));
-      art->getInfo().defaultNormalizedValue=3./5.;
-      art->setNormalized(3./5.);
+      art->getInfo().defaultNormalizedValue=2./5.;
+      art->setNormalized(2./5.);
       parameters.addParameter(art);
     }
     parameters.addParameter(STR16("Guitar Degree 05"),nullptr,28,14./28.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kGuitarDegreeBase+4);
@@ -256,8 +256,8 @@ public:
       art->appendString(STR16("SOFT"));
       art->appendString(STR16("OPEN"));
       art->appendString(STR16("HARM"));
-      art->getInfo().defaultNormalizedValue=3./5.;
-      art->setNormalized(3./5.);
+      art->getInfo().defaultNormalizedValue=2./5.;
+      art->setNormalized(2./5.);
       parameters.addParameter(art);
     }
     parameters.addParameter(STR16("Guitar Degree 06"),nullptr,28,14./28.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kGuitarDegreeBase+5);
@@ -270,8 +270,8 @@ public:
       art->appendString(STR16("SOFT"));
       art->appendString(STR16("OPEN"));
       art->appendString(STR16("HARM"));
-      art->getInfo().defaultNormalizedValue=3./5.;
-      art->setNormalized(3./5.);
+      art->getInfo().defaultNormalizedValue=2./5.;
+      art->setNormalized(2./5.);
       parameters.addParameter(art);
     }
     parameters.addParameter(STR16("Guitar Degree 07"),nullptr,28,14./28.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kGuitarDegreeBase+6);
@@ -284,8 +284,8 @@ public:
       art->appendString(STR16("SOFT"));
       art->appendString(STR16("OPEN"));
       art->appendString(STR16("HARM"));
-      art->getInfo().defaultNormalizedValue=3./5.;
-      art->setNormalized(3./5.);
+      art->getInfo().defaultNormalizedValue=2./5.;
+      art->setNormalized(2./5.);
       parameters.addParameter(art);
     }
     parameters.addParameter(STR16("Guitar Degree 08"),nullptr,28,14./28.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kGuitarDegreeBase+7);
@@ -298,8 +298,8 @@ public:
       art->appendString(STR16("SOFT"));
       art->appendString(STR16("OPEN"));
       art->appendString(STR16("HARM"));
-      art->getInfo().defaultNormalizedValue=3./5.;
-      art->setNormalized(3./5.);
+      art->getInfo().defaultNormalizedValue=2./5.;
+      art->setNormalized(2./5.);
       parameters.addParameter(art);
     }
     parameters.addParameter(STR16("Guitar Degree 09"),nullptr,28,14./28.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kGuitarDegreeBase+8);
@@ -312,8 +312,8 @@ public:
       art->appendString(STR16("SOFT"));
       art->appendString(STR16("OPEN"));
       art->appendString(STR16("HARM"));
-      art->getInfo().defaultNormalizedValue=3./5.;
-      art->setNormalized(3./5.);
+      art->getInfo().defaultNormalizedValue=2./5.;
+      art->setNormalized(2./5.);
       parameters.addParameter(art);
     }
     parameters.addParameter(STR16("Guitar Degree 10"),nullptr,28,14./28.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kGuitarDegreeBase+9);
@@ -326,8 +326,8 @@ public:
       art->appendString(STR16("SOFT"));
       art->appendString(STR16("OPEN"));
       art->appendString(STR16("HARM"));
-      art->getInfo().defaultNormalizedValue=3./5.;
-      art->setNormalized(3./5.);
+      art->getInfo().defaultNormalizedValue=2./5.;
+      art->setNormalized(2./5.);
       parameters.addParameter(art);
     }
     parameters.addParameter(STR16("Guitar Degree 11"),nullptr,28,14./28.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kGuitarDegreeBase+10);
@@ -340,8 +340,8 @@ public:
       art->appendString(STR16("SOFT"));
       art->appendString(STR16("OPEN"));
       art->appendString(STR16("HARM"));
-      art->getInfo().defaultNormalizedValue=3./5.;
-      art->setNormalized(3./5.);
+      art->getInfo().defaultNormalizedValue=2./5.;
+      art->setNormalized(2./5.);
       parameters.addParameter(art);
     }
     parameters.addParameter(STR16("Guitar Degree 12"),nullptr,28,14./28.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kGuitarDegreeBase+11);
@@ -354,8 +354,8 @@ public:
       art->appendString(STR16("SOFT"));
       art->appendString(STR16("OPEN"));
       art->appendString(STR16("HARM"));
-      art->getInfo().defaultNormalizedValue=3./5.;
-      art->setNormalized(3./5.);
+      art->getInfo().defaultNormalizedValue=2./5.;
+      art->setNormalized(2./5.);
       parameters.addParameter(art);
     }
     parameters.addParameter(STR16("Guitar Degree 13"),nullptr,28,14./28.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kGuitarDegreeBase+12);
@@ -368,8 +368,8 @@ public:
       art->appendString(STR16("SOFT"));
       art->appendString(STR16("OPEN"));
       art->appendString(STR16("HARM"));
-      art->getInfo().defaultNormalizedValue=3./5.;
-      art->setNormalized(3./5.);
+      art->getInfo().defaultNormalizedValue=2./5.;
+      art->setNormalized(2./5.);
       parameters.addParameter(art);
     }
     parameters.addParameter(STR16("Guitar Degree 14"),nullptr,28,14./28.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kGuitarDegreeBase+13);
@@ -382,8 +382,8 @@ public:
       art->appendString(STR16("SOFT"));
       art->appendString(STR16("OPEN"));
       art->appendString(STR16("HARM"));
-      art->getInfo().defaultNormalizedValue=3./5.;
-      art->setNormalized(3./5.);
+      art->getInfo().defaultNormalizedValue=2./5.;
+      art->setNormalized(2./5.);
       parameters.addParameter(art);
     }
     parameters.addParameter(STR16("Guitar Degree 15"),nullptr,28,14./28.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kGuitarDegreeBase+14);
@@ -396,8 +396,8 @@ public:
       art->appendString(STR16("SOFT"));
       art->appendString(STR16("OPEN"));
       art->appendString(STR16("HARM"));
-      art->getInfo().defaultNormalizedValue=3./5.;
-      art->setNormalized(3./5.);
+      art->getInfo().defaultNormalizedValue=2./5.;
+      art->setNormalized(2./5.);
       parameters.addParameter(art);
     }
     parameters.addParameter(STR16("Guitar Degree 16"),nullptr,28,14./28.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kGuitarDegreeBase+15);
