@@ -25,6 +25,7 @@ Processor::Processor() {
   setControllerClass(controllerId);
   steps_.resize(16);
   for(int i=0;i<16;++i) steps_[i].articulation=Articulation::PalmMute;
+  for(int i=0;i<16;++i) live_.guitarSteps[static_cast<std::size_t>(i)]=(i%2)==0;
   prepareFillVariants();
   DrumPattern candidates;
   candidates.kick.fill(true);candidates.snare.fill(true);candidates.hat.fill(true);
