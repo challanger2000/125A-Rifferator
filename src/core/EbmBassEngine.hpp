@@ -22,7 +22,8 @@ struct Settings {
     uint8_t steps{16};               // 16 or 32 sixteenth-note slots
     uint8_t velocity{100};
     uint16_t gatePermille{850};       // 0..1000, 0 suppresses note
-    uint8_t variation{0};            // 0..100, motif-preserving
+    uint8_t variation{0};            // 0..100, motif-preserving pitch substitutions
+    uint8_t rhythmVariation{0};      // 0..100, optional deterministic offbeat rests
     uint32_t seed{1};
 };
 constexpr uint32_t mix32(uint32_t x) noexcept {
@@ -59,6 +60,12 @@ inline Pattern generate(Settings cfg) noexcept {
         const unsigned motif=i%16;
         if (!active(cfg.style,motif)) continue;
         const uint32_t noise=mix32(cfg.seed ^ (i*0x9e3779b9u));
+        // Preserve beats 1 and 3 and downbeat anchors. Only selected offbeats
+        // may rest; zero retains the established groove byte-for-byte.
+        const unsigned rhythm=std::min<unsigned>(cfg.rhythmVariation,100u);
+        if (rhythm && (motif%4u==1u || motif%4u==3u) &&
+            (mix32(cfg.seed ^ (i*0x85ebca6bu) ^ 0xa55a5aa5u)%100u)<rhythm/3u)
+            continue;
         // Intentional sparse substitutions only; unchanged root on most notes.
         int semitones=interval(cfg.style,motif);
         if (cfg.variation && (noise%100u) < std::min<unsigned>(cfg.variation,100)/4u)

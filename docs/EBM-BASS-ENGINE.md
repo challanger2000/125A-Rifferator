@@ -22,3 +22,8 @@ Development branch: feature/ebm-bass-engine. Do not merge into develop/v1.0.0 wh
 
 ## Standalone test
 `c++ -std=c++23 -Wall -Wextra -pedantic tests/ebm_bass_engine_tests.cpp -o ebm_bass_engine_tests && ./ebm_bass_engine_tests`
+
+## Optional rhythmic development
+- Settings.rhythmVariation (0..100) controls deterministic offbeat omissions independently of pitch variation. At zero, prior groove behavior is unchanged.
+- Steps at multiples of four remain anchored; rests can only affect offbeat positions 1 and 3 within each quarter-note beat. No new notes or timing overlaps are introduced.
+- This parameter is intentionally internal until coordinated host/state/GUI integration; it does not alter any existing shared parameter IDs.
