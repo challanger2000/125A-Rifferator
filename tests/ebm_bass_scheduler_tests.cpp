@@ -10,14 +10,14 @@ int main() {
     EbmSchedulerAdapter adapter;
     std::vector<ScheduledMidiEvent> events;
     const auto sink=[&](const ScheduledMidiEvent& e){events.push_back(e);return true;};
-    assert(adapter.process(a,0.0,0.5,480,true,sink));
+    assert(adapter.process(a,0.0,0.6,576,true,sink));
     assert(events.size()==4);
     assert(events[0].on && events[0].velocity==75 && events[0].bus==1);
     assert(!events[1].on && events[1].sampleOffset==events[2].sampleOffset);
     assert(events[2].on && events[2].velocity==105);
     assert(!events[3].on);
     events.clear();
-    assert(adapter.process(a,0.5,1.0,480,true,sink));
+    assert(adapter.process(a,0.6,1.0,384,true,sink));
     assert(events.empty());
     events.clear();
     adapter.reset();
