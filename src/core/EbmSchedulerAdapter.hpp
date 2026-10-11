@@ -35,7 +35,7 @@ public:
         if(haveExpected_ && std::abs(startPpq-expectedPpq_)>0.002)
             if(!flush(sink)) return false;
         expectedPpq_=endPpq; haveExpected_=true;
-        struct Event { int offset,pitch,velocity; bool on; };
+        struct Event { int offset,pitch,velocity; bool on; double ppq; };
         std::array<Event,512> events{};
         int size=0;
         const double period=static_cast<double>(arrangement.periodTicks)/960.0;
@@ -54,7 +54,7 @@ public:
                     if(size==static_cast<int>(events.size())) return false;
                     const double fraction=(at-startPpq)/(endPpq-startPpq);
                     const int offset=std::clamp(static_cast<int>(fraction*frames),0,frames-1);
-                    events[size++]={offset,n.note,on?n.velocity:0,on};
+                    events[size++]={offset,n.note,on?n.velocity:0,on,at};
                     return true;
                 };
                 if(!add(base+static_cast<double>(n.endTick)/960.0,false) ||
@@ -66,7 +66,9 @@ public:
             const Event key=events[i];
             int j=i-1;
             while(j>=0 && (events[j].offset>key.offset ||
-                (events[j].offset==key.offset && events[j].on && !key.on))) {
+                (events[j].offset==key.offset &&
+                 (events[j].ppq>key.ppq ||
+                  (events[j].ppq==key.ppq && events[j].on && !key.on))))) {
                 events[j+1]=events[j];--j;
             }
             events[j+1]=key;
