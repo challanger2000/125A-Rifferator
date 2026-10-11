@@ -1,3 +1,8 @@
+#ifdef _WIN32
+// The standalone test executable has no VST3 module entry point.
+// Steinberg sdk.lib expects the same global provided by the plugin module.
+void* moduleHandle = nullptr;
+#endif
 #include "../src/RifferatorFactory.cpp"
 #ifdef NDEBUG
 #undef NDEBUG
