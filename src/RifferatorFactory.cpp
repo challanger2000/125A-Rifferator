@@ -78,7 +78,7 @@ public:
       quality->appendString(STR16("SUS4"));
       parameters.addParameter(quality);
     }
-    parameters.addParameter(STR16("Chords Enabled"),nullptr,1,0.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kChordsEnabled);
+    parameters.addParameter(STR16("Chords Enabled"),nullptr,1,1.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kChordsEnabled);
     {
       auto* mode=new StringListParameter(STR16("Chords Output"),a125::rifferator::kChordsMode);
       mode->appendString(STR16("CHORD"));
