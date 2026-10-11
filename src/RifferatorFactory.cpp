@@ -21,6 +21,55 @@ public:
     parameters.addParameter(STR16("Root MIDI"),nullptr,127,40.0/127.0,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kRootPitch);
     parameters.addParameter(STR16("Bass Velocity"),nullptr,126,99.0/126.0,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kBassVelocity);
     parameters.addParameter(STR16("Fill Intensity"),STR16("%"),0,0.0,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kFillIntensity);
+    parameters.addParameter(STR16("Drums Enabled"),nullptr,1,1.0,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kDrumEnabled);
+    parameters.addParameter(STR16("Kick 01"),nullptr,1,1.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kDrumStepBase+0);
+    parameters.addParameter(STR16("Kick 02"),nullptr,1,0.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kDrumStepBase+1);
+    parameters.addParameter(STR16("Kick 03"),nullptr,1,0.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kDrumStepBase+2);
+    parameters.addParameter(STR16("Kick 04"),nullptr,1,0.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kDrumStepBase+3);
+    parameters.addParameter(STR16("Kick 05"),nullptr,1,1.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kDrumStepBase+4);
+    parameters.addParameter(STR16("Kick 06"),nullptr,1,0.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kDrumStepBase+5);
+    parameters.addParameter(STR16("Kick 07"),nullptr,1,0.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kDrumStepBase+6);
+    parameters.addParameter(STR16("Kick 08"),nullptr,1,0.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kDrumStepBase+7);
+    parameters.addParameter(STR16("Kick 09"),nullptr,1,1.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kDrumStepBase+8);
+    parameters.addParameter(STR16("Kick 10"),nullptr,1,0.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kDrumStepBase+9);
+    parameters.addParameter(STR16("Kick 11"),nullptr,1,0.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kDrumStepBase+10);
+    parameters.addParameter(STR16("Kick 12"),nullptr,1,0.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kDrumStepBase+11);
+    parameters.addParameter(STR16("Kick 13"),nullptr,1,1.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kDrumStepBase+12);
+    parameters.addParameter(STR16("Kick 14"),nullptr,1,0.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kDrumStepBase+13);
+    parameters.addParameter(STR16("Kick 15"),nullptr,1,0.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kDrumStepBase+14);
+    parameters.addParameter(STR16("Kick 16"),nullptr,1,0.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kDrumStepBase+15);
+    parameters.addParameter(STR16("Snare 01"),nullptr,1,0.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kDrumStepBase+16);
+    parameters.addParameter(STR16("Snare 02"),nullptr,1,0.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kDrumStepBase+17);
+    parameters.addParameter(STR16("Snare 03"),nullptr,1,0.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kDrumStepBase+18);
+    parameters.addParameter(STR16("Snare 04"),nullptr,1,0.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kDrumStepBase+19);
+    parameters.addParameter(STR16("Snare 05"),nullptr,1,1.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kDrumStepBase+20);
+    parameters.addParameter(STR16("Snare 06"),nullptr,1,0.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kDrumStepBase+21);
+    parameters.addParameter(STR16("Snare 07"),nullptr,1,0.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kDrumStepBase+22);
+    parameters.addParameter(STR16("Snare 08"),nullptr,1,0.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kDrumStepBase+23);
+    parameters.addParameter(STR16("Snare 09"),nullptr,1,0.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kDrumStepBase+24);
+    parameters.addParameter(STR16("Snare 10"),nullptr,1,0.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kDrumStepBase+25);
+    parameters.addParameter(STR16("Snare 11"),nullptr,1,0.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kDrumStepBase+26);
+    parameters.addParameter(STR16("Snare 12"),nullptr,1,0.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kDrumStepBase+27);
+    parameters.addParameter(STR16("Snare 13"),nullptr,1,1.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kDrumStepBase+28);
+    parameters.addParameter(STR16("Snare 14"),nullptr,1,0.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kDrumStepBase+29);
+    parameters.addParameter(STR16("Snare 15"),nullptr,1,0.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kDrumStepBase+30);
+    parameters.addParameter(STR16("Snare 16"),nullptr,1,0.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kDrumStepBase+31);
+    parameters.addParameter(STR16("Hat 01"),nullptr,1,1.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kDrumStepBase+32);
+    parameters.addParameter(STR16("Hat 02"),nullptr,1,1.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kDrumStepBase+33);
+    parameters.addParameter(STR16("Hat 03"),nullptr,1,1.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kDrumStepBase+34);
+    parameters.addParameter(STR16("Hat 04"),nullptr,1,1.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kDrumStepBase+35);
+    parameters.addParameter(STR16("Hat 05"),nullptr,1,1.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kDrumStepBase+36);
+    parameters.addParameter(STR16("Hat 06"),nullptr,1,1.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kDrumStepBase+37);
+    parameters.addParameter(STR16("Hat 07"),nullptr,1,1.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kDrumStepBase+38);
+    parameters.addParameter(STR16("Hat 08"),nullptr,1,1.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kDrumStepBase+39);
+    parameters.addParameter(STR16("Hat 09"),nullptr,1,1.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kDrumStepBase+40);
+    parameters.addParameter(STR16("Hat 10"),nullptr,1,1.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kDrumStepBase+41);
+    parameters.addParameter(STR16("Hat 11"),nullptr,1,1.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kDrumStepBase+42);
+    parameters.addParameter(STR16("Hat 12"),nullptr,1,1.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kDrumStepBase+43);
+    parameters.addParameter(STR16("Hat 13"),nullptr,1,1.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kDrumStepBase+44);
+    parameters.addParameter(STR16("Hat 14"),nullptr,1,1.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kDrumStepBase+45);
+    parameters.addParameter(STR16("Hat 15"),nullptr,1,1.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kDrumStepBase+46);
+    parameters.addParameter(STR16("Hat 16"),nullptr,1,1.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kDrumStepBase+47);
     return Steinberg::kResultOk;
   }
   Steinberg::tresult PLUGIN_API setComponentState(Steinberg::IBStream* state) override {
@@ -51,12 +100,15 @@ public:
       if(step[0]>5 || degree<-13 || degree>15 ||
          step[2]>1 || step[3]>1)return kResultFalse;
     }
+    std::array<uint32_t,49> drumValues{};
     if(version>=3) {
       uint32_t enabled=0;
       if(!read32(enabled)||enabled>1)return kResultFalse;
+      drumValues[0]=enabled;
       for(int i=0;i<48;++i) {
         uint32_t active=0;
         if(!read32(active)||active>1)return kResultFalse;
+        drumValues[static_cast<std::size_t>(i+1)]=active;
       }
     }
     // The processor owns the pattern. The controller only synchronizes
@@ -67,6 +119,10 @@ public:
     setParamNormalized(a125::rifferator::kBassGate,double(values[4])/100.);
     setParamNormalized(a125::rifferator::kBassEnabled,values[6]?1.:0.);
     setParamNormalized(a125::rifferator::kFillIntensity,double(fill)/100.);
+    if(version>=3) {
+      setParamNormalized(a125::rifferator::kDrumEnabled,drumValues[0]?1.:0.);
+      for(int i=0;i<48;++i)setParamNormalized(a125::rifferator::kDrumStepBase+i,drumValues[static_cast<std::size_t>(i+1)]?1.:0.);
+    }
     return kResultOk;
   }
   static Steinberg::FUnknown* createInstance(void*) {
