@@ -4,6 +4,6 @@ namespace a125::rifferator {
 enum : Steinberg::Vst::ParamID {
   kGuitarGate=100, kBassGate=101, kBassEnabled=102,
   kRootPitch=103, kBassVelocity=104, kFillIntensity=105,
-  kDrumEnabled=106, kDrumStepBase=200 // 200..215 Kick, 216..231 Snare, 232..247 Hat
+  kDrumEnabled=106, kGuitarStepBase=300, kDrumStepBase=200 // 200..215 Kick, 216..231 Snare, 232..247 Hat
 };
 }
