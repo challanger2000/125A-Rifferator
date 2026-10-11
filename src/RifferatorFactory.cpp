@@ -47,6 +47,54 @@ public:
     parameters.addParameter(STR16("Guitar Step 14"),nullptr,1,0.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kGuitarStepBase+13);
     parameters.addParameter(STR16("Guitar Step 15"),nullptr,1,1.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kGuitarStepBase+14);
     parameters.addParameter(STR16("Guitar Step 16"),nullptr,1,0.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kGuitarStepBase+15);
+    parameters.addParameter(STR16("Guitar Art 01"),nullptr,5,3./5.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kGuitarArticulationBase+0);
+    parameters.addParameter(STR16("Guitar Degree 01"),nullptr,28,14./28.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kGuitarDegreeBase+0);
+    parameters.addParameter(STR16("Guitar Lock 01"),nullptr,1,0.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kGuitarLockBase+0);
+    parameters.addParameter(STR16("Guitar Art 02"),nullptr,5,3./5.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kGuitarArticulationBase+1);
+    parameters.addParameter(STR16("Guitar Degree 02"),nullptr,28,14./28.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kGuitarDegreeBase+1);
+    parameters.addParameter(STR16("Guitar Lock 02"),nullptr,1,0.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kGuitarLockBase+1);
+    parameters.addParameter(STR16("Guitar Art 03"),nullptr,5,3./5.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kGuitarArticulationBase+2);
+    parameters.addParameter(STR16("Guitar Degree 03"),nullptr,28,14./28.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kGuitarDegreeBase+2);
+    parameters.addParameter(STR16("Guitar Lock 03"),nullptr,1,0.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kGuitarLockBase+2);
+    parameters.addParameter(STR16("Guitar Art 04"),nullptr,5,3./5.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kGuitarArticulationBase+3);
+    parameters.addParameter(STR16("Guitar Degree 04"),nullptr,28,14./28.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kGuitarDegreeBase+3);
+    parameters.addParameter(STR16("Guitar Lock 04"),nullptr,1,0.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kGuitarLockBase+3);
+    parameters.addParameter(STR16("Guitar Art 05"),nullptr,5,3./5.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kGuitarArticulationBase+4);
+    parameters.addParameter(STR16("Guitar Degree 05"),nullptr,28,14./28.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kGuitarDegreeBase+4);
+    parameters.addParameter(STR16("Guitar Lock 05"),nullptr,1,0.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kGuitarLockBase+4);
+    parameters.addParameter(STR16("Guitar Art 06"),nullptr,5,3./5.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kGuitarArticulationBase+5);
+    parameters.addParameter(STR16("Guitar Degree 06"),nullptr,28,14./28.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kGuitarDegreeBase+5);
+    parameters.addParameter(STR16("Guitar Lock 06"),nullptr,1,0.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kGuitarLockBase+5);
+    parameters.addParameter(STR16("Guitar Art 07"),nullptr,5,3./5.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kGuitarArticulationBase+6);
+    parameters.addParameter(STR16("Guitar Degree 07"),nullptr,28,14./28.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kGuitarDegreeBase+6);
+    parameters.addParameter(STR16("Guitar Lock 07"),nullptr,1,0.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kGuitarLockBase+6);
+    parameters.addParameter(STR16("Guitar Art 08"),nullptr,5,3./5.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kGuitarArticulationBase+7);
+    parameters.addParameter(STR16("Guitar Degree 08"),nullptr,28,14./28.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kGuitarDegreeBase+7);
+    parameters.addParameter(STR16("Guitar Lock 08"),nullptr,1,0.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kGuitarLockBase+7);
+    parameters.addParameter(STR16("Guitar Art 09"),nullptr,5,3./5.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kGuitarArticulationBase+8);
+    parameters.addParameter(STR16("Guitar Degree 09"),nullptr,28,14./28.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kGuitarDegreeBase+8);
+    parameters.addParameter(STR16("Guitar Lock 09"),nullptr,1,0.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kGuitarLockBase+8);
+    parameters.addParameter(STR16("Guitar Art 10"),nullptr,5,3./5.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kGuitarArticulationBase+9);
+    parameters.addParameter(STR16("Guitar Degree 10"),nullptr,28,14./28.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kGuitarDegreeBase+9);
+    parameters.addParameter(STR16("Guitar Lock 10"),nullptr,1,0.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kGuitarLockBase+9);
+    parameters.addParameter(STR16("Guitar Art 11"),nullptr,5,3./5.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kGuitarArticulationBase+10);
+    parameters.addParameter(STR16("Guitar Degree 11"),nullptr,28,14./28.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kGuitarDegreeBase+10);
+    parameters.addParameter(STR16("Guitar Lock 11"),nullptr,1,0.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kGuitarLockBase+10);
+    parameters.addParameter(STR16("Guitar Art 12"),nullptr,5,3./5.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kGuitarArticulationBase+11);
+    parameters.addParameter(STR16("Guitar Degree 12"),nullptr,28,14./28.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kGuitarDegreeBase+11);
+    parameters.addParameter(STR16("Guitar Lock 12"),nullptr,1,0.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kGuitarLockBase+11);
+    parameters.addParameter(STR16("Guitar Art 13"),nullptr,5,3./5.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kGuitarArticulationBase+12);
+    parameters.addParameter(STR16("Guitar Degree 13"),nullptr,28,14./28.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kGuitarDegreeBase+12);
+    parameters.addParameter(STR16("Guitar Lock 13"),nullptr,1,0.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kGuitarLockBase+12);
+    parameters.addParameter(STR16("Guitar Art 14"),nullptr,5,3./5.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kGuitarArticulationBase+13);
+    parameters.addParameter(STR16("Guitar Degree 14"),nullptr,28,14./28.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kGuitarDegreeBase+13);
+    parameters.addParameter(STR16("Guitar Lock 14"),nullptr,1,0.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kGuitarLockBase+13);
+    parameters.addParameter(STR16("Guitar Art 15"),nullptr,5,3./5.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kGuitarArticulationBase+14);
+    parameters.addParameter(STR16("Guitar Degree 15"),nullptr,28,14./28.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kGuitarDegreeBase+14);
+    parameters.addParameter(STR16("Guitar Lock 15"),nullptr,1,0.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kGuitarLockBase+14);
+    parameters.addParameter(STR16("Guitar Art 16"),nullptr,5,3./5.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kGuitarArticulationBase+15);
+    parameters.addParameter(STR16("Guitar Degree 16"),nullptr,28,14./28.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kGuitarDegreeBase+15);
+    parameters.addParameter(STR16("Guitar Lock 16"),nullptr,1,0.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kGuitarLockBase+15);
     parameters.addParameter(STR16("Drums Enabled"),nullptr,1,1.0,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kDrumEnabled);
     parameters.addParameter(STR16("Kick 01"),nullptr,1,1.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kDrumStepBase+0);
     parameters.addParameter(STR16("Kick 02"),nullptr,1,0.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kDrumStepBase+1);
@@ -108,7 +156,7 @@ public:
     };
     uint32_t magic=0,version=0,count=0;
     if(!read32(magic)||!read32(version)||!read32(count) ||
-       magic!=0x31524641u || (version!=1 && version!=2 && version!=3 && version!=4) ||
+       magic!=0x31524641u || (version!=1 && version!=2 && version!=3 && version!=4 && version!=5) ||
        count<1 || count>32) return kResultFalse;
     std::array<uint32_t,7> values{};
     for(auto& v:values)if(!read32(v))return kResultFalse;
@@ -141,6 +189,16 @@ public:
     if(version>=4) {
       for(auto& value:guitarActive)if(!read32(value)||value>1)return kResultFalse;
     }
+    std::array<uint32_t,16> guitarArt{},guitarDegrees{},guitarLocks{};
+    if(version>=5) {
+      for(auto& value:guitarArt)if(!read32(value)||value>5)return kResultFalse;
+      for(auto& value:guitarDegrees) {
+        if(!read32(value))return kResultFalse;
+        const auto degree=static_cast<int32_t>(value);
+        if(degree<-13||degree>15)return kResultFalse;
+      }
+      for(auto& value:guitarLocks)if(!read32(value)||value>1)return kResultFalse;
+    }
     // The processor owns the pattern. The controller only synchronizes
     // the automatable parameter values presented to the host/GUI.
     setParamNormalized(a125::rifferator::kRootPitch,double(values[0])/127.);
@@ -151,6 +209,15 @@ public:
     setParamNormalized(a125::rifferator::kFillIntensity,double(fill)/100.);
     if(version>=4) {
       for(int i=0;i<16;++i)setParamNormalized(a125::rifferator::kGuitarStepBase+i,guitarActive[static_cast<std::size_t>(i)]?1.:0.);
+    }
+    if(version>=5) {
+      for(int i=0;i<16;++i) {
+        const auto j=static_cast<std::size_t>(i);
+        setParamNormalized(a125::rifferator::kGuitarArticulationBase+i,guitarArt[j]/5.);
+        setParamNormalized(a125::rifferator::kGuitarDegreeBase+i,
+                           (static_cast<int32_t>(guitarDegrees[j])+13)/28.);
+        setParamNormalized(a125::rifferator::kGuitarLockBase+i,guitarLocks[j]?1.:0.);
+      }
     }
     if(version>=3) {
       setParamNormalized(a125::rifferator::kDrumEnabled,drumValues[0]?1.:0.);
