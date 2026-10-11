@@ -10,8 +10,8 @@ int main(){
   assert(file.good());
   const std::string xml((std::istreambuf_iterator<char>(file)),std::istreambuf_iterator<char>());
   assert(xml.find("size=\"1120, 695\"")!=std::string::npos);
-  std::regex tagDef(R"(<control-tag name="([^"]+)" tag="([0-9]+)")");
-  std::regex viewTag(R"(<view[^>]*control-tag="([^"]+)")");
+  std::regex tagDef(R"RE(<control-tag name="([^"]+)RE" tag="([0-9]+)RE")RE");
+  std::regex viewTag(R"RE(<view[^>]*control-tag="([^"]+)RE")RE");
   std::set<std::string> tags;
   std::set<std::string> viewTags;
   std::map<std::string,int> counts;
@@ -44,7 +44,7 @@ int main(){
   for(int tag=710;tag<=720;++tag)assert(viewTags.count("Action"+std::to_string(tag))==1);
   assert(xml.find("pending")==std::string::npos);
   // The root editor is 695 pixels high and must not clip a direct child.
-  std::regex child(R"(<view[^>]*origin="([0-9]+), ([0-9]+)"[^>]*size="([0-9]+), ([0-9]+)")");
+  std::regex child(R"RE(<view[^>]*origin="([0-9]+), ([0-9]+)RE"[^>]*size="([0-9]+), ([0-9]+)RE")RE");
   for(auto it=std::sregex_iterator(xml.begin(),xml.end(),child);it!=std::sregex_iterator();++it){
     int x=std::stoi((*it)[1]),y=std::stoi((*it)[2]);
     int w=std::stoi((*it)[3]),h=std::stoi((*it)[4]);
