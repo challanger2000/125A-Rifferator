@@ -228,4 +228,69 @@ int main() {
     for(unsigned i=0;i<baseline.size();++i)
       assert(baseline[i].velocity==shaped.midi.bass[i].velocity);
 
+    // Combined feature matrix: evolution, harmony, fills and dynamics remain
+    // deterministic; no unintended guitar mutation or overlapping notes.
+    for (const auto mode : {BassMode::Ebm,BassMode::Hybrid}) {
+      for (const auto style : {ebm::Style::Classic,ebm::Style::Chromatic,
+                               ebm::Style::Octave,ebm::Style::Industrial,
+                               ebm::Style::Rolling}) {
+        for (const auto fillPeriod : {4,8,16}) {
+          BassPlan combined;
+          combined.mode=mode;
+          combined.sequence.style=style;
+          combined.tension=Tension::Aggressive;
+          combined.sequence.seed=43;
+          combined.sequence.variation=85;
+          combined.sequence.rhythmVariation=40;
+          combined.phraseVariation=90;
+          combined.arrangementEvolution=85;
+          combined.fillEveryBars=static_cast<uint8_t>(fillPeriod);
+          combined.fillIntensity=100;
+          combined.dynamics=80;
+          combined.harmonicRoots.fill(48);
+          combined.harmonicRoots[4]=53;
+          combined.harmonicRoots[8]=46;
+          combined.harmonicRoots[12]=55;
+          Arrangement mix;
+          mix.midi.guitar.push_back({0,240,52,100,240});
+          prepare(mix,combined);
+          assert(mix.periodTicks==61440);
+          assert(mix.midi.guitar.size()==1 && mix.midi.guitar[0].note==52);
+          assert(!mix.midi.bass.empty());
+          int64_t end=-1;
+          for(const auto& note:mix.midi.bass) {
+            assert(note.startTick>=0 && note.startTick<61440);
+            assert(note.startTick>=end);
+            assert(note.endTick>note.startTick && note.endTick<=61440);
+            assert(note.boundaryTick==note.endTick);
+            assert(note.note>=0 && note.note<=127);
+            assert(note.velocity>=1 && note.velocity<=127);
+            end=note.endTick;
+          }
+          const auto snapshot=mix.midi.bass;
+          prepare(mix,combined);
+          assert(mix.midi.bass.size()==snapshot.size());
+          for(unsigned i=0;i<snapshot.size();++i) {
+            assert(mix.midi.bass[i].startTick==snapshot[i].startTick);
+            assert(mix.midi.bass[i].endTick==snapshot[i].endTick);
+            assert(mix.midi.bass[i].note==snapshot[i].note);
+            assert(mix.midi.bass[i].velocity==snapshot[i].velocity);
+          }
+          // Fill accents may only affect the last quarter of configured bars.
+          combined.fillIntensity=0;
+          prepare(mix,combined);
+          for(const auto& note:mix.midi.bass) {
+            const auto bar=static_cast<int>(note.startTick/3840);
+            const bool fillSlot=((bar+1)%fillPeriod==0) &&
+                ((note.startTick%3840)>=2880);
+            if(fillSlot) continue;
+            const auto it=std::find_if(snapshot.begin(),snapshot.end(),
+              [&](const MidiNote& old){return old.startTick==note.startTick;});
+            assert(it!=snapshot.end());
+            assert(it->note==note.note && it->velocity==note.velocity);
+          }
+        }
+      }
+    }
+
 }
