@@ -25,6 +25,11 @@ jobs:
           if (-not (Test-Path $source -PathType Container)) { throw "SDK package missing: $source" }
           if (Test-Path $target) { throw "Duplicate target bundle exists: $target" }
           Move-Item -LiteralPath $source -Destination $target
+          $binaryDir = Join-Path $target 'Contents/x86_64-win'
+          $oldBinary = Join-Path $binaryDir 'Rifferator.vst3'
+          $newBinary = Join-Path $binaryDir '125A Rifferator.vst3'
+          if (-not (Test-Path $oldBinary -PathType Leaf)) { throw "SDK binary missing: $oldBinary" }
+          Move-Item -LiteralPath $oldBinary -Destination $newBinary
       - name: Core regression tests
         run: ctest --test-dir build -C Release --output-on-failure
       - name: VST3 delivery and GUI resource audit
@@ -38,6 +43,7 @@ jobs:
           if ($xml -notmatch '<template name="RifferatorView"') { throw 'GUI template RifferatorView not found in deployed bundle' }
           $binaries = @(Get-ChildItem -Path (Join-Path $root 'Contents') -Recurse -File -Filter '*.vst3')
           if ($binaries.Count -ne 1) { throw "Expected one VST3 module binary, found $($binaries.Count)" }
+          if ($binaries[0].Name -ne '125A Rifferator.vst3') { throw "Branded binary mismatch: $($binaries[0].Name)" }
           if (Test-Path (Join-Path (Resolve-Path 'build/VST3/Release') 'Rifferator.vst3')) { throw 'Unbranded VST3 bundle present' }
       - name: Steinberg Validator
         shell: pwsh
