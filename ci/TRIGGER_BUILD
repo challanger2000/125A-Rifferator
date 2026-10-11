@@ -38,3 +38,4 @@
 2026-10-11 audit guitar absolute pitch fix and scheduler overlap
 2026-10-11 audit EBM velocity regression
 2026-10-11 comprehensive audit guitar GUI activation 22 suites
+2026-10-11 re-audit release tests enforce asserts and bass octave
