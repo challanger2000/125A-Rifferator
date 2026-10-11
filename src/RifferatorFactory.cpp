@@ -33,7 +33,7 @@ public:
     };
     uint32_t magic=0,version=0,count=0;
     if(!read32(magic)||!read32(version)||!read32(count) ||
-       magic!=0x31524641u || (version!=1 && version!=2) ||
+       magic!=0x31524641u || (version!=1 && version!=2 && version!=3) ||
        count<1 || count>32) return kResultFalse;
     std::array<uint32_t,7> values{};
     for(auto& v:values)if(!read32(v))return kResultFalse;
@@ -50,6 +50,14 @@ public:
       const int32_t degree=static_cast<int32_t>(step[1]);
       if(step[0]>5 || degree<-13 || degree>15 ||
          step[2]>1 || step[3]>1)return kResultFalse;
+    }
+    if(version>=3) {
+      uint32_t enabled=0;
+      if(!read32(enabled)||enabled>1)return kResultFalse;
+      for(int i=0;i<48;++i) {
+        uint32_t active=0;
+        if(!read32(active)||active>1)return kResultFalse;
+      }
     }
     // The processor owns the pattern. The controller only synchronizes
     // the automatable parameter values presented to the host/GUI.
