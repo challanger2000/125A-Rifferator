@@ -1,6 +1,6 @@
 #include "../src/RifferatorFactory.cpp"
 #ifdef NDEBUG
-#error Assertions must be active in Release
+#undef NDEBUG
 #endif
 #include <cassert>
 int main() {
