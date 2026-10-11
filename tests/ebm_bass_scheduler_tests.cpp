@@ -104,6 +104,35 @@ int main() {
         assert(!unit.process(one,1.0e20,1.0e20+1.0e10,64,true,collect));
         assert(got.size()==1 && !got[0].on);
     }
+    // Dense host window must reject overflow explicitly, without emitting partial
+    // NoteOn data that could create stuck notes.
+    {
+        EbmSchedulerAdapter unit;
+        Arrangement dense;
+        dense.periodTicks=3840;
+        for(int i=0;i<16;++i) {
+            const int64_t start=static_cast<int64_t>(i)*240;
+            dense.midi.bass.push_back({start,start+120,36+(i%4),100,start+120});
+        }
+        int delivered=0;
+        auto count=[&](const ScheduledMidiEvent&){++delivered;return true;};
+        assert(!unit.process(dense,0.0,80.0,4096,true,count));
+        assert(delivered==0);
+        // A regular block after failure must still work.
+        assert(unit.process(dense,0.0,0.25,256,true,count));
+        assert(delivered==2);
+    }
+    // An invalid velocity must be rejected without emitting any NoteOns.
+    {
+        EbmSchedulerAdapter unit;
+        Arrangement invalid;
+        invalid.periodTicks=3840;
+        invalid.midi.bass={{0,120,40,0,120}};
+        int delivered=0;
+        auto count=[&](const ScheduledMidiEvent&){++delivered;return true;};
+        assert(!unit.process(invalid,0.0,0.25,256,true,count));
+        assert(delivered==0);
+    }
     // Stress: varying block lengths, repeated 16-bar loop and stop recovery.
     {
         Arrangement stress;

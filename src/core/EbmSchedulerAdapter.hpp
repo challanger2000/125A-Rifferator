@@ -55,11 +55,11 @@ public:
         for(const auto& n:arrangement.midi.bass) {
             if(n.startTick<0 || n.endTick<=n.startTick || n.endTick>arrangement.periodTicks
                || n.note<0 || n.note>127 || n.velocity<1 || n.velocity>127)
-                return flush(sink,0) && false;
+                { flush(sink,0); return false; }
             const double phase=static_cast<double>(n.startTick)/960.0;
             const auto first=static_cast<int64_t>(std::floor((startPpq-phase)/period))-1;
             const auto last=static_cast<int64_t>(std::ceil((endPpq-phase)/period))+1;
-            if(last-first>8) return flush(sink,0) && false;
+            if(last<first || last-first>8) { flush(sink,0); return false; }
             for(int64_t cycle=first;cycle<=last;++cycle) {
                 const double base=static_cast<double>(cycle)*period;
                 auto add=[&](double at,bool on) noexcept {
@@ -71,7 +71,7 @@ public:
                     return true;
                 };
                 if(!add(base+static_cast<double>(n.endTick)/960.0,false) ||
-                   !add(base+phase,true)) return flush(sink,0) && false;
+                   !add(base+phase,true)) { flush(sink,0); return false; }
             }
         }
         // Small fixed buffer; off events always before simultaneous ons.
@@ -90,7 +90,7 @@ public:
             const auto& e=events[i];
             if(!e.on && !active_[e.pitch]) continue;
             if(!sink(ScheduledMidiEvent{1,e.offset,e.pitch,e.velocity,-1,e.on}))
-                return flush(sink,e.offset) && false;
+                { flush(sink,e.offset); return false; }
             active_[e.pitch]=e.on;
         }
         return true;
