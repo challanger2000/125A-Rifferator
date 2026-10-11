@@ -26,8 +26,12 @@ Processor::Processor() {
   steps_.resize(16);
   for(int i=0;i<16;i+=2) steps_[i].articulation=Articulation::PalmMute;
   prepareFillVariants();
-  drumNotes_=renderDrums(drumPattern_,16);
+  DrumPattern candidates;
+  candidates.kick.fill(true);candidates.snare.fill(true);candidates.hat.fill(true);
+  drumNotes_=renderDrums(candidates,16);
   scheduler_.setDrums(&drumNotes_);
+  live_.drumsEnabled=drumPattern_.enabled;
+  live_.drumSteps={drumPattern_.kick,drumPattern_.snare,drumPattern_.hat};
 }
 FUnknown* Processor::createInstance(void*) {
   return static_cast<IAudioProcessor*>(new Processor);
@@ -66,7 +70,25 @@ tresult PLUGIN_API Processor::process(ProcessData& data) {
          !std::isfinite(value))continue;
       value=std::clamp(value,0.,1.);
       const int v=static_cast<int>(std::lround(value*100.));
-      switch(queue->getParameterId()) {
+      const auto id=queue->getParameterId();
+      if(id>=kDrumStepBase && id<kDrumStepBase+48) {
+        const int index=static_cast<int>(id-kDrumStepBase);
+        const bool active=value>=0.5;
+        if(live_.drumSteps[static_cast<std::size_t>(index/16)][static_cast<std::size_t>(index%16)]!=active) {
+          live_.drumSteps[static_cast<std::size_t>(index/16)][static_cast<std::size_t>(index%16)]=active;
+          flushOnNextProcess_=true;
+        }
+        auto* row=index<16?&drumPattern_.kick:index<32?&drumPattern_.snare:&drumPattern_.hat;
+        (*row)[static_cast<std::size_t>(index%16)]=active;
+        continue;
+      }
+      if(id==kDrumEnabled) {
+        const bool active=value>=0.5;
+        if(live_.drumsEnabled!=active)flushOnNextProcess_=true;
+        live_.drumsEnabled=active;drumPattern_.enabled=active;
+        continue;
+      }
+      switch(id) {
         case kGuitarGate:next.guitarGate=v;changed=true;break;
         case kBassGate:next.bassGate=v;changed=true;break;
         case kBassEnabled:next.bassOn=value>=0.5;changed=true;break;
