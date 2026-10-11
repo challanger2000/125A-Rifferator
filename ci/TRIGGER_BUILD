@@ -58,3 +58,4 @@
 2026-10-11 restore valid QA after invalid hostless VSTGUI probe
 2026-10-11 release candidate chord sustain and 3 guitar generate patterns
 2026-10-11 RC four bus transport and note release regression
+2026-10-11 nondefault V8 all-engine persistence regression
