@@ -73,5 +73,34 @@ int main() {
   int shortOn=0,shortOff=0;
   for(const auto& e:events) {if(e.on)++shortOn;else ++shortOff;}
   assert(shortOn==2 && shortOff==2);
+  // Extreme but finite PPQ positions must not overflow integer cycle indices.
+  // Active notes are released and no new note-ons are emitted.
+  BlockScheduler extreme;
+  events.clear();
+  extreme.process(pattern,0.,0.1,4800,period,sink,true);
+  assert(!events.empty());
+  events.clear();
+  extreme.process(pattern,1.0e16,1.0e16+1.,4800,period,sink,true);
+  assert(!events.empty());
+  for(const auto& e:events)assert(!e.on);
+  events.clear();
+  extreme.process(pattern,1.0e16,1.0e16+1.,4800,period,sink,true);
+  assert(events.empty());
+  // Rejecting the protective NoteOff must keep the active note for retry.
+  extreme.reset();
+  events.clear();
+  extreme.process(pattern,0.,0.1,4800,period,sink,true);
+  events.clear();
+  bool rejectedExtreme=false;
+  auto rejectExtreme=[&](const ScheduledMidiEvent& e){
+    if(!e.on){rejectedExtreme=true;return false;}
+    events.push_back(e);return true;
+  };
+  extreme.process(pattern,1.0e16,1.0e16+1.,4800,period,rejectExtreme,true);
+  assert(rejectedExtreme);
+  int recoveredExtreme=0;
+  auto acceptExtreme=[&](const ScheduledMidiEvent& e){if(!e.on)++recoveredExtreme;return true;};
+  extreme.process(pattern,1.0e16,1.0e16+1.,4800,period,acceptExtreme,true);
+  assert(recoveredExtreme>=1);
   scheduler.reset();
 }
