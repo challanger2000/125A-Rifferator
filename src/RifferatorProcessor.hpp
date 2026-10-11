@@ -2,6 +2,7 @@
 #include "core/BlockScheduler.hpp"
 #include "core/RiffArrangement.hpp"
 #include "core/DrumCompanion.hpp"
+#include "core/ChordCompanion.hpp"
 #include "core/EbmBassArrangement.hpp"
 #include "core/EbmSchedulerAdapter.hpp"
 #include "public.sdk/source/vst/vstaudioeffect.h"
@@ -30,6 +31,7 @@ private:
   void prepareFillVariants();
   DrumPattern drumPattern_{DrumPattern::standard()};
   std::vector<MidiNote> drumNotes_{};
+  std::vector<MidiNote> chordNotes_{};
   BlockScheduler scheduler_{};
   std::array<Arrangement,5> ebmPrepared_{};
   ebm_integration::EbmSchedulerAdapter ebmScheduler_{};
