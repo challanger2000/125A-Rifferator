@@ -10,6 +10,17 @@ int main(){
   assert(file.good());
   const std::string xml((std::istreambuf_iterator<char>(file)),std::istreambuf_iterator<char>());
   assert(xml.find("size=\"1120, 696\"")!=std::string::npos);
+  // Guitar matrix is six exclusive articulation rows per 16 steps.
+  // Its toggle surface is kept stateful; the controller explicitly restores
+  // the selected cell on redundant OFF callbacks.
+  for(int row=0;row<6;++row)for(int step=0;step<16;++step) {
+    const auto tag="control-tag=\\\"GCell"+std::to_string(row)+"_"+std::to_string(step)+"\\\"";
+    const auto pos=xml.find(tag);
+    assert(pos!=std::string::npos);
+    const auto end=xml.find("/>",pos);
+    assert(end!=std::string::npos);
+    assert(xml.substr(pos,end-pos).find("kick-style=\\\"false\\\"")!=std::string::npos);
+  }
   // 150% must produce integral host window dimensions (1680 x 1044).
   assert((1120*3)%2==0 && (696*3)%2==0);
   std::regex tagDef(R"RE(<control-tag name="([^"]+)" tag="([0-9]+)")RE");
