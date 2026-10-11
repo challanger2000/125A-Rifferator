@@ -106,7 +106,7 @@ public:
                 constexpr std::array<int,7> scale{0,2,3,5,7,8,10};
                 // Prepared riff notes already contain the scale degree.
                 // Live degree control is absolute, not an additional transpose.
-                pitch+=degreeOffset(degree,scale)-degreeOffset(1,scale);
+                pitch=40+live.rootSemitones+degreeOffset(degree,scale);
                 const int articulation=live.guitarArticulation[static_cast<std::size_t>(step)];
                 if(bus==0) {
                   constexpr std::array<int,6> velocities{0,20,50,95,115,127};
