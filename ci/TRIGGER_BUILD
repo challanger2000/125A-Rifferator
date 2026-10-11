@@ -43,3 +43,4 @@
 2026-10-11 corrected asserted power chord note-off timing check
 2026-10-11 asserted guitar fill routing audit final
 2026-10-11 processor V8 V6 state roundtrip QA
+2026-10-11 strict audit complete project roundtrip public SDK API fix
