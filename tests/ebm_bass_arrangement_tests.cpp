@@ -54,4 +54,17 @@ int main() {
       assert(source.midi.bass[i].startTick==first[i].startTick);
     }
 
+    plan.sequence.gatePermille=500;
+    prepare(source,plan);
+    for(const auto& n:source.midi.bass) {
+      assert(n.endTick-n.startTick==120);
+      assert(n.boundaryTick==n.endTick);
+    }
+    plan.sequence.gatePermille=1000;
+    prepare(source,plan);
+    for(const auto& n:source.midi.bass) assert(n.endTick-n.startTick==240);
+    plan.sequence.gatePermille=1;
+    prepare(source,plan);
+    for(const auto& n:source.midi.bass) assert(n.endTick-n.startTick==1);
+
 }
