@@ -1,4 +1,6 @@
 #include "../src/RifferatorProcessor.hpp"
+#include "../src/RifferatorParameters.hpp"
+#include "public.sdk/source/vst/hosting/parameterchanges.h"
 #include "public.sdk/source/common/memorystream.h"
 #ifdef NDEBUG
 #error Regression asserts disabled in CI
@@ -114,11 +116,40 @@ int main(){
     MemoryStream oneStep(small.data(),static_cast<Steinberg::TSize>(small.size()));
     Processor shortPattern;
     assert(shortPattern.setState(&oneStep)==Steinberg::kResultOk);
+    // Exercise the actual Processor::process automation path on step 16.
+    // Previously this indexed steps_[15] in a restored one-element vector.
+    Steinberg::Vst::ParameterChanges changes(3);
+    auto queueValue=[&](Steinberg::Vst::ParamID id,double normalized) {
+      Steinberg::int32 queueIndex=0,pointIndex=0;
+      auto* queue=changes.addParameterData(id,queueIndex);
+      assert(queue!=nullptr);
+      assert(queue->addPoint(0,normalized,pointIndex)==Steinberg::kResultOk);
+    };
+    queueValue(kGuitarArticulationBase+15,4./5.);
+    queueValue(kGuitarDegreeBase+15,20./28.);
+    queueValue(kGuitarLockBase+15,1.);
+    Steinberg::Vst::ProcessData block{};
+    block.numSamples=0;
+    block.inputParameterChanges=&changes;
+    assert(shortPattern.process(block)==Steinberg::kResultOk);
     MemoryStream saved;
     assert(shortPattern.getState(&saved)==Steinberg::kResultOk);
     std::int32_t savedCount=0;
     std::memcpy(&savedCount,static_cast<const char*>(saved.getData())+8,4);
     assert(savedCount==1);
+    // State V8 contains fixed-size 16-step live controls after the one
+    // legacy pattern step. Verify all three high-index edits survived.
+    const auto* words=static_cast<const char*>(saved.getData());
+    auto wordAt=[&](std::size_t index) {
+      std::int32_t v=0;
+      assert((index+1)*4<=static_cast<std::size_t>(saved.getSize()));
+      std::memcpy(&v,words+index*4,4);
+      return v;
+    };
+    const std::size_t base=11u+4u+49u;
+    assert(wordAt(base+16u+15u)==4);
+    assert(wordAt(base+32u+15u)==7);
+    assert(wordAt(base+48u+15u)==1);
   }
 
 }
