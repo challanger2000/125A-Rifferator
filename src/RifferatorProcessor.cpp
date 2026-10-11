@@ -83,6 +83,13 @@ tresult PLUGIN_API Processor::setActive(TBool active) {
   if(!active)flushOnNextProcess_=true;
   return AudioEffect::setActive(active);
 }
+tresult PLUGIN_API Processor::setProcessing(TBool state) {
+  // The base AudioEffect implementation returns kNotImplemented. This MIDI-only
+  // processor has no processing-start allocation or worker lifecycle to manage.
+  // Note flushing for transport changes and deactivation remains in process()/setActive().
+  (void)state;
+  return kResultOk;
+}
 tresult PLUGIN_API Processor::process(ProcessData& data) {
   if(data.inputParameterChanges) {
     Config next=config_;
