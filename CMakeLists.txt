@@ -98,6 +98,9 @@ add_test(NAME rifferator_guitar_activation COMMAND rifferator_guitar_activation_
 add_executable(rifferator_midi_overflow_tests tests/midi_overflow_assertions_tests.cpp)
 add_test(NAME rifferator_midi_overflow COMMAND rifferator_midi_overflow_tests)
 
+add_executable(rifferator_guitar_fill_routing_tests tests/guitar_fill_live_routing_tests.cpp)
+add_test(NAME rifferator_guitar_fill_routing COMMAND rifferator_guitar_fill_routing_tests)
+
 # ASSERTION AUDIT: CI Release must not compile out regression checks.
 # /UNDEBUG is MSVC /U<macro>; -UNDEBUG is GCC/Clang equivalent.
 get_property(rifferator_targets DIRECTORY PROPERTY BUILDSYSTEM_TARGETS)
