@@ -42,3 +42,8 @@ The 16-bar assumption is intentional here, to match the product brief; revisit b
 - harmonicRoots defaults to 255 (unspecified), falling back to sequence.root. This keeps the configured root meaningful when no song map is provided.
 - Explicit MIDI note 0 is valid and never treated as absent. EBM reads bar zero only; HYBRID reads each bar.
 - Reject impossible step tick geometry before changing an existing arrangement; guitar notes are never rewritten.
+
+## Optional 16-bar dynamics
+- dynamics=0 preserves existing velocities. Values 1..100 apply a four-section velocity arc: restrained first four bars, neutral next four, increasing energy in bars 9..16.
+- Pitch, rests, note starts, ends, and guitar content are unchanged. Entire arrangement remains prepared outside audio thread.
+- This does not replace listening evaluation or host-level MIDI QA.
