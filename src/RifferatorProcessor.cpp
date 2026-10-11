@@ -198,7 +198,7 @@ tresult PLUGIN_API Processor::process(ProcessData& data) {
   };
   if(bassSwitchPending_) {
     // Never activate a second bus-1 producer before the first one is silent.
-    if(!scheduler_.flush(sink,0) || !ebmScheduler_.patternChanged(sink))
+    if(!scheduler_.flushBus(1,sink,0) || !ebmScheduler_.patternChanged(sink))
       return kResultOk;
     activeBassMode_=bassMode_;
     bassSwitchPending_=false;
