@@ -189,7 +189,10 @@ int main() {
         auto count=[&](const ScheduledMidiEvent&){++delivered;return true;};
         assert(!unit.process(dense,0.0,80.0,4096,true,count));
         assert(delivered==0);
-        // A regular block after failure must still work.
+        // First callback after overflow is reserved for safe recovery.
+        assert(!unit.process(dense,0.0,0.25,256,true,count));
+        assert(delivered==0);
+        // Only the following valid block may resume NoteOns.
         assert(unit.process(dense,0.0,0.25,256,true,count));
         assert(delivered==2);
     }
