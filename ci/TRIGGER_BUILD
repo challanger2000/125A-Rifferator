@@ -72,3 +72,4 @@
 2026-10-11 verified VSTGUI template root hierarchy bugfix
 2026-10-11 setProcessing kNotImplemented isolated event-probe correction
 2026-10-11 guard core MIDI scheduler extreme host positions with regression
+2026-10-11 MIDI rejected NoteOff recovery and transport restart regression
