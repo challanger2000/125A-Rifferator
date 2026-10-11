@@ -46,3 +46,6 @@ add_test(NAME rifferator_arrangement COMMAND rifferator_arrangement_tests)
 
 add_executable(rifferator_transport_tests tests/transport_regression_tests.cpp)
 add_test(NAME rifferator_transport COMMAND rifferator_transport_tests)
+
+add_executable(rifferator_drum_tests tests/drum_companion_tests.cpp)
+add_test(NAME rifferator_drums COMMAND rifferator_drum_tests)
