@@ -47,3 +47,9 @@ The 16-bar assumption is intentional here, to match the product brief; revisit b
 - dynamics=0 preserves existing velocities. Values 1..100 apply a four-section velocity arc: restrained first four bars, neutral next four, increasing energy in bars 9..16.
 - Pitch, rests, note starts, ends, and guitar content are unchanged. Entire arrangement remains prepared outside audio thread.
 - This does not replace listening evaluation or host-level MIDI QA.
+
+## MIDI scheduler audit – integration blockers
+- The current BlockScheduler forwards LiveControls.bassVelocity for every bass NoteOn, overriding MidiNote.velocity. Therefore the EBM accent, fill and 16-bar dynamics data is currently LOST at the final MIDI output. During coordinated integration, route per-note velocity for EBM/HYBRID while preserving FOLLOW semantics. Do not claim audible bass dynamics before this change.
+- The scheduler currently treats active pitches as booleans; test repeated same-pitch steps at 100% gate, NoteOff-before-NoteOn ordering, transport stop/seek/loop flush and host event rejection at integration.
+- The EBM per-note duration is already encoded in boundaryTick, and must be combined with LiveControls.bassGate=100 only for EBM/HYBRID.
+- Standalone midi-audit tests cover all five styles, three tension modes, six roots including MIDI 0/127, four gates, phrase variation, fills, dynamics and deterministic regeneration. This is an offline invariants audit, NOT an operational host MIDI-output test.
