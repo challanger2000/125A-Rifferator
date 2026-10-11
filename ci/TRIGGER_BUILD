@@ -74,3 +74,4 @@
 2026-10-11 guard core MIDI scheduler extreme host positions with regression
 2026-10-11 MIDI rejected NoteOff recovery and transport restart regression
 2026-10-11 verify restored live drum MIDI output and state synchronization
+2026-10-11 retest drum recall after expected first-block mode flush
