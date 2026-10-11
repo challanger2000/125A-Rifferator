@@ -1,6 +1,7 @@
 #pragma once
 #include "core/BlockScheduler.hpp"
 #include "core/RiffArrangement.hpp"
+#include "core/DrumCompanion.hpp"
 #include "public.sdk/source/vst/vstaudioeffect.h"
 #include "pluginterfaces/vst/ivstprocesscontext.h"
 #include <vector>
@@ -25,6 +26,8 @@ private:
   std::array<Arrangement,11> fillVariants_{};
   int fillIndex_{};
   void prepareFillVariants();
+  DrumPattern drumPattern_{DrumPattern::standard()};
+  std::vector<MidiNote> drumNotes_{};
   BlockScheduler scheduler_{};
   bool flushOnNextProcess_{};
   LiveControls live_{};
