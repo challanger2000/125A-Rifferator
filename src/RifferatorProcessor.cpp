@@ -43,6 +43,7 @@ Processor::Processor() {
   candidates.kick.fill(true);candidates.snare.fill(true);candidates.hat.fill(true);
   drumNotes_=renderDrums(candidates,16);
   scheduler_.setDrums(&drumNotes_);
+  live_.chordsEnabled=true;
   chordNotes_=makeChordCandidates();
   scheduler_.setChords(&chordNotes_);
   live_.drumsEnabled=drumPattern_.enabled;
@@ -280,7 +281,7 @@ template<class T> bool readExact(Steinberg::IBStream* stream,T& value) {
 }
 tresult PLUGIN_API Processor::getState(IBStream* stream) {
   const uint32_t magic=0x31524641u; // AFR1
-  const uint32_t version=7;
+  const uint32_t version=8;
   const int32 count=static_cast<int32>(steps_.size());
   if(!writeExact(stream,magic)||!writeExact(stream,version)||!writeExact(stream,count))
     return kResultFalse;
@@ -314,13 +315,14 @@ tresult PLUGIN_API Processor::getState(IBStream* stream) {
      !writeExact(stream,static_cast<int32>(live_.chordsRootOnly?1:0)))return kResultFalse;
   for(int root:live_.harmony.roots)
     if(!writeExact(stream,static_cast<int32>(root)))return kResultFalse;
+  if(!writeExact(stream,static_cast<int32>(live_.chordQuality)))return kResultFalse;
   return kResultOk;
 }
 tresult PLUGIN_API Processor::setState(IBStream* stream) {
   uint32_t magic=0,version=0;
   int32 count=0;
   if(!readExact(stream,magic)||!readExact(stream,version)||
-     !readExact(stream,count)||magic!=0x31524641u||(version!=1&&version!=2&&version!=3&&version!=4&&version!=5&&version!=6&&version!=7)||
+     !readExact(stream,count)||magic!=0x31524641u||(version!=1&&version!=2&&version!=3&&version!=4&&version!=5&&version!=6&&version!=7&&version!=8)||
      count<1||count>32)return kResultFalse;
   std::array<int32,7> settings{};
   for(auto& v:settings)if(!readExact(stream,v))return kResultFalse;
@@ -412,6 +414,8 @@ tresult PLUGIN_API Processor::setState(IBStream* stream) {
       root=value;
     }
   }
+  int32 restoredChordQuality=0;
+  if(version>=8 && (!readExact(stream,restoredChordQuality)||restoredChordQuality<0||restoredChordQuality>4))return kResultFalse;
   Config next=config_;
   next.rootMidi=settings[0];
   next.bassVelocity=settings[1];
@@ -432,6 +436,7 @@ tresult PLUGIN_API Processor::setState(IBStream* stream) {
   prepareFillVariants();
   live_.chordsEnabled=restoredChords!=0;
   live_.chordsRootOnly=restoredChordMode!=0;
+  live_.chordQuality=restoredChordQuality;
   live_.harmony=restoredHarmony;
   bassMode_=restoredBassMode;
   ebmStyle_=restoredEbmStyle;
