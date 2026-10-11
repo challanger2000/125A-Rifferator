@@ -462,6 +462,10 @@ tresult PLUGIN_API Processor::setState(IBStream* stream) {
   steps_=std::move(parsed);
   config_=next;
   drumPattern_=parsedDrums;
+  // The live scheduler reads these masks, not the serialized DrumPattern.
+  // Without this sync, project recall restores the state but plays old steps.
+  live_.drumsEnabled=drumPattern_.enabled;
+  live_.drumSteps={drumPattern_.kick,drumPattern_.snare,drumPattern_.hat};
   drumNotes_=renderDrums(drumPattern_,16);
   scheduler_.setDrums(&drumNotes_);
   fill_.intensityPercent=restoredFill;
