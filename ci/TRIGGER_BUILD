@@ -67,3 +67,4 @@
 2026-10-11 branded VST3 binary and bundle validator fix
 2026-10-11 Windows VSTGUI embedded UIDescription resource fix
 2026-10-11 align Rifferator editor construction to validated Midiator
+2026-10-11 release audit legacy automation OOB correction and baseline
