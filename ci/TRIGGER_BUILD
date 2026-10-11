@@ -76,3 +76,4 @@
 2026-10-11 verify restored live drum MIDI output and state synchronization
 2026-10-11 retest drum recall after expected first-block mode flush
 2026-10-11 verify multi-point automation final state and project roundtrip
+2026-10-12 verify dark CTextButton gradients and attached-editor zoom controls
