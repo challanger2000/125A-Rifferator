@@ -12,7 +12,18 @@ struct ScheduledMidiEvent {
   int bus{}, sampleOffset{}, pitch{}, velocity{}, noteId{-1};
   bool on{};
 };
-struct LiveControls { int guitarGate{95}; int bassGate{95}; int rootSemitones{}; int bassVelocity{100}; bool bassEnabled{true}; };
+struct LiveControls {
+  int guitarGate{95}; int bassGate{95}; int rootSemitones{};
+  int bassVelocity{100}; bool bassEnabled{true}; bool drumsEnabled{true};
+  std::array<std::array<bool,16>,3> drumSteps{};
+  LiveControls() noexcept {
+    for(int i=0;i<16;++i) {
+      drumSteps[0][i]=i%4==0;
+      drumSteps[1][i]=i==4||i==12;
+      drumSteps[2][i]=true;
+    }
+  }
+};
 class BlockScheduler {
 public:
   static constexpr int kCapacity=1024;
@@ -40,7 +51,13 @@ public:
     int count=0;
     auto collect=[&](const std::vector<MidiNote>& notes,int bus) {
       if(bus==1 && !live.bassEnabled)return;
+      if(bus==2 && !live.drumsEnabled)return;
       for(const auto& note:notes) {
+        if(bus==2) {
+          const int row=note.note==36?0:note.note==38?1:note.note==42?2:-1;
+          const int step=static_cast<int>((note.startTick/240)%16);
+          if(row<0||step<0||!live.drumSteps[static_cast<std::size_t>(row)][static_cast<std::size_t>(step)])continue;
+        }
         const double periodPpq=static_cast<double>(period)/960.0;
         const double phase=static_cast<double>(note.startTick)/960.0;
         const int64_t first=static_cast<int64_t>(std::floor((startPpq-phase)/periodPpq))-1;
