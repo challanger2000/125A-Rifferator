@@ -55,4 +55,27 @@ int main() {
   events.clear();
   assert(adapter.process(arrangement,0.25,0.375,512,true,sink,0,0));
   assert(events.empty());
+  // HYBRID follows a true bar-level harmonic change, not every chromatic note.
+  HarmonyMap harmony;
+  harmony.roots[1]=41; // C to C# as a new harmonic root in bar 2
+  events.clear();
+  adapter.reset();
+  assert(adapter.process(arrangement,4.,4.25,960,true,sink,0,100,&harmony,40));
+  bool shifted=false;
+  for(const auto& e:events)if(e.on) {
+    assert(e.pitch==41);
+    shifted=true;
+  }
+  assert(shifted);
+  events.clear();
+  assert(adapter.flush(sink));
+  adapter.reset();
+  assert(adapter.process(arrangement,4.,4.25,960,true,sink,0,100,nullptr,40));
+  bool unchanged=false;
+  for(const auto& e:events)if(e.on) {
+    assert(e.pitch==40);
+    unchanged=true;
+  }
+  assert(unchanged);
 }
+
