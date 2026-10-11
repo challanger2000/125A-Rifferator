@@ -36,7 +36,7 @@ Processor::Processor() {
   for(int i=0;i<16;++i) steps_[i].articulation=Articulation::PalmMute;
   for(int i=0;i<16;++i) {
     live_.guitarSteps[static_cast<std::size_t>(i)]=(i%2)==0;
-    live_.guitarArticulation[static_cast<std::size_t>(i)]=3;
+    live_.guitarArticulation[static_cast<std::size_t>(i)]=2;
     live_.guitarDegree[static_cast<std::size_t>(i)]=1;
   }
   prepareFillVariants();
