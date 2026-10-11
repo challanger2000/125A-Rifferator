@@ -180,6 +180,10 @@ int main(){
     Steinberg::Vst::EventList emitted(512);
     Steinberg::Vst::ProcessData block{};
     block.numSamples=6000;block.processContext=&ctx;block.outputEvents=&emitted;
+    // State restore requests a bass-mode flush; the first callback intentionally
+    // performs this transition without scheduling fresh NoteOns.
+    assert(replay.process(block)==Steinberg::kResultOk);
+    assert(emitted.getEventCount()==0);
     assert(replay.process(block)==Steinberg::kResultOk);
     int kickOns=0,otherDrumOns=0;
     for(Steinberg::int32 i=0;i<emitted.getEventCount();++i){
