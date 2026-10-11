@@ -246,7 +246,14 @@ tresult PLUGIN_API Processor::process(ProcessData& data) {
   const double end=start+(haveTempo?double(data.numSamples)*ctx->tempo/
     (60.*processSetup.sampleRate):0.);
   const auto& active=fillVariants_[static_cast<std::size_t>(fillIndex_)];
+  // Derive a stable harmonic anchor from the actual live guitar step controls.
+  // Explicit per-bar harmony edits override this automatic result.
+  const int autoRoot=inferredGuitarRoot(live_.guitarSteps,live_.guitarArticulation,
+                                       live_.guitarDegree,config_.scale,config_.rootMidi);
+  HarmonyMap resolvedHarmony=live_.harmony;
+  for(auto& root:resolvedHarmony.roots)if(root==128)root=autoRoot;
   LiveControls routing=live_;
+  routing.harmony=resolvedHarmony;
   routing.externalBassMode=activeBassMode_!=0;
   scheduler_.process(active.midi,start,end,data.numSamples,
     active.periodTicks,sink,
@@ -257,7 +264,7 @@ tresult PLUGIN_API Processor::process(ProcessData& data) {
     if(!ebmScheduler_.process(prepared,start,end,data.numSamples,
          running&&havePosition&&haveTempo,sink,
          config_.rootMidi-40,config_.bassGate,
-         activeBassMode_==2?&live_.harmony:nullptr,config_.rootMidi))
+         activeBassMode_==2?&resolvedHarmony:nullptr,config_.rootMidi))
       flushOnNextProcess_=true;
   } else if(!ebmScheduler_.flush(sink,0)) {
     flushOnNextProcess_=true;
