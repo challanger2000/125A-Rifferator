@@ -64,5 +64,14 @@ int main() {
   liveScheduler.reset();
   liveScheduler.process(pattern,0.0,0.25,12000,period,sink,true,live);
   for(const auto& e:events) assert(e.bus==0);
+  // Minimum positive gate must terminate rather than leaving stuck notes.
+  events.clear();
+  BlockScheduler shortGate;
+  LiveControls tiny;
+  tiny.guitarGate=1; tiny.bassGate=1;
+  shortGate.process(pattern,0.0,0.25,48000,period,sink,true,tiny);
+  int shortOn=0,shortOff=0;
+  for(const auto& e:events) {if(e.on)++shortOn;else ++shortOff;}
+  assert(shortOn==2 && shortOff==2);
   scheduler.reset();
 }
