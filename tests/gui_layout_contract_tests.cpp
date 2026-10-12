@@ -10,6 +10,13 @@ int main(){
   assert(file.good());
   const std::string xml((std::istreambuf_iterator<char>(file)),std::istreambuf_iterator<char>());
   assert(xml.find("size=\"1120, 696\"")!=std::string::npos);
+  // DOUBLE must be produced once, in the live scheduler, never pre-rendered.
+  std::ifstream processorFile("src/RifferatorProcessor.cpp");
+  assert(processorFile.good());
+  const std::string processor((std::istreambuf_iterator<char>(processorFile)),
+                               std::istreambuf_iterator<char>());
+  assert(processor.find("step.doubled=false;")!=std::string::npos);
+
   assert(xml.find("title=\"DEGREE\"")!=std::string::npos);
   // GUI wiring regression: every visible switch must have the controller
   // handler that publishes its VST3 parameter edit (not a dead decoration).
