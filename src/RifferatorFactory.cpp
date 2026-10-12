@@ -717,7 +717,7 @@ public:
     constexpr uint32 version=1u;
     const uint32 zoom=zoomFactor_>=1.25?150u:100u;
     const uint32 fields[3]{magic,version,zoom};
-    for(const auto field:fields) {
+    for(auto field:fields) {
       int32 written=0;
       if(stream->write(&field,sizeof(field),&written)!=kResultOk ||
          written!=sizeof(field))return kResultFalse;
