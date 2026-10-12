@@ -24,6 +24,12 @@ int main(){
                          "refreshSwitch(id)"})assert(controller.find(expr)!=std::string::npos);
 
   assert(xml.find("title=\"PITCH\"")==std::string::npos);
+  for(int step=0;step<16;++step) {
+    const auto tag=std::string("<control-tag name=\"GDouble")+std::to_string(step)+"\" tag=\""+std::to_string(448+step)+"\"/>";
+    assert(xml.find(tag)!=std::string::npos);
+    const auto button=std::string("control-tag=\"GDouble")+std::to_string(step)+"\"";
+    assert(xml.find(button)!=std::string::npos);
+  }
   // Guitar matrix is six exclusive articulation rows per 16 steps.
   // Its toggle surface is kept stateful; the controller explicitly restores
   // the selected cell on redundant OFF callbacks.
