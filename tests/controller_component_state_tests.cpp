@@ -274,5 +274,56 @@ int main() {
     assert(Controller::musicalValue(3,controls.getParamNormalized(kFillIntensity))==75);
     assert(controls.terminate()==Steinberg::kResultOk);
   }
+  // Real controller path for the three drum commands: verify that
+  // STANDARD BEAT restores exactly GM kick/snare/hat step positions, seeded
+  // GENERATE is reproducible across fresh controllers, conservative VARIATE
+  // is bounded and global Drum Enabled is never silently re-enabled.
+  {
+    Controller first,second;
+    assert(first.initialize(nullptr)==Steinberg::kResultOk);
+    assert(second.initialize(nullptr)==Steinberg::kResultOk);
+    auto drumSnapshot=[&](Controller& c) {
+      std::array<bool,48> steps{};
+      for(int i=0;i<48;++i)
+        steps[static_cast<std::size_t>(i)]=
+          c.getParamNormalized(kDrumStepBase+i)>=0.5;
+      return steps;
+    };
+    auto clearDrums=[&](Controller& c) {
+      assert(c.setParamNormalized(kDrumEnabled,0.)==Steinberg::kResultOk);
+      for(int i=0;i<48;++i)
+        assert(c.setParamNormalized(kDrumStepBase+i,0.)==Steinberg::kResultOk);
+    };
+    clearDrums(first);clearDrums(second);
+    first.restoreStandardDrums();
+    second.restoreStandardDrums();
+    const auto standard=drumSnapshot(first);
+    assert(standard==drumSnapshot(second));
+    for(int i=0;i<16;++i) {
+      assert(standard[static_cast<std::size_t>(i)]==(i%4==0));
+      assert(standard[static_cast<std::size_t>(16+i)]==(i==4||i==12));
+      assert(standard[static_cast<std::size_t>(32+i)]);
+    }
+    near(first.getParamNormalized(kDrumEnabled),0.);
+    first.runDrumGeneration(GenerationCommand::Generate);
+    second.runDrumGeneration(GenerationCommand::Generate);
+    const auto firstGenerated=drumSnapshot(first);
+    assert(firstGenerated==drumSnapshot(second));
+    assert(firstGenerated!=standard);
+    near(first.getParamNormalized(kDrumEnabled),0.);
+    first.runDrumGeneration(GenerationCommand::Variate);
+    second.runDrumGeneration(GenerationCommand::Variate);
+    assert(drumSnapshot(first)==drumSnapshot(second));
+    int retained=0;
+    const auto varied=drumSnapshot(first);
+    for(int i=0;i<48;++i)if(varied[static_cast<std::size_t>(i)]==
+        firstGenerated[static_cast<std::size_t>(i)])++retained;
+    assert(retained>=1);
+    first.restoreStandardDrums();
+    assert(drumSnapshot(first)==standard);
+    near(first.getParamNormalized(kDrumEnabled),0.);
+    assert(first.terminate()==Steinberg::kResultOk);
+    assert(second.terminate()==Steinberg::kResultOk);
+  }
   assert(controller.terminate()==Steinberg::kResultOk);
 }
