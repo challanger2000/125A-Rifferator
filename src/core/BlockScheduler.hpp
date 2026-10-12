@@ -104,7 +104,7 @@ public:
         if(last<first || last-first>64) { invalidWindow=true; return; }
         for(int64_t n=first;n<=last;++n) {
           const double cycle=periodPpq*static_cast<double>(n);
-          auto push=[&](double t,bool on,int fifth=0) {
+          auto push=[&](double t,bool on,int fifth=0,bool secondStroke=false) {
             if(t<startPpq || t>=endPpq)return;
             if(count>=kCapacity) {eventOverflow=true;return;}
             const auto offset=static_cast<int>(std::floor(
@@ -131,7 +131,11 @@ public:
             if(bus==0) {
               velocity=guitarStepVelocity(static_cast<int>((note.startTick/240)%16),live.guitarArticulation[static_cast<std::size_t>((note.startTick/240)%16)]);
               if(live.guitarArticulation[static_cast<std::size_t>((note.startTick/240)%16)]==2)
-                velocity=std::clamp(velocity,live.pmMin,live.pmMax);
+                {
+                  velocity=std::clamp(velocity,live.pmMin,live.pmMax);
+                  if(on && secondStroke)
+                    velocity=std::max(live.pmMin,velocity-std::min(4,(live.pmMax-live.pmMin)/3));
+                }
               pitch+=fifth;
             }
             if(bus==1)velocity=live.bassVelocity;
@@ -159,7 +163,7 @@ public:
             push(cycle+static_cast<double>(firstOff)/960.0,false);
             push(cycle+phase,true);
             push(cycle+static_cast<double>(secondOff)/960.0,false);
-            push(cycle+static_cast<double>(midpoint)/960.0,true);
+            push(cycle+static_cast<double>(midpoint)/960.0,true,0,true);
             continue;
           }
           if(bus==3) {
