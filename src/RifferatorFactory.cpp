@@ -629,12 +629,14 @@ public:
        fill>100)return kResultFalse;
     // Validate the entire serialized riff before publishing parameter values.
     // A truncated pattern must never partially restore the controller.
+    std::array<uint32_t,32> storedDouble{};
     for(uint32_t i=0;i<count;++i) {
       std::array<uint32_t,4> step{};
       for(auto& value:step)if(!read32(value))return kResultFalse;
       const int32_t degree=static_cast<int32_t>(step[1]);
       if(step[0]>5 || degree<-13 || degree>15 ||
          step[2]>1 || step[3]>1)return kResultFalse;
+      storedDouble[i]=step[2];
     }
     std::array<uint32_t,49> drumValues{};
     if(version>=3) {
@@ -690,6 +692,9 @@ public:
     setParamNormalized(a125::rifferator::kBassGate,double(values[4])/100.);
     setParamNormalized(a125::rifferator::kBassEnabled,values[6]?1.:0.);
     setParamNormalized(a125::rifferator::kFillIntensity,double(fill)/100.);
+    for(int i=0;i<16;++i)
+      setParamNormalized(a125::rifferator::kGuitarDoubleBase+i,
+        storedDouble[static_cast<std::size_t>(i%count)]?1.:0.);
     if(version>=4) {
       for(int i=0;i<16;++i)setParamNormalized(a125::rifferator::kGuitarStepBase+i,guitarActive[static_cast<std::size_t>(i)]?1.:0.);
     }
