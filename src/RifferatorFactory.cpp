@@ -32,7 +32,6 @@ public:
     std::vector<Step> current;
     current.reserve(16);
     for(int i=0;i<16;++i) {
-      const auto index=static_cast<std::size_t>(i);
       const bool enabled=getParamNormalized(kGuitarStepBase+i)>=0.5;
       const int art=std::clamp(static_cast<int>(std::lround(
         getParamNormalized(kGuitarArticulationBase+i)*5.)),0,5);
@@ -42,7 +41,7 @@ public:
       const bool locked=getParamNormalized(kGuitarLockBase+i)>=0.5;
       current.push_back({static_cast<Articulation>(enabled?art:0),
                          degree,doubled,locked});
-      (void)index;
+
     }
     RandomOptions options;
     // Distinct and reproducible (per session) seeds; no more three-preset
@@ -213,7 +212,7 @@ public:
       viewOwner_=editor;
     }
     if(auto* control=dynamic_cast<VSTGUI::CControl*>(view)) {
-      if((control->getTag()>=500 && control->getTag()<596) || (control->getTag()>=700 && control->getTag()<=721) || (control->getTag()>=800 && control->getTag()<832) || (control->getTag()>=200 && control->getTag()<248) || (control->getTag()>=300 && control->getTag()<316) || (control->getTag()>=432 && control->getTag()<464) || (control->getTag()>=880 && control->getTag()<884))
+      if((control->getTag()>=500 && control->getTag()<596) || (control->getTag()>=700 && control->getTag()<=722) || (control->getTag()>=800 && control->getTag()<832) || (control->getTag()>=200 && control->getTag()<248) || (control->getTag()>=300 && control->getTag()<316) || (control->getTag()>=432 && control->getTag()<464) || (control->getTag()>=880 && control->getTag()<884))
         control->setListener(this);
       const auto tag=control->getTag();
       if(tag>=884 && tag<886) {
