@@ -87,7 +87,7 @@ public:
   }
   VSTGUI::VST3Editor* activeEditor_{};
   VSTGUI::VST3Editor* viewOwner_{};
-  std::array<VSTGUI::CControl*,21> commandButtons_{};
+  std::array<VSTGUI::CControl*,25> commandButtons_{};
   void refreshCommands() {
     const auto selected=[&](int tag) -> bool {
       using namespace a125::rifferator;
@@ -97,9 +97,10 @@ public:
       if(tag==718)return getParamNormalized(kChordsEnabled)>=0.5;
       if(tag==719)return getParamNormalized(kBassEnabled)>=0.5;
       if(tag==720)return getParamNormalized(kChordsMode)>=0.5;
+      if(tag==724)return getParamNormalized(kDrumEnabled)>=0.5;
       return false;
     };
-    for(int tag=701;tag<=720;++tag)if(auto* button=commandButtons_[static_cast<std::size_t>(tag-700)]) {
+    for(int tag=701;tag<=724;++tag)if(auto* button=commandButtons_[static_cast<std::size_t>(tag-700)]) {
       button->setValueNormalized(selected(tag)?1.f:0.f);
       button->invalid();
     }
@@ -116,6 +117,39 @@ public:
     else if(id>=kGuitarDoubleBase && id<kGuitarDoubleBase+16)control=doubleButtons_[id-kGuitarDoubleBase];
     else if(id>=kDrumStepBase && id<kDrumStepBase+48)control=drumButtons_[id-kDrumStepBase];
     if(control){control->setValueNormalized(getParamNormalized(id)>=0.5?1.f:0.f);control->invalid();}
+  }
+  // Six previously host-only musical controls are now available directly
+  // in the editor. Tags 900..911 are +/- actions; 912..917 are readouts.
+  // No new VST3 parameter IDs or processor state words are introduced.
+  std::array<VSTGUI::CTextButton*,6> musicalDisplays_{};
+  static Steinberg::Vst::ParamID musicalParam(int index) noexcept {
+    using namespace a125::rifferator;
+    constexpr Steinberg::Vst::ParamID ids[6]{
+      kRootPitch,kGuitarGate,kBassGate,kFillIntensity,kBassVelocity,kEbmStyle};
+    return ids[static_cast<std::size_t>(std::clamp(index,0,5))];
+  }
+  static int musicalValue(int index,double normalized) noexcept {
+    const double n=std::clamp(normalized,0.,1.);
+    if(index==0)return std::clamp(static_cast<int>(std::lround(n*127.)),0,127);
+    if(index==4)return std::clamp(1+static_cast<int>(std::lround(n*126.)),1,127);
+    if(index==5)return std::clamp(static_cast<int>(std::lround(n*4.)),0,4);
+    return std::clamp(static_cast<int>(std::lround(n*100.)),0,100);
+  }
+  static double musicalNormalized(int index,int value) noexcept {
+    if(index==0)return std::clamp(value,0,127)/127.;
+    if(index==4)return (std::clamp(value,1,127)-1)/126.;
+    if(index==5)return std::clamp(value,0,4)/4.;
+    return std::clamp(value,0,100)/100.;
+  }
+  void refreshMusicalDisplays() {
+    static constexpr const char* styles[5]{
+      "CLASSIC","CHROMATIC","OCTAVE","INDUSTRIAL","ROLLING"};
+    for(int i=0;i<6;++i)if(auto* display=musicalDisplays_[static_cast<std::size_t>(i)]) {
+      const int value=musicalValue(i,getParamNormalized(musicalParam(i)));
+      const auto label=i==5?std::string(styles[value]):
+        std::to_string(value)+(i>=1 && i<=3?"%":"");
+      display->setTitle(label.c_str());display->invalid();
+    }
   }
   std::array<VSTGUI::CTextButton*,2> pmDisplays_{};
   void refreshPmDisplays() {
@@ -179,7 +213,10 @@ public:
     const auto result=EditControllerEx1::setParamNormalized(id,value);
     if(result==Steinberg::kResultOk) {
       if(id==a125::rifferator::kPmMin || id==a125::rifferator::kPmMax)refreshPmDisplays();
-      if(id==a125::rifferator::kBassMode || id==a125::rifferator::kChordsQuality || id==a125::rifferator::kChordsEnabled || id==a125::rifferator::kBassEnabled || id==a125::rifferator::kChordsMode) refreshCommands();
+      if(id==a125::rifferator::kBassMode || id==a125::rifferator::kChordsQuality || id==a125::rifferator::kChordsEnabled || id==a125::rifferator::kBassEnabled || id==a125::rifferator::kChordsMode || id==a125::rifferator::kDrumEnabled)refreshCommands();
+      for(int i=0;i<6;++i)if(id==musicalParam(i)) {
+        refreshMusicalDisplays();break;
+      }
       if(id>=a125::rifferator::kGuitarStepBase && id<a125::rifferator::kGuitarStepBase+16)refreshGuitarStep(static_cast<int>(id-a125::rifferator::kGuitarStepBase));
       if(id>=a125::rifferator::kGuitarArticulationBase && id<a125::rifferator::kGuitarArticulationBase+16)refreshGuitarStep(static_cast<int>(id-a125::rifferator::kGuitarArticulationBase));
       if((id>=a125::rifferator::kGuitarStepBase && id<a125::rifferator::kGuitarStepBase+16) ||
@@ -202,6 +239,7 @@ public:
       lockButtons_.fill(nullptr);
       doubleButtons_.fill(nullptr);
       pmDisplays_.fill(nullptr);
+      musicalDisplays_.fill(nullptr);
       drumButtons_.fill(nullptr);
     }
   }
@@ -221,9 +259,14 @@ public:
       viewOwner_=editor;
     }
     if(auto* control=dynamic_cast<VSTGUI::CControl*>(view)) {
-      if((control->getTag()>=500 && control->getTag()<596) || (control->getTag()>=700 && control->getTag()<=722) || (control->getTag()>=800 && control->getTag()<832) || (control->getTag()>=200 && control->getTag()<248) || (control->getTag()>=300 && control->getTag()<316) || (control->getTag()>=432 && control->getTag()<464) || (control->getTag()>=880 && control->getTag()<884))
+      if((control->getTag()>=500 && control->getTag()<596) || (control->getTag()>=700 && control->getTag()<=722) || (control->getTag()>=800 && control->getTag()<832) || (control->getTag()>=200 && control->getTag()<248) || (control->getTag()>=300 && control->getTag()<316) || (control->getTag()>=432 && control->getTag()<464) || (control->getTag()>=880 && control->getTag()<884) || (control->getTag()>=900 && control->getTag()<912) || control->getTag()==724)
         control->setListener(this);
       const auto tag=control->getTag();
+      if(tag>=912 && tag<918) {
+        musicalDisplays_[static_cast<std::size_t>(tag-912)]=
+          dynamic_cast<VSTGUI::CTextButton*>(control);
+        refreshMusicalDisplays();
+      }
       if(tag>=884 && tag<886) {
         pmDisplays_[static_cast<std::size_t>(tag-884)]=dynamic_cast<VSTGUI::CTextButton*>(control);
         refreshPmDisplays();
@@ -236,7 +279,8 @@ public:
         degreeDisplays_[static_cast<std::size_t>(control->getTag()-850)]=dynamic_cast<VSTGUI::CTextButton*>(control);
         refreshDegree(control->getTag()-850);
       }
-      if(control->getTag()>=701 && control->getTag()<=720) {
+      if((control->getTag()>=701 && control->getTag()<=720) ||
+         control->getTag()==724) {
         commandButtons_[static_cast<std::size_t>(control->getTag()-700)]=control;
         refreshCommands();
       }
@@ -364,6 +408,27 @@ public:
     if(command==720) {
       const auto id=a125::rifferator::kChordsMode;
       send(id,getParamNormalized(id)>=0.5?0.:1.);
+      return;
+    }
+    if(command>=900 && command<912) {
+      const int index=(command-900)/2;
+      const auto id=musicalParam(index);
+      const int original=musicalValue(index,getParamNormalized(id));
+      const int minimum=index==4?1:0;
+      const int maximum=index==0||index==4?127:index==5?4:100;
+      const int updated=std::clamp(
+        original+(command%2==0?-1:1),minimum,maximum);
+      if(updated==original)return;
+      const double normalized=musicalNormalized(index,updated);
+      beginEdit(id);setParamNormalized(id,normalized);
+      performEdit(id,normalized);endEdit(id);
+      return;
+    }
+    if(command==724) {
+      const auto id=a125::rifferator::kDrumEnabled;
+      const double value=getParamNormalized(id)>=0.5?0.:1.;
+      beginEdit(id);setParamNormalized(id,value);
+      performEdit(id,value);endEdit(id);
       return;
     }
     if(command==700 || command==722) {
