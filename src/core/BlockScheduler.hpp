@@ -15,6 +15,7 @@ struct ScheduledMidiEvent {
   bool on{};
 };
 struct LiveControls {
+  int pmMin{30}; int pmMax{40};
   int guitarGate{95}; int bassGate{95}; int rootSemitones{}; int absoluteRoot{-1}; int bassOffset{-12}; int preparedRoot{40};
   int bassVelocity{100}; bool bassEnabled{true}; bool drumsEnabled{true}; bool externalBassMode{false}; bool chordsEnabled{false}; bool chordsRootOnly{false}; int chordQuality{0}; bool chordsAuto{true};
   HarmonyMap harmony{};
@@ -129,6 +130,8 @@ public:
             }
             if(bus==0) {
               velocity=guitarStepVelocity(static_cast<int>((note.startTick/240)%16),live.guitarArticulation[static_cast<std::size_t>((note.startTick/240)%16)]);
+              if(live.guitarArticulation[static_cast<std::size_t>((note.startTick/240)%16)]==2)
+                velocity=std::clamp(velocity,live.pmMin,live.pmMax);
               pitch+=fifth;
             }
             if(bus==1)velocity=live.bassVelocity;
