@@ -85,6 +85,63 @@ int main() {
   near(controller.getParamNormalized(kGuitarDegreeBase),9./28.);
   near(controller.getParamNormalized(kGuitarDoubleBase),1.);
   near(controller.getParamNormalized(kGuitarLockBase),1.);
+  // VST3 controller state is independent of the musical Processor snapshot.
+  // GUI zoom must survive project reopen at both supported factors and
+  // malformed/truncated state must never overwrite the existing setting.
+  MemoryStream zoomDefault;
+  assert(controller.getState(&zoomDefault)==Steinberg::kResultOk);
+  assert(zoomDefault.getSize()==3*static_cast<Steinberg::TSize>(sizeof(std::uint32_t)));
+  std::vector<unsigned char> zoomData(
+    reinterpret_cast<const unsigned char*>(zoomDefault.getData()),
+    reinterpret_cast<const unsigned char*>(zoomDefault.getData())+zoomDefault.getSize());
+  const auto zoomWord=[&](int index) {
+    std::uint32_t v=0;
+    std::memcpy(&v,zoomData.data()+index*sizeof(v),sizeof(v));return v;
+  };
+  const auto putZoomWord=[&](int index,std::uint32_t value) {
+    std::memcpy(zoomData.data()+index*sizeof(value),&value,sizeof(value));
+  };
+  assert(zoomWord(0)==0x315A4652u && zoomWord(1)==1u && zoomWord(2)==100u);
+  putZoomWord(2,150u);
+  MemoryStream zoom150(zoomData.data(),static_cast<Steinberg::TSize>(zoomData.size()));
+  assert(controller.setState(&zoom150)==Steinberg::kResultOk);
+  MemoryStream zoomPersisted;
+  assert(controller.getState(&zoomPersisted)==Steinberg::kResultOk);
+  assert(std::memcmp(zoomPersisted.getData(),zoomData.data(),zoomData.size())==0);
+  const auto assertZoom150=[&]() {
+    MemoryStream verify;
+    assert(controller.getState(&verify)==Steinberg::kResultOk);
+    assert(verify.getSize()==static_cast<Steinberg::TSize>(zoomData.size()));
+    std::uint32_t v=0;
+    std::memcpy(&v,static_cast<const char*>(verify.getData())+2*sizeof(v),sizeof(v));
+    assert(v==150u);
+  };
+  putZoomWord(2,125u);
+  MemoryStream invalidZoom(zoomData.data(),static_cast<Steinberg::TSize>(zoomData.size()));
+  assert(controller.setState(&invalidZoom)!=Steinberg::kResultOk);
+  assertZoom150();
+  putZoomWord(2,150u);putZoomWord(1,2u);
+  MemoryStream futureZoom(zoomData.data(),static_cast<Steinberg::TSize>(zoomData.size()));
+  assert(controller.setState(&futureZoom)!=Steinberg::kResultOk);
+  assertZoom150();
+  putZoomWord(1,1u);putZoomWord(0,0u);
+  MemoryStream badMagic(zoomData.data(),static_cast<Steinberg::TSize>(zoomData.size()));
+  assert(controller.setState(&badMagic)!=Steinberg::kResultOk);
+  assertZoom150();
+  putZoomWord(0,0x315A4652u);
+  MemoryStream shortZoom(zoomData.data(),static_cast<Steinberg::TSize>(zoomData.size()-1));
+  assert(controller.setState(&shortZoom)!=Steinberg::kResultOk);
+  assertZoom150();
+  assert(controller.setState(nullptr)!=Steinberg::kResultOk);
+  assertZoom150();
+  putZoomWord(2,100u);
+  MemoryStream zoom100(zoomData.data(),static_cast<Steinberg::TSize>(zoomData.size()));
+  assert(controller.setState(&zoom100)==Steinberg::kResultOk);
+  MemoryStream backTo100;
+  assert(controller.getState(&backTo100)==Steinberg::kResultOk);
+  assert(std::memcmp(backTo100.getData(),zoomData.data(),zoomData.size())==0);
+  // Zoom operations must not alter unrelated processor-state parameters.
+  near(controller.getParamNormalized(kGuitarLockBase),1.);
   const double baseline=controller.getParamNormalized(kBassMode);
   write32(bass+20,99); // reject malformed trailing field atomically
   MemoryStream corrupt(snapshot.data(),static_cast<Steinberg::TSize>(snapshot.size()));
