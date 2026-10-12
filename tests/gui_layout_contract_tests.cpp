@@ -150,7 +150,8 @@ int main(){
   assert(generationCode.find("const bool preserveStop=")!=std::string::npos);
   assert(generationCode.find("publish(kGuitarDoubleBase+i,0.)")!=std::string::npos);
   assert(controller.find("if(command==700 || command==722)")!=std::string::npos);
-  assert(controller.find("(control->getTag()>=700 && control->getTag()<=722)")!=std::string::npos);
+  // Drum commands 725..727 extend the command listener range beyond Guitar VARIATE 722.
+  assert(controller.find("(control->getTag()>=700 && control->getTag()<=727)")!=std::string::npos);
   assert(controller.find("makeIndustrialGuitarGroove(")==std::string::npos);
   assert(controller.find("kGuitarLockBase+step")!=std::string::npos);
   for(const auto* expr: {"command>=200 && command<248",
