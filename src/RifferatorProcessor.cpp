@@ -291,8 +291,9 @@ tresult PLUGIN_API Processor::process(ProcessData& data) {
     }
     activeBassMode_=bassMode_;
     bassSwitchPending_=false;
-    skipUnscheduledBlock();
-    return kResultOk; // new-mode NoteOns start only on a later callback
+    // Both bass producers have released their old notes. Scheduling can
+    // continue safely in this SAME callback so project recall or a live mode
+    // switch never drops the first 16th/kick/chord at the transport boundary.
   }
   if(flushOnNextProcess_) {
     if(!scheduler_.flush(sink,0) || !ebmScheduler_.flush(sink,0)) {
