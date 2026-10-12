@@ -11,6 +11,18 @@ int main(){
   const std::string xml((std::istreambuf_iterator<char>(file)),std::istreambuf_iterator<char>());
   assert(xml.find("size=\"1120, 696\"")!=std::string::npos);
   assert(xml.find("title=\"DEGREE\"")!=std::string::npos);
+  // GUI wiring regression: every visible switch must have the controller
+  // handler that publishes its VST3 parameter edit (not a dead decoration).
+  std::ifstream controllerFile("src/RifferatorFactory.cpp");
+  assert(controllerFile.good());
+  const std::string controller((std::istreambuf_iterator<char>(controllerFile)),
+                               std::istreambuf_iterator<char>());
+  for(const auto* expr: {"command>=200 && command<248",
+                         "command>=300 && command<316",
+                         "command>=432 && command<448",
+                         "beginEdit(id);setParamNormalized(id,value);performEdit(id,value);endEdit(id)",
+                         "refreshSwitch(id)"})assert(controller.find(expr)!=std::string::npos);
+
   assert(xml.find("title=\"PITCH\"")==std::string::npos);
   // Guitar matrix is six exclusive articulation rows per 16 steps.
   // Its toggle surface is kept stateful; the controller explicitly restores
