@@ -271,6 +271,8 @@ tresult PLUGIN_API Processor::process(ProcessData& data) {
   LiveControls routing=live_;
   routing.absoluteRoot=config_.rootMidi;
   routing.scale=config_.scale;
+  for(int i=0;i<16 && i<static_cast<int>(steps_.size());++i)
+    routing.guitarDouble[static_cast<std::size_t>(i)]=steps_[static_cast<std::size_t>(i)].doubled;
   routing.bassOffset=config_.bassOffset;
   routing.preparedRoot=preparedRootMidi_;
   routing.harmony=resolvedHarmony;
