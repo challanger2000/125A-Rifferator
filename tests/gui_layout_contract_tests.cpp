@@ -18,6 +18,16 @@ int main(){
   assert(processor.find("step.doubled=false;")!=std::string::npos);
 
   assert(xml.find("title=\"DEGREE\"")!=std::string::npos);
+  // Signed degrees down to -13 need more than the former 19-pixel readout.
+  for(int i=0;i<16;++i) {
+    const auto name="control-tag=\"DegreeValue"+std::to_string(i)+"\"";
+    const auto begin=xml.find(name);
+    assert(begin!=std::string::npos);
+    const auto end=xml.find("/>",begin);
+    assert(end!=std::string::npos);
+    assert(xml.substr(begin,end-begin).find("size=\"28, 19\"")!=std::string::npos);
+  }
+
   assert(xml.find("control-tag=\"ClearPattern\"")!=std::string::npos);
   // 1..127 must fit without clipping in both velocity displays.
   assert(xml.find("control-tag=\"PmMinValue\" origin=\"157, 382\" size=\"48, 24\"")!=std::string::npos);
