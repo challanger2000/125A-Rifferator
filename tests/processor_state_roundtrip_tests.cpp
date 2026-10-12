@@ -119,7 +119,7 @@ int main(){
     assert(shortPattern.setState(&oneStep)==Steinberg::kResultOk);
     // Exercise the actual Processor::process automation path on step 16.
     // Previously this indexed steps_[15] in a restored one-element vector.
-    Steinberg::Vst::ParameterChanges changes(3);
+    Steinberg::Vst::ParameterChanges changes(2);
     auto queueValue=[&](Steinberg::Vst::ParamID id,double normalized) {
       Steinberg::int32 queueIndex=0,pointIndex=0;
       auto* queue=changes.addParameterData(id,queueIndex);
@@ -128,10 +128,17 @@ int main(){
     };
     queueValue(kGuitarArticulationBase+15,4./5.);
     queueValue(kGuitarDegreeBase+15,20./28.);
-    queueValue(kGuitarLockBase+15,1.);
     Steinberg::Vst::ProcessData block{};
     block.numSamples=0;
     block.inputParameterChanges=&changes;
+    assert(shortPattern.process(block)==Steinberg::kResultOk);
+    // Lock in a separate callback; simultaneous LOCK+edits intentionally
+    // resolve to the final lock state and would reject the edits.
+    Steinberg::Vst::ParameterChanges lockStep(1);
+    Steinberg::int32 qi=0,pi=0;
+    auto* lockQueue=lockStep.addParameterData(kGuitarLockBase+15,qi);
+    assert(lockQueue && lockQueue->addPoint(0,1.,pi)==Steinberg::kResultOk);
+    block.inputParameterChanges=&lockStep;
     assert(shortPattern.process(block)==Steinberg::kResultOk);
     MemoryStream saved;
     assert(shortPattern.getState(&saved)==Steinberg::kResultOk);
