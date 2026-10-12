@@ -133,6 +133,7 @@ int main(){
   // STOP releases a long OPEN at step 2; an empty step does not.
   {
     Pair held;held.guitar.push_back({0,950,40,115,960});
+    held.bass.push_back({0,950,28,100,960});
     LiveControls controls;
     controls.guitarSteps.fill(false);
     controls.guitarSteps[0]=true;controls.guitarArticulation[0]=4;
@@ -144,6 +145,9 @@ int main(){
     bool stopped=false;
     for(const auto& e:actual)if(e.bus==0 && !e.on && e.pitch==40 && e.sampleOffset==480)stopped=true;
     assert(stopped);
+    // A guitar STOP must never terminate the held bass on bus 1.
+    for(const auto& e:actual)
+      assert(!(e.bus==1 && !e.on && e.sampleOffset==480));
     controls.guitarSteps[1]=false;
     engine.reset();actual.clear();
     engine.process(held,0.,0.5,960,61440,
