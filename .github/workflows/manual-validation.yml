@@ -50,7 +50,7 @@ jobs:
           $directTemplate = $parsedGui.DocumentElement.SelectSingleNode('./template[@name="RifferatorView"]')
           if ($null -eq $directTemplate) { throw 'RifferatorView must be a DIRECT child of vstgui-ui-description for UIDescription::createView/getViewAttributes' }
           if ($directTemplate.GetAttribute('class') -ne 'CViewContainer' -or
-              $directTemplate.GetAttribute('size') -ne '1120, 696') { throw 'Invalid editor root class or size' }
+              $directTemplate.GetAttribute('size') -ne '1120, 640') { throw 'Invalid editor root class or size' }
           if ($null -ne $parsedGui.DocumentElement.SelectSingleNode('./templates')) { throw 'Unsupported <templates> wrapper would create a zero-sized editor' }
           $binaries = @(Get-ChildItem -Path (Join-Path $root 'Contents') -Recurse -File -Filter '*.vst3')
           if ($binaries.Count -ne 1) { throw "Expected one VST3 module binary, found $($binaries.Count)" }
