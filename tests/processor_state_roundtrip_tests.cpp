@@ -331,6 +331,74 @@ int main(){
     assert(off[0] && off[2] && off[3] && !off[1] && !duplicate);
   }
 
+  // End-to-end live LOCK: pre-rendered FILL transposition must be masked
+  // on both real guitar and follow-bass VST3 outputs, while the GUI-selected
+  // musical degree remains active.
+  {
+    std::vector<Step> reference(16);
+    for(auto& step:reference){step.articulation=Articulation::PalmMute;step.degree=1;}
+    Config config;
+    FillOptions fill;
+    fill.intensityPercent=100;
+    const auto arrangement=arrange(reference,config,fill,16);
+    int step=-1,delta=0;
+    std::int64_t onset=0;
+    for(const auto& note:arrangement.midi.guitar) {
+      if(note.startTick<15*3840 || note.startTick>=16*3840 ||
+         note.note==config.rootMidi)continue;
+      const int candidate=static_cast<int>((note.startTick/240)%16);
+      if(candidate<8)continue;
+      step=candidate;delta=note.note-config.rootMidi;
+      onset=note.startTick;break;
+    }
+    assert(step>=8 && step<16 && delta!=0);
+    auto playFill=[&](bool locked) {
+      Processor playing;
+      Steinberg::Vst::ParameterChanges changes(4);
+      auto edit=[&](Steinberg::Vst::ParamID id,double value){
+        Steinberg::int32 qi=0,pi=0;
+        auto* q=changes.addParameterData(id,qi);
+        assert(q && q->addPoint(0,value,pi)==Steinberg::kResultOk);
+      };
+      edit(kFillIntensity,1.);
+      edit(kGuitarStepBase+step,1.);
+      edit(kGuitarDegreeBase+step,16./28.); // degree 3
+      edit(kGuitarLockBase+step,locked?1.:0.);
+      Steinberg::Vst::ProcessData setupBlock{};
+      setupBlock.numSamples=0;
+      setupBlock.inputParameterChanges=&changes;
+      assert(playing.process(setupBlock)==Steinberg::kResultOk);
+      Steinberg::Vst::ProcessSetup setup{};
+      setup.processMode=Steinberg::Vst::kRealtime;
+      setup.symbolicSampleSize=Steinberg::Vst::kSample32;
+      setup.sampleRate=48000.;setup.maxSamplesPerBlock=6000;
+      assert(playing.setupProcessing(setup)==Steinberg::kResultOk);
+      Steinberg::Vst::ProcessContext ctx{};
+      ctx.state=Steinberg::Vst::ProcessContext::kPlaying |
+                Steinberg::Vst::ProcessContext::kProjectTimeMusicValid |
+                Steinberg::Vst::ProcessContext::kTempoValid;
+      ctx.tempo=120.;ctx.projectTimeMusic=static_cast<double>(onset)/960.;
+      Steinberg::Vst::EventList outgoing(512);
+      Steinberg::Vst::ProcessData block{};
+      block.numSamples=6000;block.processContext=&ctx;block.outputEvents=&outgoing;
+      assert(playing.process(block)==Steinberg::kResultOk);
+      int guitar=-1,bass=-1,ng=0,nb=0;
+      for(Steinberg::int32 i=0;i<outgoing.getEventCount();++i) {
+        Steinberg::Vst::Event event{};
+        assert(outgoing.getEvent(i,event)==Steinberg::kResultOk);
+        if(event.type!=Steinberg::Vst::Event::kNoteOnEvent)continue;
+        if(event.busIndex==0){++ng;guitar=event.noteOn.pitch;}
+        if(event.busIndex==1){++nb;bass=event.noteOn.pitch;}
+      }
+      assert(ng==1 && nb==1);
+      return std::array<int,2>{guitar,bass};
+    };
+    const auto unlocked=playFill(false);
+    const auto locked=playFill(true);
+    assert(unlocked[0]==43+delta && unlocked[1]==31+delta);
+    assert(locked[0]==43 && locked[1]==31);
+  }
+
   // Regression: project recall must apply every stored drum step to the LIVE
   // MIDI masks. A byte-identical getState roundtrip alone missed this defect.
   {
