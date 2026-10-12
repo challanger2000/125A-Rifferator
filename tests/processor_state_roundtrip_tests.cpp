@@ -201,7 +201,7 @@ int main(){
     Steinberg::Vst::ProcessSetup setup{};
     setup.processMode=Steinberg::Vst::kRealtime;
     setup.symbolicSampleSize=Steinberg::Vst::kSample32;
-    setup.sampleRate=48000.;setup.maxSamplesPerBlock=3000;
+    setup.sampleRate=48000.;setup.maxSamplesPerBlock=600;
     assert(playing.setupProcessing(setup)==Steinberg::kResultOk);
     Steinberg::Vst::ProcessContext ctx{};
     ctx.state=Steinberg::Vst::ProcessContext::kPlaying |
@@ -209,7 +209,7 @@ int main(){
               Steinberg::Vst::ProcessContext::kTempoValid;
     ctx.tempo=120.;
     Steinberg::Vst::ProcessData block{};
-    block.numSamples=3000;block.processContext=&ctx;
+    block.numSamples=600;block.processContext=&ctx;
     Steinberg::Vst::EventList first(512);
     block.outputEvents=&first;
     ctx.projectTimeMusic=0.;
@@ -231,7 +231,7 @@ int main(){
     Steinberg::Vst::EventList second(512);
     block.outputEvents=&second;
     block.inputParameterChanges=&edit;
-    ctx.projectTimeMusic=.125;
+    ctx.projectTimeMusic=.025;
     assert(playing.process(block)==Steinberg::kResultOk);
     bool drumReleased=false;
     for(Steinberg::int32 i=0;i<second.getEventCount();++i){
