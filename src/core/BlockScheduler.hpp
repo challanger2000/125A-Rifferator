@@ -24,6 +24,7 @@ struct LiveControls {
   std::array<int,16> guitarArticulation{};
   std::array<int,16> guitarDegree{};
   std::array<bool,16> guitarLocks{};
+  std::array<bool,16> guitarDouble{};
   LiveControls() noexcept {
     for(int i=0;i<16;++i) {
       drumSteps[0][i]=i%4==0;
@@ -144,6 +145,22 @@ public:
           const int64_t scaled=note.startTick+(note.boundaryTick-note.startTick)*gate/100;
           const int64_t endTick=std::max(note.startTick+1,scaled);
           if(gate<=0) continue;
+          // Original Thrash DI UP reference: one normal stroke at the step
+          // start, followed by a second stroke halfway through the step.
+          // Each gets its own NoteOff and must never spill into the next step.
+          if(bus==0 && live.guitarDouble[static_cast<std::size_t>((note.startTick/240)%16)]) {
+            const int64_t half=std::max<int64_t>(1,(note.boundaryTick-note.startTick)/2);
+            const int64_t midpoint=note.startTick+half;
+            const int64_t firstOff=std::max<int64_t>(note.startTick+1,
+              std::min<int64_t>(midpoint,note.startTick+half*gate/100));
+            const int64_t secondOff=std::max<int64_t>(midpoint+1,
+              std::min<int64_t>(note.boundaryTick,midpoint+(note.boundaryTick-midpoint)*gate/100));
+            push(cycle+static_cast<double>(firstOff)/960.0,false);
+            push(cycle+phase,true);
+            push(cycle+static_cast<double>(secondOff)/960.0,false);
+            push(cycle+static_cast<double>(midpoint)/960.0,true);
+            continue;
+          }
           if(bus==3) {
             // Sustain a chord voice across bars when its next pitch is
             // unchanged. A new transport start still emits the required On
