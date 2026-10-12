@@ -106,3 +106,4 @@
 2026-10-12 BUNDLE: generate clears stale double, lock guard and GUI regression
 2026-10-12 BUNDLE locked-step ON DOUBLE buttons consistent GUI feedback and regression
 2026-10-12 BUNDLE state restore legacy GUI step activation articulation degree lock regression
+2026-10-12 BUNDLE PM range controller clamp and out-of-default project restore ordering
