@@ -275,6 +275,7 @@ public:
       lockButtons_.fill(nullptr);
       doubleButtons_.fill(nullptr);
       pmDisplays_.fill(nullptr);
+      musicalDisplays_.fill(nullptr);
       drumButtons_.fill(nullptr);
       viewOwner_=editor;
     }
