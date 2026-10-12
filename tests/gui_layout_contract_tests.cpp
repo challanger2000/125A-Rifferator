@@ -27,6 +27,10 @@ int main(){
   const std::string controller((std::istreambuf_iterator<char>(controllerFile)),
                                std::istreambuf_iterator<char>());
   assert(controller.find("command==721")!=std::string::npos);
+  // Locked STEP and DOUBLE toggles must revert locally, not only in processor.
+  assert(controller.find("command>=448?command-448:command-300")!=std::string::npos);
+  assert(controller.find("refreshSwitch(id);")!=std::string::npos);
+
   // GENERATE resets previous DOUBLE triggers only after the LOCK guard.
   const auto generateStart=controller.find("if(control->getTag()==700)");
   const auto generateEnd=controller.find("const int tag=control->getTag();",generateStart);
