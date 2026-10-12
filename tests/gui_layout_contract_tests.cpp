@@ -19,6 +19,9 @@ int main(){
 
   assert(xml.find("title=\"DEGREE\"")!=std::string::npos);
   assert(xml.find("control-tag=\"ClearPattern\"")!=std::string::npos);
+  // 1..127 must fit without clipping in both velocity displays.
+  assert(xml.find("control-tag=\"PmMinValue\" origin=\"157, 382\" size=\"48, 24\"")!=std::string::npos);
+  assert(xml.find("control-tag=\"PmMaxValue\" origin=\"296, 382\" size=\"48, 24\"")!=std::string::npos);
 
   // GUI wiring regression: every visible switch must have the controller
   // handler that publishes its VST3 parameter edit (not a dead decoration).
