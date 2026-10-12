@@ -10,6 +10,8 @@ int main(){
   assert(file.good());
   const std::string xml((std::istreambuf_iterator<char>(file)),std::istreambuf_iterator<char>());
   assert(xml.find("size=\"1120, 696\"")!=std::string::npos);
+  assert(xml.find("title=\"DEGREE\"")!=std::string::npos);
+  assert(xml.find("title=\"PITCH\"")==std::string::npos);
   // Guitar matrix is six exclusive articulation rows per 16 steps.
   // Its toggle surface is kept stateful; the controller explicitly restores
   // the selected cell on redundant OFF callbacks.
