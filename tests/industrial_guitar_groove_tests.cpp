@@ -37,7 +37,7 @@ int main(){
     for(const auto& e:actual)if(e.bus==0 && e.on) {
       ++ons;assert(e.velocity==expected[art]);
     }
-    assert(ons==(art==0?0:art==4?2:1));
+    assert(ons==(art==0?0:1));
   }
   // UP/DOUBLE: two successive strikes at half-step spacing, not a chord.
   {
@@ -60,22 +60,24 @@ int main(){
     assert(ons[0]==0 && ons[1]>=479 && ons[1]<=480);
     assert(ons[0]<offs[0] && offs[0]<=ons[1] && ons[1]<offs[1]);
   }
-  // DOUBLE OPEN must emit two complete root+fifth power chords.
+  // FIFTH is already sampled by the guitar library: one pitch per attack.
   {
     Pair one;one.guitar.push_back({0,200,40,110,240});
-    LiveControls selected;
-    selected.guitarSteps.fill(false);selected.guitarSteps[0]=true;
-    selected.guitarArticulation[0]=4;selected.guitarDouble[0]=true;
-    BlockScheduler engine;
-    std::vector<ScheduledMidiEvent> actual;
-    engine.process(one,0.,0.25,960,61440,
-      [&](ScheduledMidiEvent e){actual.push_back(e);return true;},true,selected);
-    int rootOn=0,fifthOn=0,rootOff=0,fifthOff=0;
-    for(const auto& e:actual)if(e.bus==0) {
-      if(e.pitch==40)(e.on?rootOn:rootOff)++;
-      if(e.pitch==47)(e.on?fifthOn:fifthOff)++;
+    for(bool doubled:{false,true}) {
+      LiveControls selected;
+      selected.guitarSteps.fill(false);selected.guitarSteps[0]=true;
+      selected.guitarArticulation[0]=4;selected.guitarDouble[0]=doubled;
+      BlockScheduler engine;
+      std::vector<ScheduledMidiEvent> actual;
+      engine.process(one,0.,0.25,960,61440,
+        [&](ScheduledMidiEvent e){actual.push_back(e);return true;},true,selected);
+      int ons=0,offs=0;
+      for(const auto& e:actual)if(e.bus==0) {
+        assert(e.pitch==40); // no synthetic fifth at pitch 47
+        (e.on?ons:offs)++;
+      }
+      assert(ons==(doubled?2:1) && offs==(doubled?2:1));
     }
-    assert(rootOn==2 && fifthOn==2 && rootOff==2 && fifthOff==2);
   }
   // STOP releases a long OPEN at step 2; an empty step does not.
   {
