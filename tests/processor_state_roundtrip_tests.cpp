@@ -346,6 +346,57 @@ int main(){
     assert(guitarOff==3 && bassOff==3);
   }
 
+  // DOUBLE is shared by Guitar and FOLLOW Bass only. In EBM mode a
+  // DOUBLE edit must not interrupt the independently sounding bass.
+  {
+    Processor playing;
+    Steinberg::Vst::ParameterChanges mode(1);
+    Steinberg::int32 qi=0,pi=0;
+    auto* selection=mode.addParameterData(kBassMode,qi);
+    assert(selection && selection->addPoint(0,.5,pi)==Steinberg::kResultOk);
+    Steinberg::Vst::ProcessData zero{};
+    zero.numSamples=0;zero.inputParameterChanges=&mode;
+    assert(playing.process(zero)==Steinberg::kResultOk);
+    Steinberg::Vst::ProcessSetup setup{};
+    setup.processMode=Steinberg::Vst::kRealtime;
+    setup.symbolicSampleSize=Steinberg::Vst::kSample32;
+    setup.sampleRate=48000.;setup.maxSamplesPerBlock=600;
+    assert(playing.setupProcessing(setup)==Steinberg::kResultOk);
+    Steinberg::Vst::ProcessContext ctx{};
+    ctx.state=Steinberg::Vst::ProcessContext::kPlaying |
+              Steinberg::Vst::ProcessContext::kProjectTimeMusicValid |
+              Steinberg::Vst::ProcessContext::kTempoValid;
+    ctx.projectTimeMusic=0.;ctx.tempo=120.;
+    Steinberg::Vst::ProcessData block{};
+    block.numSamples=600;block.processContext=&ctx;
+    Steinberg::Vst::EventList first(512);
+    block.outputEvents=&first;
+    assert(playing.process(block)==Steinberg::kResultOk);
+    bool started=false;
+    for(Steinberg::int32 i=0;i<first.getEventCount();++i) {
+      Steinberg::Vst::Event e{};
+      assert(first.getEvent(i,e)==Steinberg::kResultOk);
+      if(e.busIndex==1 && e.type==Steinberg::Vst::Event::kNoteOnEvent)
+        started=true;
+    }
+    assert(started);
+    Steinberg::Vst::ParameterChanges dbl(1);
+    qi=0;pi=0;
+    auto* q=dbl.addParameterData(kGuitarDoubleBase,qi);
+    assert(q && q->addPoint(0,1.,pi)==Steinberg::kResultOk);
+    Steinberg::Vst::EventList later(512);
+    block.outputEvents=&later;
+    block.inputParameterChanges=&dbl;
+    ctx.projectTimeMusic=.025;
+    assert(playing.process(block)==Steinberg::kResultOk);
+    for(Steinberg::int32 i=0;i<later.getEventCount();++i) {
+      Steinberg::Vst::Event e{};
+      assert(later.getEvent(i,e)==Steinberg::kResultOk);
+      assert(!(e.busIndex==1 && e.type==Steinberg::Vst::Event::kNoteOffEvent &&
+               e.sampleOffset==0));
+    }
+  }
+
   // End-to-end VST3 event test: every edit releases exactly those note
   // buses whose musical data changes, never unrelated held voices.
   // Exercise actual ProcessData parameter queues and EventList outputs.
