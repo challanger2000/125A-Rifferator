@@ -244,7 +244,12 @@ public:
       if(!e.on && !active_[static_cast<std::size_t>(e.bus)][static_cast<std::size_t>(e.pitch)]) continue;
       if(e.on && e.bus==3 && active_[3][static_cast<std::size_t>(e.pitch)])continue;
       if(e.on && active_[static_cast<std::size_t>(e.bus)][static_cast<std::size_t>(e.pitch)]) {
-        if(!flushBus(e.bus,sink,e.sampleOffset)) { recoveryPending_=true; return; }
+        // Retrigger only this pitch. A bus-wide flush used to cut unrelated
+        // held guitar/bass notes whenever one pitch was retriggered.
+        if(!sink(ScheduledMidiEvent{e.bus,e.sampleOffset,e.pitch,0,-1,false})) {
+          recoveryPending_=true;return;
+        }
+        active_[static_cast<std::size_t>(e.bus)][static_cast<std::size_t>(e.pitch)]=false;
       }
       if(sink(e)) active_[static_cast<std::size_t>(e.bus)][static_cast<std::size_t>(e.pitch)]=e.on;
       else {
