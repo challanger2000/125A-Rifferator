@@ -146,8 +146,34 @@ public:
           };
           const int gate=(bus==2 || bus==3)?100:std::clamp(bus==0?live.guitarGate:live.bassGate,0,100);
           const int64_t scaled=note.startTick+(note.boundaryTick-note.startTick)*gate/100;
-          const int64_t endTick=std::max(note.startTick+1,scaled);
+          int64_t endTick=std::max(note.startTick+1,scaled);
           if(gate<=0) continue;
+          // OPEN/FIFTH is a sustained sampled-library articulation. Empty
+          // matrix steps do not rearticulate it: keep the NoteOn alive until
+          // the next enabled guitar step, including the next bar's first step.
+          // At STOP the release is exact; otherwise the last sixteenth
+          // retains the chosen gate so new attacks remain distinct.
+          if(bus==0) {
+            const int step=static_cast<int>((note.startTick/240)%16);
+            if(live.guitarArticulation[static_cast<std::size_t>(step)]==4 &&
+               !live.guitarDouble[static_cast<std::size_t>(step)]) {
+              int nextDistance=16;
+              for(int delta=1;delta<=16;++delta) {
+                if(live.guitarSteps[static_cast<std::size_t>((step+delta)%16)]) {
+                  nextDistance=delta;break;
+                }
+              }
+              const int nextStep=(step+nextDistance)%16;
+              const bool stop=live.guitarSteps[static_cast<std::size_t>(nextStep)] &&
+                              live.guitarArticulation[static_cast<std::size_t>(nextStep)]==0;
+              if(nextDistance>1 || stop) {
+                const int64_t boundary=note.startTick+static_cast<int64_t>(nextDistance)*240;
+                endTick=stop?boundary:
+                  std::max<int64_t>(note.startTick+1,
+                    boundary-static_cast<int64_t>(240)*(100-gate)/100);
+              }
+            }
+          }
           // The second attack retains the selected instrument articulation's
           // velocity zone; the Kontakt reference's fixed 75 would change PM
           // to a different articulation on velocity-switched guitar VSTis.
