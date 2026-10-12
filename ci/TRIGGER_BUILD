@@ -102,3 +102,4 @@
 2026-10-12 double sustained open midpoint bounded to 16th grid step
 2026-10-12 prevent duplicate DOUBLE expansion between prepared pattern and scheduler
 2026-10-12 BUNDLED: pitch-specific retrigger, sustained-overlap test, guitar STOP bass isolation
+2026-10-12 BUNDLE: fix sustained-overlap expected gated length and implement lock-respecting CLEAR PATTERN UI
