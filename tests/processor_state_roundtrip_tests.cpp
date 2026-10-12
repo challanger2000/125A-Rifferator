@@ -153,6 +153,46 @@ int main(){
     assert(wordAt(base+48u+15u)==1);
   }
 
+  // Host automation of an already locked step must be rejected by the
+  // Processor just as it is by the Controller. Saving the project must retain
+  // the original guitar ACTIVE, articulation, DEGREE and DOUBLE values.
+  {
+    std::vector<unsigned char> snapshot(data,data+full.getSize());
+    auto write=[&](std::size_t word,std::int32_t value){
+      assert((word+1)*4<=snapshot.size());
+      std::memcpy(snapshot.data()+word*4,&value,4);
+    };
+    const std::size_t doubleWord=11u+2u;
+    const std::size_t activeWord=11u+16u*4u+49u;
+    write(doubleWord,0);
+    write(activeWord,0);
+    write(activeWord+16u,4);
+    write(activeWord+32u,7);
+    write(activeWord+48u,1);
+    MemoryStream lockedState(snapshot.data(),
+      static_cast<Steinberg::TSize>(snapshot.size()));
+    Processor locked;
+    assert(locked.setState(&lockedState)==Steinberg::kResultOk);
+    Steinberg::Vst::ParameterChanges changes(4);
+    auto edit=[&](Steinberg::Vst::ParamID id,double value){
+      Steinberg::int32 qi=0,pi=0;
+      auto* q=changes.addParameterData(id,qi);
+      assert(q && q->addPoint(0,value,pi)==Steinberg::kResultOk);
+    };
+    edit(kGuitarStepBase,1.);
+    edit(kGuitarArticulationBase,.4);
+    edit(kGuitarDegreeBase,0.);
+    edit(kGuitarDoubleBase,1.);
+    Steinberg::Vst::ProcessData block{};
+    block.numSamples=0;
+    block.inputParameterChanges=&changes;
+    assert(locked.process(block)==Steinberg::kResultOk);
+    MemoryStream saved;
+    assert(locked.getState(&saved)==Steinberg::kResultOk);
+    assert(saved.getSize()==static_cast<Steinberg::TSize>(snapshot.size()));
+    assert(std::memcmp(saved.getData(),snapshot.data(),snapshot.size())==0);
+  }
+
   // Fast host automation contract: this V1 processor applies the last valid
   // point in each parameter queue once per block, including zero-sample flushes.
   // Lock/step interleaving must not corrupt serialized state.
