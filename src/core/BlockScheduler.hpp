@@ -184,6 +184,28 @@ public:
       }
     };
     collect(pattern.guitar,0); collect(pattern.bass,1);
+    // STOP is a command, not an empty step: it releases currently active
+    // guitar notes at the exact step boundary. Empty steps emit no command.
+    // Insert it into the same sorted event batch so it also works when the
+    // preceding NoteOn and this STOP occur within one audio block.
+    const double periodPpq=static_cast<double>(period)/960.0;
+    for(int step=0;step<16;++step) {
+      if(!live.guitarSteps[static_cast<std::size_t>(step)] ||
+         live.guitarArticulation[static_cast<std::size_t>(step)]!=0)continue;
+      const double phase=static_cast<double>(step*240)/960.0;
+      const int64_t first=static_cast<int64_t>(std::floor((startPpq-phase)/periodPpq))-1;
+      const int64_t last=static_cast<int64_t>(std::ceil((endPpq-phase)/periodPpq))+1;
+      if(last<first || last-first>64){invalidWindow=true;break;}
+      for(int64_t n=first;n<=last;++n) {
+        const double t=periodPpq*static_cast<double>(n)+phase;
+        if(t<startPpq || t>=endPpq)continue;
+        if(count>=kCapacity){eventOverflow=true;break;}
+        const int offset=std::clamp(static_cast<int>(std::floor(
+          (t-startPpq)/(endPpq-startPpq)*blockSize)),0,blockSize-1);
+        events[static_cast<std::size_t>(count++)]={0,offset,-1,0,-1,false};
+      }
+    }
+
     if(drums_)collect(*drums_,2);
     if(chords_)collect(*chords_,3);
     if(eventOverflow || invalidWindow) {
@@ -206,6 +228,10 @@ public:
     }
     for(int i=0;i<count;++i) {
       const auto e=events[static_cast<std::size_t>(i)];
+      if(e.bus==0 && e.pitch==-1) {
+        if(!flushBus(0,sink,e.sampleOffset)){recoveryPending_=true;return;}
+        continue;
+      }
       if(!e.on && !active_[static_cast<std::size_t>(e.bus)][static_cast<std::size_t>(e.pitch)]) continue;
       if(e.on && e.bus==3 && active_[3][static_cast<std::size_t>(e.pitch)])continue;
       if(e.on && active_[static_cast<std::size_t>(e.bus)][static_cast<std::size_t>(e.pitch)]) {
