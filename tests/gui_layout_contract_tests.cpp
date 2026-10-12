@@ -18,6 +18,10 @@ int main(){
   assert(processor.find("step.doubled=false;")!=std::string::npos);
 
   assert(xml.find("title=\"DEGREE\"")!=std::string::npos);
+  assert(xml.find("control-tag=\"ClearPattern\"")!=std::string::npos);
+  assert(controller.find("command==721")!=std::string::npos);
+  assert(controller.find("kGuitarLockBase+step")!=std::string::npos);
+
   // GUI wiring regression: every visible switch must have the controller
   // handler that publishes its VST3 parameter edit (not a dead decoration).
   std::ifstream controllerFile("src/RifferatorFactory.cpp");
