@@ -84,9 +84,10 @@ int main(){
       LiveControls selected;
       selected.guitarSteps.fill(false);selected.guitarSteps[0]=true;
       selected.guitarArticulation[0]=4;selected.guitarDouble[0]=doubled;
+      selected.guitarSteps[1]=true;selected.guitarArticulation[1]=0;
       BlockScheduler engine;
       std::vector<ScheduledMidiEvent> actual;
-      engine.process(one,0.,0.25,960,61440,
+      engine.process(one,0.,0.5,1920,61440,
         [&](ScheduledMidiEvent e){actual.push_back(e);return true;},true,selected);
       int ons=0,offs=0;
       for(const auto& e:actual)if(e.bus==0) {
@@ -95,6 +96,33 @@ int main(){
       }
       assert(ons==(doubled?2:1) && offs==(doubled?2:1));
     }
+  }
+  // OPEN must span silent steps and STOP must cut it at the selected grid.
+  {
+    Pair one;one.guitar.push_back({0,200,40,115,240});
+    LiveControls c;
+    c.guitarSteps.fill(false);
+    c.guitarSteps[0]=true;c.guitarArticulation[0]=4;
+    c.guitarSteps[3]=true;c.guitarArticulation[3]=0;
+    BlockScheduler engine;
+    std::vector<ScheduledMidiEvent> result;
+    engine.process(one,0.,1.1,1056,61440,
+      [&](ScheduledMidiEvent e){result.push_back(e);return true;},true,c);
+    int ons=0,offs=0;
+    for(const auto& e:result)if(e.bus==0 && e.pitch==40) {
+      if(e.on)++ons;
+      else {++offs; assert(e.sampleOffset==720);}
+    }
+    assert(ons==1 && offs==1);
+    // With the STOP step empty, OPEN holds beyond this window.
+    c.guitarSteps[3]=false;
+    engine.reset();result.clear();
+    engine.process(one,0.,1.1,1056,61440,
+      [&](ScheduledMidiEvent e){result.push_back(e);return true;},true,c);
+    ons=0;offs=0;
+    for(const auto& e:result)if(e.bus==0 && e.pitch==40)
+      (e.on?ons:offs)++;
+    assert(ons==1 && offs==0);
   }
   // The live 16-step STOP row repeats in EVERY bar of a long arrangement.
   {
@@ -137,8 +165,8 @@ int main(){
     overlap.guitar.push_back({0,950,45,115,960});
     overlap.guitar.push_back({240,450,40,115,480});
     LiveControls c;c.guitarSteps.fill(false);
-    c.guitarSteps[0]=true;c.guitarArticulation[0]=4;
-    c.guitarSteps[1]=true;c.guitarArticulation[1]=4;
+    c.guitarSteps[0]=true;c.guitarArticulation[0]=2;
+    c.guitarSteps[1]=true;c.guitarArticulation[1]=2;
     BlockScheduler engine;
     std::vector<ScheduledMidiEvent> actual;
     engine.process(overlap,0.,1.,960,61440,
@@ -193,9 +221,9 @@ int main(){
     assert(e.bus==0 && e.pitch==40);
     if(e.on)++notesOn;else ++notesOff;
   }
-  assert(notesOn==1 && notesOff==1);
-  // Trigger already received its scheduled NoteOff; flush must be empty.
+  assert(notesOn==1 && notesOff==0);
+  // An OPEN with following empty steps is still held; flush must release it.
   events.clear();
   assert(scheduler.flush(sink,0));
-  assert(events.empty());
+  assert(events.size()==1 && !events[0].on && events[0].pitch==40);
 }
