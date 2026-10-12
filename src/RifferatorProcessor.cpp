@@ -98,6 +98,13 @@ tresult PLUGIN_API Processor::process(ProcessData& data) {
     Config next=config_;
     FillOptions nextFill=fill_;
     bool changed=false;
+    // Guitar matrix edits can change the follow-bass and inferred chord root,
+    // but cannot affect the independent drum bus.
+    const auto guitarHarmonyChanged=[&]() noexcept {
+      guitarFlushPending_=true;
+      bassFlushPending_=true;
+      chordFlushPending_=true;
+    };
     for(int i=0;i<data.inputParameterChanges->getParameterCount();++i) {
       auto* queue=data.inputParameterChanges->getParameterData(i);
       if(!queue || queue->getPointCount()<=0)continue;
@@ -169,7 +176,7 @@ tresult PLUGIN_API Processor::process(ProcessData& data) {
         if(!live_.guitarLocks[index] && live_.guitarArticulation[index]!=articulation) {
           live_.guitarArticulation[index]=articulation;
           if(index<steps_.size())steps_[index].articulation=static_cast<Articulation>(articulation);
-          flushOnNextProcess_=true;
+          guitarHarmonyChanged();
         }
         continue;
       }
@@ -179,7 +186,7 @@ tresult PLUGIN_API Processor::process(ProcessData& data) {
         if(!live_.guitarLocks[index] && live_.guitarDegree[index]!=degree) {
           live_.guitarDegree[index]=degree;
           if(index<steps_.size())steps_[index].degree=degree;
-          flushOnNextProcess_=true;
+          guitarHarmonyChanged();
         }
         continue;
       }
@@ -188,7 +195,7 @@ tresult PLUGIN_API Processor::process(ProcessData& data) {
         const bool enabled=value>=0.5;
         if(live_.guitarLocks[static_cast<std::size_t>(step)])continue;
         if(live_.guitarSteps[static_cast<std::size_t>(step)]!=enabled)
-          flushOnNextProcess_=true;
+          guitarHarmonyChanged();
         live_.guitarSteps[static_cast<std::size_t>(step)]=enabled;
         continue;
       }
@@ -222,10 +229,11 @@ tresult PLUGIN_API Processor::process(ProcessData& data) {
     if(changed) {
       // Gate, root and bass changes use only fixed-size transforms at render
       // time. The fill generation remains a non-realtime operation.
-      if(next.guitarGate!=config_.guitarGate || next.bassGate!=config_.bassGate ||
-         next.rootMidi!=config_.rootMidi || next.bassOn!=config_.bassOn ||
-         next.bassVelocity!=config_.bassVelocity)
-        flushOnNextProcess_=true;
+      if(next.guitarGate!=config_.guitarGate)guitarFlushPending_=true;
+      if(next.bassGate!=config_.bassGate ||
+         next.bassOn!=config_.bassOn ||
+         next.bassVelocity!=config_.bassVelocity)bassFlushPending_=true;
+      if(next.rootMidi!=config_.rootMidi)guitarHarmonyChanged();
       live_.guitarGate=next.guitarGate;
       live_.bassGate=next.bassGate;
       live_.bassEnabled=next.bassOn;
@@ -237,7 +245,11 @@ tresult PLUGIN_API Processor::process(ProcessData& data) {
       config_.bassVelocity=next.bassVelocity;
       config_.rootMidi=next.rootMidi;
       const int newFillIndex=std::clamp((nextFill.intensityPercent+5)/10,0,10);
-      if(newFillIndex!=fillIndex_) { fillIndex_=newFillIndex;flushOnNextProcess_=true; }
+      if(newFillIndex!=fillIndex_) {
+        fillIndex_=newFillIndex;
+        guitarFlushPending_=true;
+        bassFlushPending_=true;
+      }
       fill_.intensityPercent=nextFill.intensityPercent;
     }
   }
@@ -273,6 +285,7 @@ tresult PLUGIN_API Processor::process(ProcessData& data) {
     drumFlushPending_=false;
     chordFlushPending_=false;
     guitarFlushPending_=false;
+    bassFlushPending_=false;
   } else {
     // Local edits must only release notes from their own output bus.
     // Failed NoteOffs remain pending until a future callback accepts them.
@@ -287,6 +300,13 @@ tresult PLUGIN_API Processor::process(ProcessData& data) {
     if(guitarFlushPending_) {
       if(!scheduler_.flushBus(0,sink,0))return kResultOk;
       guitarFlushPending_=false;
+    }
+    if(bassFlushPending_) {
+      // Bus 1 has two mutually exclusive MIDI producers. Flush both on a
+      // change to the shared guitar guide or any bass control.
+      if(!scheduler_.flushBus(1,sink,0) || !ebmScheduler_.flush(sink,0))
+        return kResultOk;
+      bassFlushPending_=false;
     }
   }
   const auto* ctx=data.processContext;
