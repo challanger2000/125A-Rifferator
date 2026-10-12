@@ -157,7 +157,13 @@ tresult PLUGIN_API Processor::process(ProcessData& data) {
       if(id>=kHybridRootBase && id<kHybridRootBase+16) {
         const auto bar=static_cast<std::size_t>(id-kHybridRootBase);
         const int root=std::clamp(static_cast<int>(std::lround(value*128.)),0,128);
-        if(live_.harmony.roots[bar]!=root)chordFlushPending_=true;
+        if(live_.harmony.roots[bar]!=root) {
+          chordFlushPending_=true;
+          // HYBRID derives bus-1 pitch from this exact harmony map. Its
+          // sounding bass note must be released before applying the new root.
+          // FOLLOW and standalone EBM bass do not use explicit bar roots.
+          if(activeBassMode_==2)bassFlushPending_=true;
+        }
         live_.harmony.roots[bar]=root;
         continue;
       }
