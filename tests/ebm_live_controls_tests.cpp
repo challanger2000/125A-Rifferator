@@ -87,5 +87,25 @@ int main() {
     stronger=true;
   }
   assert(stronger);
+  // The EBM bass adapter must keep a held voice across a callback skipped
+  // solely for host output backpressure, without hiding an actual seek.
+  {
+    Arrangement held;
+    held.periodTicks=3840;
+    held.midi.bass.push_back({0,950,40,110,960});
+    EbmSchedulerAdapter sched;
+    std::vector<ScheduledMidiEvent> collected;
+    auto record=[&](ScheduledMidiEvent e){collected.push_back(e);return true;};
+    assert(sched.process(held,0.,.025,240,true,record));
+    assert(collected.size()==1 && collected[0].bus==1 && collected[0].on);
+    collected.clear();
+    sched.advanceSkippedBlock(.025,.05);
+    assert(sched.process(held,.05,.075,240,true,record));
+    assert(collected.empty());
+    sched.advanceSkippedBlock(.125,.15);
+    assert(sched.process(held,.15,.175,240,true,record));
+    assert(collected.size()==1 && !collected[0].on &&
+           collected[0].bus==1 && collected[0].sampleOffset==0);
+  }
 }
 
