@@ -92,3 +92,4 @@
 2026-10-12 step matrix second click clears articulation; STOP stays separate
 2026-10-12 suppress redundant zoom resize and check controller guard
 2026-10-12 retain articulation velocity on second DOUBLE attack
+2026-10-12 configurable PM MIN MAX controls with backward-compatible state v9 and DOUBLE test
