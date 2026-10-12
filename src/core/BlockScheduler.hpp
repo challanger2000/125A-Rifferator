@@ -160,16 +160,12 @@ public:
               std::min<int64_t>(midpoint,note.startTick+half*gate/100));
             const int64_t secondOff=std::max<int64_t>(midpoint+1,
               std::min<int64_t>(note.boundaryTick,midpoint+(note.boundaryTick-midpoint)*gate/100));
-            // OPEN is a root+fifth power chord; DOUBLE must repeat both voices.
-            const bool powerChord=live.guitarArticulation[static_cast<std::size_t>((note.startTick/240)%16)]==4;
+            // The guitar library owns PM and FIFTH voicings: trigger one
+            // MIDI pitch per attack; never synthesize an extra fifth.
             push(cycle+static_cast<double>(firstOff)/960.0,false);
-            if(powerChord)push(cycle+static_cast<double>(firstOff)/960.0,false,7);
             push(cycle+phase,true);
-            if(powerChord)push(cycle+phase,true,7);
             push(cycle+static_cast<double>(secondOff)/960.0,false);
-            if(powerChord)push(cycle+static_cast<double>(secondOff)/960.0,false,7);
             push(cycle+static_cast<double>(midpoint)/960.0,true,0,true);
-            if(powerChord)push(cycle+static_cast<double>(midpoint)/960.0,true,7,true);
             continue;
           }
           if(bus==3) {
@@ -187,10 +183,6 @@ public:
             push(cycle+static_cast<double>(endTick)/960.0,false);
           }
           push(cycle+phase,true);
-          if(bus==0 && live.guitarArticulation[static_cast<std::size_t>((note.startTick/240)%16)]==4) {
-            push(cycle+static_cast<double>(endTick)/960.0,false,7);
-            push(cycle+phase,true,7);
-          }
         }
       }
     };
