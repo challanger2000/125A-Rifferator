@@ -197,7 +197,7 @@ tresult PLUGIN_API Processor::process(ProcessData& data) {
         const bool active=value>=0.5;
         if(live_.drumSteps[static_cast<std::size_t>(index/16)][static_cast<std::size_t>(index%16)]!=active) {
           live_.drumSteps[static_cast<std::size_t>(index/16)][static_cast<std::size_t>(index%16)]=active;
-          flushOnNextProcess_=true;
+          drumFlushPending_=true;
         }
         auto* row=index<16?&drumPattern_.kick:index<32?&drumPattern_.snare:&drumPattern_.hat;
         (*row)[static_cast<std::size_t>(index%16)]=active;
@@ -205,7 +205,7 @@ tresult PLUGIN_API Processor::process(ProcessData& data) {
       }
       if(id==kDrumEnabled) {
         const bool active=value>=0.5;
-        if(live_.drumsEnabled!=active)flushOnNextProcess_=true;
+        if(live_.drumsEnabled!=active)drumFlushPending_=true;
         live_.drumsEnabled=active;drumPattern_.enabled=active;
         continue;
       }
@@ -270,6 +270,12 @@ tresult PLUGIN_API Processor::process(ProcessData& data) {
   if(flushOnNextProcess_) {
     if(!scheduler_.flush(sink,0) || !ebmScheduler_.flush(sink,0))return kResultOk;
     flushOnNextProcess_=false;
+    drumFlushPending_=false;
+  } else if(drumFlushPending_) {
+    // Drum-pattern edits must not silence unrelated sustained guitar,
+    // bass and chord notes. Retry an unaccepted drum NoteOff next block.
+    if(!scheduler_.flushBus(2,sink,0))return kResultOk;
+    drumFlushPending_=false;
   }
   const auto* ctx=data.processContext;
   const bool running=ctx && (ctx->state&ProcessContext::kPlaying)!=0;
