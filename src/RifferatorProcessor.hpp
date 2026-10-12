@@ -41,6 +41,7 @@ private:
   int ebmStyle_{};
   bool bassSwitchPending_{};
   bool flushOnNextProcess_{};
+  bool drumFlushPending_{};
   LiveControls live_{};
   int preparedRootMidi_{40};
 };
