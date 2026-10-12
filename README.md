@@ -4,9 +4,9 @@
 
 Development V1.0.0 on `develop/v1.0.0` — guitar-first Windows VST3 MIDI generator with **four separate event outputs** (Guitar, Bass, Drums, Chords), each using MIDI channel 1.
 
-- **GUITAR:** 16-step articulation matrix, live pitch/step controls and per-step LOCK; seeded GENERATE and conservative VARIATE (30% mutation) commands run on the controller thread. 100%/150% GUI zoom.
-- **BASS:** FOLLOW, EBM and HYBRID modes with enable controls.
-- **DRUMS:** Editable 16-step GM Kick 36 / Snare 38 / Closed Hat 42.
+- **GUITAR:** 16-step articulation matrix, live root MIDI, guitar/bass gate and fill-intensity controls, per-step pitch/LOCK; seeded GENERATE and conservative VARIATE (30% mutation) on the controller thread. 100%/150% GUI zoom.
+- **BASS:** FOLLOW, EBM and HYBRID modes, plus direct MIDI velocity, gate and EBM style controls.
+- **DRUMS:** Editable 16-step GM Kick 36 / Snare 38 / Closed Hat 42, with an explicit Drums ON/OFF switch.
 - **CHORDS:** Guitar-following output with chord-quality and root-only modes.
 
 ## Development and verification status
@@ -17,6 +17,6 @@ The earlier standalone editor create/release test was **removed from CTest** bec
 
 **Real host acceptance protocol:** [Studio One GUI/lifecycle QA](docs/HOST-GUI-QA.md).
 
-Development build artifacts are attached to successful GitHub Actions runs. The latest confirmed baseline before GUI-generation integration is #38257386913 (29/29 CTest, 537/537 Steinberg validator). The new GENERATE/VARIATE command wiring is **not verified by CI yet**. Do not ship a Final or Gumroad package before the host protocol, scope agreement and 125A release QA pass.
+Development build artifacts are attached to successful GitHub Actions runs. The latest independently confirmed CI baseline is [#38260745327](https://github.com/challanger2000/125A-Rifferator/actions/runs/38260745327), validating seeded GENERATE/VARIATE. The additional seven GUI control groups are **not verified by CI yet**. Do not ship a Final or Gumroad package before the Studio One host protocol, agreed V1 scope and 125A release QA pass.
 
 See [bass integration contract](docs/BASS-INTEGRATION-CONTRACT.md).
