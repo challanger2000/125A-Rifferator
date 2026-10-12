@@ -4,7 +4,7 @@
 
 Development V1.0.0 on `develop/v1.0.0` — guitar-first Windows VST3 MIDI generator with **four separate event outputs** (Guitar, Bass, Drums, Chords), each using MIDI channel 1.
 
-- **GUITAR:** 16-step articulation matrix, live root MIDI, guitar/bass gate and fill-intensity controls, per-step pitch/LOCK; seeded GENERATE and conservative VARIATE (30% mutation) on the controller thread. 100%/150% GUI zoom.
+- **GUITAR:** Full-size 16-step articulation matrix with STEP ON/DOUBLE/LOCK/DEGREE, dedicated Root MIDI, Guitar/Bass Gate, Fill and PM Velocity settings, plus seeded GENERATE/VARIATE/CLEAR. **GUITAR** and **BASS / CHORDS / DRUMS** are separate, mutually exclusive GUI pages in a 1120×640 editor; 100%/150% zoom.
 - **BASS:** FOLLOW, EBM and HYBRID modes, plus direct MIDI velocity, gate and EBM style controls.
 - **DRUMS:** Editable 16-step GM Kick 36 / Snare 38 / Closed Hat 42, Drums ON/OFF, STANDARD BEAT reset and seeded GENERATE/VARIATE drum commands. Independent drum locks are not implemented in this V1 editor.
 - **CHORDS:** Guitar-following output with chord-quality and root-only modes.
@@ -17,6 +17,6 @@ The earlier standalone editor create/release test was **removed from CTest** bec
 
 **Real host acceptance protocol:** [Studio One GUI/lifecycle QA](docs/HOST-GUI-QA.md).
 
-Development build artifacts are attached to successful GitHub Actions runs. The latest independently confirmed CI baseline is [#38260745327](https://github.com/challanger2000/125A-Rifferator/actions/runs/38260745327), validating seeded GENERATE/VARIATE. The seven additional GUI control groups passed [#38289271370](https://github.com/challanger2000/125A-Rifferator/actions/runs/38289271370). The latest drum-command integration has **not yet passed CI**. Do not ship a Final or Gumroad package before the Studio One host protocol, agreed V1 scope and 125A release QA pass.
+Development build artifacts are attached to successful GitHub Actions runs. The latest independently confirmed CI baseline is [#38260745327](https://github.com/challanger2000/125A-Rifferator/actions/runs/38260745327), validating seeded GENERATE/VARIATE. The seven additional GUI control groups passed [#38289271370](https://github.com/challanger2000/125A-Rifferator/actions/runs/38289271370). The most recent independently verified baseline is [#38293244458](https://github.com/challanger2000/125A-Rifferator/actions/runs/38293244458), **29/29 CTest + 537/537 validator PASS**. A new two-page GUI redesign and controller-state v2 are **awaiting their first CI build and actual Studio One visual/click acceptance**; do not use the old green artifact as evidence that the overlapping GUI is repaired. Do not ship a Final or Gumroad package before the Studio One host protocol, agreed V1 scope and 125A release QA pass.
 
 See [bass integration contract](docs/BASS-INTEGRATION-CONTRACT.md).
