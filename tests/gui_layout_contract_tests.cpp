@@ -16,6 +16,13 @@ int main(){
   const std::string processor((std::istreambuf_iterator<char>(processorFile)),
                                std::istreambuf_iterator<char>());
   assert(processor.find("step.doubled=false;")!=std::string::npos);
+  // Project restore must reconcile live articulation/degree/locks with the
+  // step snapshot used by later Save and Generate operations.
+  for(const auto* expression:{"steps_[i].articulation=static_cast<Articulation>(restoredArt[i])",
+                              "steps_[i].degree=restoredDegree[i]",
+                              "steps_[i].locked=restoredLocks[i]"})
+    assert(processor.find(expression)!=std::string::npos);
+
 
   assert(xml.find("title=\"DEGREE\"")!=std::string::npos);
   // Signed degrees down to -13 need more than the former 19-pixel readout.
