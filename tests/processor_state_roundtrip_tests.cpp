@@ -193,6 +193,58 @@ int main(){
     assert(std::memcmp(saved.getData(),again.getData(),saved.getSize())==0);
   }
 
+  // A live drum edit must not cut sustained guitar or chord notes.
+  // Exercise Processor::process and the actual VST3 EventList, not only a
+  // scheduler helper: the old global flush ended all four output buses.
+  {
+    Processor playing;
+    Steinberg::Vst::ProcessSetup setup{};
+    setup.processMode=Steinberg::Vst::kRealtime;
+    setup.symbolicSampleSize=Steinberg::Vst::kSample32;
+    setup.sampleRate=48000.;setup.maxSamplesPerBlock=3000;
+    assert(playing.setupProcessing(setup)==Steinberg::kResultOk);
+    Steinberg::Vst::ProcessContext ctx{};
+    ctx.state=Steinberg::Vst::ProcessContext::kPlaying |
+              Steinberg::Vst::ProcessContext::kProjectTimeMusicValid |
+              Steinberg::Vst::ProcessContext::kTempoValid;
+    ctx.tempo=120.;
+    Steinberg::Vst::ProcessData block{};
+    block.numSamples=3000;block.processContext=&ctx;
+    Steinberg::Vst::EventList first(512);
+    block.outputEvents=&first;
+    ctx.projectTimeMusic=0.;
+    assert(playing.process(block)==Steinberg::kResultOk);
+    bool chordOn=false,guitarOn=false,drumOn=false;
+    for(Steinberg::int32 i=0;i<first.getEventCount();++i){
+      Steinberg::Vst::Event e{};
+      assert(first.getEvent(i,e)==Steinberg::kResultOk);
+      if(e.type!=Steinberg::Vst::Event::kNoteOnEvent)continue;
+      chordOn|=e.busIndex==3;
+      guitarOn|=e.busIndex==0;
+      drumOn|=e.busIndex==2;
+    }
+    assert(chordOn && guitarOn && drumOn);
+    Steinberg::Vst::ParameterChanges edit(1);
+    Steinberg::int32 queueIndex=0,pointIndex=0;
+    auto* q=edit.addParameterData(kDrumStepBase,queueIndex);
+    assert(q && q->addPoint(0,0.,pointIndex)==Steinberg::kResultOk);
+    Steinberg::Vst::EventList second(512);
+    block.outputEvents=&second;
+    block.inputParameterChanges=&edit;
+    ctx.projectTimeMusic=.125;
+    assert(playing.process(block)==Steinberg::kResultOk);
+    bool drumReleased=false;
+    for(Steinberg::int32 i=0;i<second.getEventCount();++i){
+      Steinberg::Vst::Event e{};
+      assert(second.getEvent(i,e)==Steinberg::kResultOk);
+      if(e.type!=Steinberg::Vst::Event::kNoteOffEvent ||
+         e.sampleOffset!=0)continue;
+      assert(e.busIndex==2); // no unintended guitar, bass or chord flush
+      drumReleased=true;
+    }
+    assert(drumReleased);
+  }
+
   // Regression: project recall must apply every stored drum step to the LIVE
   // MIDI masks. A byte-identical getState roundtrip alone missed this defect.
   {
