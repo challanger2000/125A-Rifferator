@@ -404,6 +404,66 @@ int main(){
     }
   }
 
+  // Explicit harmony-map edits change both chord output and HYBRID Bass
+  // pitch, but not the independent EBM or guitar-following bass. Confirm
+  // held notes are selectively released at the start of the host callback.
+  for(int bassMode=0;bassMode<3;++bassMode) {
+    Processor playing;
+    Steinberg::Vst::ProcessSetup setup{};
+    setup.processMode=Steinberg::Vst::kRealtime;
+    setup.symbolicSampleSize=Steinberg::Vst::kSample32;
+    setup.sampleRate=48000.;setup.maxSamplesPerBlock=600;
+    assert(playing.setupProcessing(setup)==Steinberg::kResultOk);
+    if(bassMode!=0) {
+      Steinberg::Vst::ParameterChanges modeChange(1);
+      Steinberg::int32 qi=0,pi=0;
+      auto* q=modeChange.addParameterData(kBassMode,qi);
+      assert(q && q->addPoint(0,bassMode/2.,pi)==Steinberg::kResultOk);
+      Steinberg::Vst::ProcessData control{};
+      control.numSamples=0;control.inputParameterChanges=&modeChange;
+      assert(playing.process(control)==Steinberg::kResultOk);
+    }
+    Steinberg::Vst::ProcessContext ctx{};
+    ctx.state=Steinberg::Vst::ProcessContext::kPlaying |
+              Steinberg::Vst::ProcessContext::kProjectTimeMusicValid |
+              Steinberg::Vst::ProcessContext::kTempoValid;
+    ctx.tempo=120.;ctx.projectTimeMusic=0.;
+    Steinberg::Vst::EventList first(512);
+    Steinberg::Vst::ProcessData block{};
+    block.numSamples=600;block.processContext=&ctx;block.outputEvents=&first;
+    assert(playing.process(block)==Steinberg::kResultOk);
+    bool sawBass=false,sawChord=false;
+    for(Steinberg::int32 i=0;i<first.getEventCount();++i) {
+      Steinberg::Vst::Event e{};
+      assert(first.getEvent(i,e)==Steinberg::kResultOk);
+      if(e.type!=Steinberg::Vst::Event::kNoteOnEvent)continue;
+      sawBass|=e.busIndex==1;
+      sawChord|=e.busIndex==3;
+    }
+    assert(sawBass && sawChord);
+    Steinberg::Vst::ParameterChanges change(1);
+    Steinberg::int32 qi=0,pi=0;
+    auto* q=change.addParameterData(kHybridRootBase,qi);
+    assert(q && q->addPoint(0,53./128.,pi)==Steinberg::kResultOk);
+    Steinberg::Vst::EventList after(512);
+    block.outputEvents=&after;block.inputParameterChanges=&change;
+    ctx.projectTimeMusic=.025;
+    assert(playing.process(block)==Steinberg::kResultOk);
+    int released[4]{};
+    for(Steinberg::int32 i=0;i<after.getEventCount();++i) {
+      Steinberg::Vst::Event e{};
+      assert(after.getEvent(i,e)==Steinberg::kResultOk);
+      if(e.type==Steinberg::Vst::Event::kNoteOffEvent &&
+         e.sampleOffset==0) {
+        assert(e.busIndex>=0 && e.busIndex<4);
+        ++released[e.busIndex];
+      }
+    }
+    assert(released[0]==0 && released[2]==0);
+    assert(released[3]>=1); // chord harmony changed in every bass mode
+    assert(released[1]==(bassMode==2?1:0));
+  }
+
   // End-to-end VST3 event test: every edit releases exactly those note
   // buses whose musical data changes, never unrelated held voices.
   // Exercise actual ProcessData parameter queues and EventList outputs.
