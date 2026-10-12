@@ -101,3 +101,4 @@
 2026-10-12 STOP events restricted to active pattern period regression
 2026-10-12 double sustained open midpoint bounded to 16th grid step
 2026-10-12 prevent duplicate DOUBLE expansion between prepared pattern and scheduler
+2026-10-12 BUNDLED: pitch-specific retrigger, sustained-overlap test, guitar STOP bass isolation
