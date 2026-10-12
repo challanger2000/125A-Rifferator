@@ -242,7 +242,7 @@ int main(){
   struct Rect {int x,y,w,h; std::string page; std::string name;};
   std::vector<Rect> stack{{0,0,1120,640,"header","root"}};
   std::vector<Rect> interactive;
-  const std::regex viewTokens(R"RE(<view\\b[^>]*\\/>|<view\\b[^>]*>|<\\/view>)RE");
+  const std::regex viewTokens(R"RE(<view\b[^>]*\/>|<view\b[^>]*>|<\/view>)RE");
   const std::regex originRe(R"RE(origin="([0-9]+), ([0-9]+)")RE");
   const std::regex sizeRe(R"RE(size="([0-9]+), ([0-9]+)")RE");
   const std::regex ctagRe(R"RE(control-tag="([^"]+)")RE");
