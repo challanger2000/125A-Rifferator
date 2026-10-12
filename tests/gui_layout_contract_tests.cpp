@@ -7,11 +7,13 @@
 #include <iterator>
 #include <array>
 #include <utility>
+#include <vector>
+#include <algorithm>
 int main(){
   std::ifstream file("resource/rifferator.uidesc");
   assert(file.good());
   const std::string xml((std::istreambuf_iterator<char>(file)),std::istreambuf_iterator<char>());
-  assert(xml.find("size=\"1120, 696\"")!=std::string::npos);
+  assert(xml.find("size=\"1120, 640\"")!=std::string::npos);
   // DOUBLE must be produced once, in the live scheduler, never pre-rendered.
   std::ifstream processorFile("src/RifferatorProcessor.cpp");
   assert(processorFile.good());
@@ -62,7 +64,7 @@ int main(){
     }
   }
   assert(xml.find("<control-tag name=\"DrumsEnabledAction\" tag=\"724\"/>")!=std::string::npos);
-  assert(xml.find("control-tag=\"DrumsEnabledAction\" origin=\"912, 582\"")!=std::string::npos);
+  assert(xml.find("control-tag=\"DrumsEnabledAction\" origin=\"908, 346\"")!=std::string::npos);
   // Three active drum commands must occupy separate non-overlapping
   // positions in the fixed header band and have unique controller tags.
   for(const auto& spec:std::array<std::pair<const char*,int>,3>{{
@@ -73,9 +75,9 @@ int main(){
     assert(xml.find(std::string("control-tag=\"")+spec.first+
       "\" origin=\"")!=std::string::npos);
   }
-  assert(xml.find("control-tag=\"StandardDrums\" origin=\"348, 582\" size=\"173, 27\"")!=std::string::npos);
-  assert(xml.find("control-tag=\"GenerateDrums\" origin=\"533, 582\" size=\"173, 27\"")!=std::string::npos);
-  assert(xml.find("control-tag=\"VariateDrums\" origin=\"718, 582\" size=\"173, 27\"")!=std::string::npos);
+  assert(xml.find("control-tag=\"StandardDrums\" origin=\"347, 346\" size=\"174, 34\"")!=std::string::npos);
+  assert(xml.find("control-tag=\"GenerateDrums\" origin=\"534, 346\" size=\"174, 34\"")!=std::string::npos);
+  assert(xml.find("control-tag=\"VariateDrums\" origin=\"721, 346\" size=\"174, 34\"")!=std::string::npos);
 
   assert(xml.find("control-tag=\"ClearPattern\"")!=std::string::npos);
   // Numerical PM readouts are labels, not misleading interactive switches.
@@ -87,8 +89,8 @@ int main(){
     assert(xml.substr(begin,end-begin).find("mouse-enabled=\"false\"")!=std::string::npos);
   }
   // 1..127 must fit without clipping in both velocity displays.
-  assert(xml.find("control-tag=\"PmMinValue\" origin=\"157, 382\" size=\"48, 24\"")!=std::string::npos);
-  assert(xml.find("control-tag=\"PmMaxValue\" origin=\"296, 382\" size=\"48, 24\"")!=std::string::npos);
+  assert(xml.find("control-tag=\"PmMinValue\" origin=\"75, 425\" size=\"47, 27\"")!=std::string::npos);
+  assert(xml.find("control-tag=\"PmMaxValue\" origin=\"195, 425\" size=\"47, 27\"")!=std::string::npos);
 
   // GUI wiring regression: every visible switch must have the controller
   // handler that publishes its VST3 parameter edit (not a dead decoration).
@@ -103,7 +105,7 @@ int main(){
   assert(controller.find("runDrumGeneration(command==726?")!=std::string::npos);
   assert(controller.find("publishDrumSteps(generateDrums(")!=std::string::npos);
   assert(controller.find("publishDrumSteps(a125::rifferator::DrumPattern::standard())")!=std::string::npos);
-  assert(controller.find("(control->getTag()>=700 && control->getTag()<=727)")!=std::string::npos);
+  assert(controller.find("(control->getTag()>=700 && control->getTag()<=729)")!=std::string::npos);
   assert(controller.find("if(id==musicalParam(i))")!=std::string::npos);
   assert(controller.find("refreshMusicalDisplays();")!=std::string::npos);
   assert(controller.find("control->getTag()==724")!=std::string::npos);
@@ -136,7 +138,7 @@ int main(){
   // applies results through VST3 parameter edits outside process().
   assert(xml.find("<control-tag name=\"GuitarGenerate\" tag=\"700\"/>")!=std::string::npos);
   assert(xml.find("<control-tag name=\"GuitarVariate\" tag=\"722\"/>")!=std::string::npos);
-  assert(xml.find("control-tag=\"GuitarVariate\" origin=\"422, 424\" size=\"180, 32\"")!=std::string::npos);
+  assert(xml.find("control-tag=\"GuitarVariate\" origin=\"535, 478\" size=\"235, 39\"")!=std::string::npos);
   const auto generation=controller.find("void runGuitarGeneration(");
   assert(generation!=std::string::npos);
   const auto generationEnd=controller.find("VSTGUI::VST3Editor* activeEditor_",generation);
@@ -151,7 +153,7 @@ int main(){
   assert(generationCode.find("publish(kGuitarDoubleBase+i,0.)")!=std::string::npos);
   assert(controller.find("if(command==700 || command==722)")!=std::string::npos);
   // Drum commands 725..727 extend the command listener range beyond Guitar VARIATE 722.
-  assert(controller.find("(control->getTag()>=700 && control->getTag()<=727)")!=std::string::npos);
+  assert(controller.find("(control->getTag()>=700 && control->getTag()<=729)")!=std::string::npos);
   assert(controller.find("makeIndustrialGuitarGroove(")==std::string::npos);
   assert(controller.find("kGuitarLockBase+step")!=std::string::npos);
   for(const auto* expr: {"command>=200 && command<248",
@@ -183,8 +185,8 @@ int main(){
     assert(end!=std::string::npos);
     assert(xml.substr(pos,end-pos).find("kick-style=\"false\"")!=std::string::npos);
   }
-  // 150% must produce integral host window dimensions (1680 x 1044).
-  assert((1120*3)%2==0 && (696*3)%2==0);
+  // 150% must produce integral host window dimensions (1680 x 960).
+  assert((1120*3)%2==0 && (640*3)%2==0);
   std::regex tagDef(R"RE(<control-tag name="([^"]+)" tag="([0-9]+)")RE");
   std::regex viewTag(R"RE(<view[^>]*control-tag="([^"]+)")RE");
   std::set<std::string> tags;
@@ -227,11 +229,79 @@ int main(){
   assert(counts.at("Action701")==701 && counts.at("Action702")==702);
   assert(counts.at("GuitarGenerate")==700);
 
-  // The root editor is 696 pixels high and must not clip a direct child.
+  // The 640px root editor must not clip any direct or nested child.
   std::regex child(R"RE(<view[^>]*origin="([0-9]+), ([0-9]+)"[^>]*size="([0-9]+), ([0-9]+)")RE");
   for(auto it=std::sregex_iterator(xml.begin(),xml.end(),child);it!=std::sregex_iterator();++it){
     int x=std::stoi((*it)[1]),y=std::stoi((*it)[2]);
     int w=std::stoi((*it)[3]),h=std::stoi((*it)[4]);
-    assert(x+w<=1120 && y+h<=696);
+    assert(x+w<=1120 && y+h<=640);
   }
+  // A flat bounds check cannot catch the original Rifferator failure:
+  // the DOUBLE row extended beyond its 345px guitar parent, while the
+  // PM controls overlapped it. Validate nested geometry in every page.
+  struct Rect {int x,y,w,h; std::string page; std::string name;};
+  std::vector<Rect> stack{{0,0,1120,640,"header","root"}};
+  std::vector<Rect> interactive;
+  const std::regex viewTokens(R"RE(<view\\b[^>]*\\/>|<view\\b[^>]*>|<\\/view>)RE");
+  const std::regex originRe(R"RE(origin="([0-9]+), ([0-9]+)")RE");
+  const std::regex sizeRe(R"RE(size="([0-9]+), ([0-9]+)")RE");
+  const std::regex ctagRe(R"RE(control-tag="([^"]+)")RE");
+  for(auto i=std::sregex_iterator(xml.begin(),xml.end(),viewTokens);
+      i!=std::sregex_iterator();++i) {
+    const std::string node=(*i)[0].str();
+    if(node=="</view>") {
+      assert(stack.size()>1);
+      stack.pop_back();
+      continue;
+    }
+    std::smatch p,sz,tag;
+    assert(std::regex_search(node,p,originRe));
+    assert(std::regex_search(node,sz,sizeRe));
+    const int lx=std::stoi(p[1]),ly=std::stoi(p[2]);
+    const int w=std::stoi(sz[1]),h=std::stoi(sz[2]);
+    const Rect& parent=stack.back();
+    assert(lx>=0 && ly>=0 && w>0 && h>0);
+    assert(lx+w<=parent.w && ly+h<=parent.h);
+    std::string page=parent.page;
+    if(node.find("rifferator-page=\"guitar\"")!=std::string::npos)
+      page="guitar";
+    else if(node.find("rifferator-page=\"rhythm\"")!=std::string::npos)
+      page="rhythm";
+    Rect rect{parent.x+lx,parent.y+ly,w,h,page,""};
+    if(std::regex_search(node,tag,ctagRe)) {
+      rect.name=tag[1].str();
+      interactive.push_back(rect);
+    }
+    if(node.size()<2 || node.substr(node.size()-2)!="/>")
+      stack.push_back(rect);
+  }
+  assert(stack.size()==1);
+  assert(interactive.size()>=280);
+  // A hidden page occupies the same coordinates by design; compare only
+  // controls on the same visible page. Any colliding interactive surfaces
+  // would be unclickable/misleading despite VST3 validator passing.
+  for(std::size_t i=0;i<interactive.size();++i)
+    for(std::size_t j=i+1;j<interactive.size();++j) {
+      const auto& a=interactive[i];
+      const auto& b=interactive[j];
+      if(a.page!=b.page)continue;
+      const int dx=std::min(a.x+a.w,b.x+b.w)-std::max(a.x,b.x);
+      const int dy=std::min(a.y+a.h,b.y+b.h)-std::max(a.y,b.y);
+      assert(dx<=0 || dy<=0);
+    }
+  for(const auto& button:interactive) {
+    if(button.name=="GuitarPage" || button.name=="RhythmPage")
+      assert(button.y+button.h<=106); // no transparent page over header
+    if(button.name.rfind("GDouble",0)==0)
+      assert(button.y>=458 && button.y+button.h<=491);
+  }
+  assert(xml.find("rifferator-page=\"guitar\" origin=\"0, 106\" size=\"1120, 534\"")!=std::string::npos);
+  assert(xml.find("rifferator-page=\"rhythm\" origin=\"0, 106\" size=\"1120, 534\"")!=std::string::npos);
+  assert(xml.find("<control-tag name=\"GuitarPage\" tag=\"728\"/>")!=std::string::npos);
+  assert(xml.find("<control-tag name=\"RhythmPage\" tag=\"729\"/>")!=std::string::npos);
+  assert(controller.find("attributes.getAttributeValue(\"rifferator-page\")")!=std::string::npos);
+  assert(controller.find("if(command==728 || command==729)")!=std::string::npos);
+  assert(controller.find("guitarPageView_->setVisible(!rhythmPageSelected_)")!=std::string::npos);
+  assert(controller.find("rhythmPageView_->setVisible(rhythmPageSelected_)")!=std::string::npos);
+
 }
