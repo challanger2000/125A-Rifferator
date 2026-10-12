@@ -121,3 +121,4 @@
 2026-10-12 BUNDLE: controller LOCK rejects host step automation; full recall replaces previously locked GUI state; Processor state regression
 2026-10-12 BATCH: FOLLOW bass inherits guitar DOUBLE strikes; deterministic PM MIN/MAX velocity accents; VST3 processor and core regression audit
 2026-10-12 BUNDLE: FOLLOW DOUBLE bass release, deterministic final LOCK automation precedence and EBM independence regressions
+2026-10-12 VERIFY: update NoteOff backpressure regression for correctly released FOLLOW Bass after DOUBLE edit; no duplicate Drum NoteOff
