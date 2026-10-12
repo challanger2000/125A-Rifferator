@@ -102,5 +102,25 @@ int main() {
   auto acceptExtreme=[&](const ScheduledMidiEvent& e){if(!e.on)++recoveredExtreme;return true;};
   extreme.process(pattern,1.0e16,1.0e16+1.,4800,period,acceptExtreme,true);
   assert(recoveredExtreme>=1);
+  // A host-capacity retry can intentionally skip one contiguous block.
+  // Preserve a still-held bass note, but never conceal a real transport jump.
+  {
+    Pair sustained;
+    sustained.bass.push_back({0,950,28,110,960});
+    LiveControls c;
+    BlockScheduler sched;
+    std::vector<ScheduledMidiEvent> emitted;
+    auto accept=[&](ScheduledMidiEvent e){emitted.push_back(e);return true;};
+    sched.process(sustained,0.,.025,240,3840,accept,true,c);
+    assert(emitted.size()==1 && emitted[0].bus==1 && emitted[0].on);
+    emitted.clear();
+    sched.advanceSkippedBlock(.025,.05);
+    sched.process(sustained,.05,.075,240,3840,accept,true,c);
+    assert(emitted.empty()); // no phantom seek and bass flush
+    sched.advanceSkippedBlock(.125,.15); // non-contiguous: must not hide seek
+    sched.process(sustained,.15,.175,240,3840,accept,true,c);
+    assert(emitted.size()==1 && emitted[0].bus==1 && !emitted[0].on &&
+           emitted[0].sampleOffset==0);
+  }
   scheduler.reset();
 }
