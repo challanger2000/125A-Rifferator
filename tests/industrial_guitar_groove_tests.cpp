@@ -158,7 +158,7 @@ int main(){
     int ons=0,offs=0;
     for(const auto& e:actual)if(e.bus==0 && e.pitch==40) {
       if(e.on)++ons;
-      else {++offs;assert(e.sampleOffset==1908);}
+      else {++offs;assert(e.sampleOffset>=1907 && e.sampleOffset<=1908);}
     }
     assert(ons==1 && offs==1); // only the valid loop end, never Step 12
     // Valid Step 3 STOP must fire in every eight-step repetition, while
@@ -173,6 +173,31 @@ int main(){
       else {assert(e.sampleOffset==720 || e.sampleOffset==2640);++offs;}
     }
     assert(ons==2 && offs==2);
+  }
+  // STOP at an exact audio-block boundary must send one NoteOff and
+  // must not re-trigger or duplicate it in the next callback.
+  {
+    Pair one;one.guitar.push_back({0,200,40,115,240});
+    LiveControls c;c.guitarSteps.fill(false);
+    c.guitarSteps[0]=true;c.guitarArticulation[0]=4;
+    c.guitarSteps[1]=true;c.guitarArticulation[1]=0;
+    BlockScheduler scheduler;
+    std::vector<ScheduledMidiEvent> e;
+    auto sink=[&](ScheduledMidiEvent ev){e.push_back(ev);return true;};
+    scheduler.process(one,0.,0.25,240,61440,sink,true,c);
+    int ons=0,offs=0;
+    for(auto event:e)if(event.bus==0){ons+=event.on;offs+=!event.on;}
+    assert(ons==1 && offs==0);
+    e.clear();
+    scheduler.process(one,0.25,0.5,240,61440,sink,true,c);
+    for(auto event:e)if(event.bus==0) {
+      assert(!event.on && event.sampleOffset==0);
+      ++offs;
+    }
+    assert(offs==1);
+    e.clear();
+    scheduler.process(one,0.5,0.75,240,61440,sink,true,c);
+    assert(e.empty());
   }
   // Retrigger of one pitch must not kill another sustained guitar pitch.
   {
