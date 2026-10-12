@@ -151,7 +151,14 @@ public:
               if(live.guitarArticulation[static_cast<std::size_t>((note.startTick/240)%16)]==2) {
                 const int lower=std::clamp(live.pmMin,1,127);
                 const int upper=std::clamp(live.pmMax,lower,127);
-                velocity=std::clamp(velocity,lower,upper);
+                // Both PM controls shape the actual MIDI dynamics. A fixed
+                // Heavier PM velocity (50) merely clamped to the interval
+                // made most MIN/MAX changes completely inaudible.
+                // Deterministic four-step accents never escape the user's
+                // PM articulation zone, including a single-value range.
+                constexpr int kPmAccentFourth[4]{4,1,3,2};
+                const int pmStep=static_cast<int>((note.startTick/240)%16);
+                velocity=lower+(upper-lower)*kPmAccentFourth[pmStep%4]/4;
                 if(on && secondStroke)
                   velocity=std::max(lower,velocity-std::min(4,(upper-lower)/3));
               }
@@ -204,7 +211,7 @@ public:
           // Original Thrash DI UP reference: one normal stroke at the step
           // start, followed by a second stroke halfway through the step.
           // Each gets its own NoteOff and must never spill into the next step.
-          if(bus==0 && live.guitarDouble[static_cast<std::size_t>((note.startTick/240)%16)]) {
+          if((bus==0 || bus==1) && live.guitarDouble[static_cast<std::size_t>((note.startTick/240)%16)]) {
             // DOUBLE retriggers halfway through its 16th grid step,
             // not halfway through the duration of a sustained OPEN note.
             const int64_t stepEnd=std::min<int64_t>(note.boundaryTick,note.startTick+240);
@@ -214,8 +221,9 @@ public:
               std::min<int64_t>(midpoint,note.startTick+half*gate/100));
             const int64_t secondOff=std::max<int64_t>(midpoint+1,
               std::min<int64_t>(stepEnd,midpoint+(stepEnd-midpoint)*gate/100));
-            // The guitar library owns PM and FIFTH voicings: trigger one
-            // MIDI pitch per attack; never synthesize an extra fifth.
+            // Both guitar and FOLLOW bass inherit the two rhythmic attacks.
+            // The guitar sample library owns PM and FIFTH voicing: never
+            // synthesize an extra fifth or generate more than two attacks.
             push(cycle+static_cast<double>(firstOff)/960.0,false);
             push(cycle+phase,true);
             push(cycle+static_cast<double>(secondOff)/960.0,false);
