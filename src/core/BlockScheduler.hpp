@@ -157,13 +157,19 @@ public:
             const int step=static_cast<int>((note.startTick/240)%16);
             if(live.guitarArticulation[static_cast<std::size_t>(step)]==4 &&
                !live.guitarDouble[static_cast<std::size_t>(step)]) {
-              int nextDistance=16;
-              for(int delta=1;delta<=16;++delta) {
-                if(live.guitarSteps[static_cast<std::size_t>((step+delta)%16)]) {
+              // An arrangement shorter than one bar uses only its actual
+              // step count. Ignore STOP/active flags beyond that period;
+              // wrapping them used to schedule stray NoteOffs mid-loop.
+              const int loopSteps=std::clamp(
+                static_cast<int>(period/240),1,16);
+              int nextDistance=loopSteps;
+              for(int delta=1;delta<=loopSteps;++delta) {
+                const int candidate=(step+delta)%loopSteps;
+                if(live.guitarSteps[static_cast<std::size_t>(candidate)]) {
                   nextDistance=delta;break;
                 }
               }
-              const int nextStep=(step+nextDistance)%16;
+              const int nextStep=(step+nextDistance)%loopSteps;
               const bool stop=live.guitarSteps[static_cast<std::size_t>(nextStep)] &&
                               live.guitarArticulation[static_cast<std::size_t>(nextStep)]==0;
               if(nextDistance>1 || stop) {
