@@ -85,6 +85,15 @@ public:
     }
   }
   Steinberg::tresult PLUGIN_API setParamNormalized(Steinberg::Vst::ParamID id,Steinberg::Vst::ParamValue value) override {
+    // Match the processor's PM interval constraints even for DAW automation.
+    // Otherwise the host GUI could display an invalid, non-playable range.
+    if(id==a125::rifferator::kPmMin || id==a125::rifferator::kPmMax) {
+      const auto other=id==a125::rifferator::kPmMin?
+        a125::rifferator::kPmMax:a125::rifferator::kPmMin;
+      const auto bound=EditControllerEx1::getParamNormalized(other);
+      value=id==a125::rifferator::kPmMin?
+        std::min(value,bound):std::max(value,bound);
+    }
     const auto result=EditControllerEx1::setParamNormalized(id,value);
     if(result==Steinberg::kResultOk) {
       if(id==a125::rifferator::kPmMin || id==a125::rifferator::kPmMax)refreshPmDisplays();
@@ -751,8 +760,16 @@ public:
     uint32_t pmMin=30,pmMax=50;
     if(version>=9 && (!read32(pmMin)||!read32(pmMax)||
         pmMin<1||pmMax>127||pmMin>pmMax))return kResultFalse;
-    setParamNormalized(a125::rifferator::kPmMin,(pmMin-1)/126.);
-    setParamNormalized(a125::rifferator::kPmMax,(pmMax-1)/126.);
+    // Set the bound that expands the current interval first; this also
+    // restores ranges wholly above or below the default 30..50.
+    const auto minId=a125::rifferator::kPmMin,maxId=a125::rifferator::kPmMax;
+    const auto restoreMin=[&](){setParamNormalized(minId,(pmMin-1)/126.);};
+    const auto restoreMax=[&](){setParamNormalized(maxId,(pmMax-1)/126.);};
+    if((pmMax-1)/126. < getParamNormalized(minId)) {
+      restoreMin();restoreMax();
+    } else {
+      restoreMax();restoreMin();
+    }
     // The processor owns the pattern. The controller only synchronizes
     // the automatable parameter values presented to the host/GUI.
     setParamNormalized(a125::rifferator::kChordsQuality,quality/4.);
