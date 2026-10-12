@@ -155,8 +155,24 @@ int main(){
     std::vector<ScheduledMidiEvent> actual;
     engine.process(held,0.,2.,1920,1920,
       [&](ScheduledMidiEvent e){actual.push_back(e);return true;},true,controls);
-    for(const auto& e:actual)
-      assert(!(e.bus==0 && !e.on && e.sampleOffset==960));
+    int ons=0,offs=0;
+    for(const auto& e:actual)if(e.bus==0 && e.pitch==40) {
+      if(e.on)++ons;
+      else {++offs;assert(e.sampleOffset==1908);}
+    }
+    assert(ons==1 && offs==1); // only the valid loop end, never Step 12
+    // Valid Step 3 STOP must fire in every eight-step repetition, while
+    // the out-of-range Step 12 STOP must still be ignored.
+    controls.guitarSteps[3]=true;controls.guitarArticulation[3]=0;
+    engine.reset();actual.clear();
+    engine.process(held,0.,4.,3840,1920,
+      [&](ScheduledMidiEvent e){actual.push_back(e);return true;},true,controls);
+    ons=offs=0;
+    for(const auto& e:actual)if(e.bus==0 && e.pitch==40) {
+      if(e.on)++ons;
+      else {assert(e.sampleOffset==720 || e.sampleOffset==2640);++offs;}
+    }
+    assert(ons==2 && offs==2);
   }
   // Retrigger of one pitch must not kill another sustained guitar pitch.
   {
