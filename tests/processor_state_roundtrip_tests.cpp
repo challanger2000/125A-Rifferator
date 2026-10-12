@@ -233,6 +233,65 @@ int main(){
     assert(std::memcmp(saved.getData(),again.getData(),saved.getSize())==0);
   }
 
+  // Real VST3 processor path: PM velocity endpoints must change the output
+  // NoteOn velocity and FOLLOW bass must get exactly two DOUBLE attacks.
+  // Only a single MIDI pitch is sent per guitar attack (library voicings).
+  {
+    Processor playing;
+    Steinberg::Vst::ParameterChanges params(4);
+    auto edit=[&](Steinberg::Vst::ParamID id,double value){
+      Steinberg::int32 qi=0,pi=0;
+      auto* q=params.addParameterData(id,qi);
+      assert(q && q->addPoint(0,value,pi)==Steinberg::kResultOk);
+    };
+    edit(kPmMin,34./126.); // PM MIN 35
+    edit(kPmMax,39./126.); // PM MAX 40
+    edit(kGuitarStepBase+1,1.);
+    edit(kGuitarDoubleBase,1.);
+    Steinberg::Vst::ProcessData paramBlock{};
+    paramBlock.numSamples=0;paramBlock.inputParameterChanges=&params;
+    assert(playing.process(paramBlock)==Steinberg::kResultOk);
+    Steinberg::Vst::ProcessSetup setup{};
+    setup.processMode=Steinberg::Vst::kRealtime;
+    setup.symbolicSampleSize=Steinberg::Vst::kSample32;
+    setup.sampleRate=48000.;setup.maxSamplesPerBlock=12000;
+    assert(playing.setupProcessing(setup)==Steinberg::kResultOk);
+    Steinberg::Vst::ProcessContext ctx{};
+    ctx.state=Steinberg::Vst::ProcessContext::kPlaying |
+              Steinberg::Vst::ProcessContext::kProjectTimeMusicValid |
+              Steinberg::Vst::ProcessContext::kTempoValid;
+    ctx.projectTimeMusic=0.;ctx.tempo=120.;
+    Steinberg::Vst::EventList output(512);
+    Steinberg::Vst::ProcessData block{};
+    block.numSamples=12000;block.processContext=&ctx;
+    block.outputEvents=&output;
+    assert(playing.process(block)==Steinberg::kResultOk);
+    std::vector<int> guitarAt,bassAt,guitarVelocity;
+    int guitarOff=0,bassOff=0;
+    for(Steinberg::int32 i=0;i<output.getEventCount();++i) {
+      Steinberg::Vst::Event e{};
+      assert(output.getEvent(i,e)==Steinberg::kResultOk);
+      if(e.busIndex==0) {
+        if(e.type==Steinberg::Vst::Event::kNoteOnEvent) {
+          assert(e.noteOn.pitch==40);
+          guitarAt.push_back(e.sampleOffset);
+          guitarVelocity.push_back(static_cast<int>(std::lround(e.noteOn.velocity*127.)));
+        } else if(e.type==Steinberg::Vst::Event::kNoteOffEvent)++guitarOff;
+      }
+      if(e.busIndex==1) {
+        if(e.type==Steinberg::Vst::Event::kNoteOnEvent) {
+          assert(e.noteOn.pitch==28);
+          assert(static_cast<int>(std::lround(e.noteOn.velocity*127.))==100);
+          bassAt.push_back(e.sampleOffset);
+        } else if(e.type==Steinberg::Vst::Event::kNoteOffEvent)++bassOff;
+      }
+    }
+    assert((guitarAt==std::vector<int>{0,3000,6000}));
+    assert((bassAt==std::vector<int>{0,3000,6000}));
+    assert((guitarVelocity==std::vector<int>{40,39,36}));
+    assert(guitarOff==3 && bassOff==3);
+  }
+
   // End-to-end VST3 event test: every edit releases exactly those note
   // buses whose musical data changes, never unrelated held voices.
   // Exercise actual ProcessData parameter queues and EventList outputs.
