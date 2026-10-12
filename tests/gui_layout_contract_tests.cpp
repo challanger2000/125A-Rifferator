@@ -19,7 +19,7 @@ int main(){
                                std::istreambuf_iterator<char>());
   for(const auto* expr: {"command>=200 && command<248",
                          "command>=300 && command<316",
-                         "command>=432 && command<448",
+                         "command>=432 && command<464",
                          "beginEdit(id);setParamNormalized(id,value);performEdit(id,value);endEdit(id)",
                          "refreshSwitch(id)"})assert(controller.find(expr)!=std::string::npos);
 
