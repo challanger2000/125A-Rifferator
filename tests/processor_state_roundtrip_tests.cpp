@@ -273,6 +273,64 @@ int main(){
     assert(seenOff[3]==expectChords);
   }
 
+  // Backpressure regression: if the host accepts only one NoteOff during
+  // a combined edit, retry ONLY the remaining outstanding bus releases
+  // in the next callback. Never lose a release or duplicate the accepted one.
+  {
+    Processor playing;
+    Steinberg::Vst::ProcessSetup setup{};
+    setup.processMode=Steinberg::Vst::kRealtime;
+    setup.symbolicSampleSize=Steinberg::Vst::kSample32;
+    setup.sampleRate=48000.;setup.maxSamplesPerBlock=600;
+    assert(playing.setupProcessing(setup)==Steinberg::kResultOk);
+    Steinberg::Vst::ProcessContext ctx{};
+    ctx.state=Steinberg::Vst::ProcessContext::kPlaying |
+              Steinberg::Vst::ProcessContext::kProjectTimeMusicValid |
+              Steinberg::Vst::ProcessContext::kTempoValid;
+    ctx.tempo=120.;
+    Steinberg::Vst::ProcessData block{};
+    block.numSamples=600;block.processContext=&ctx;
+    Steinberg::Vst::EventList first(512);
+    block.outputEvents=&first;
+    ctx.projectTimeMusic=0.;
+    assert(playing.process(block)==Steinberg::kResultOk);
+    Steinberg::Vst::ParameterChanges edits(3);
+    auto change=[&](Steinberg::Vst::ParamID id,double value) {
+      Steinberg::int32 qi=0,pi=0;
+      auto* q=edits.addParameterData(id,qi);
+      assert(q && q->addPoint(0,value,pi)==Steinberg::kResultOk);
+    };
+    change(kDrumStepBase,0.);
+    change(kChordsQuality,.25);
+    change(kGuitarDoubleBase,1.);
+    Steinberg::Vst::EventList limited(1);
+    block.outputEvents=&limited;
+    block.inputParameterChanges=&edits;
+    ctx.projectTimeMusic=.025;
+    assert(playing.process(block)==Steinberg::kResultOk);
+    assert(limited.getEventCount()==1);
+    Steinberg::Vst::Event firstOff{};
+    assert(limited.getEvent(0,firstOff)==Steinberg::kResultOk);
+    assert(firstOff.type==Steinberg::Vst::Event::kNoteOffEvent &&
+           firstOff.busIndex==2 && firstOff.noteOff.pitch==36);
+    Steinberg::Vst::EventList retry(512);
+    block.outputEvents=&retry;
+    block.inputParameterChanges=nullptr;
+    ctx.projectTimeMusic=.05;
+    assert(playing.process(block)==Steinberg::kResultOk);
+    bool off[4]{};
+    bool duplicate=false;
+    for(Steinberg::int32 i=0;i<retry.getEventCount();++i) {
+      Steinberg::Vst::Event e{};
+      assert(retry.getEvent(i,e)==Steinberg::kResultOk);
+      if(e.type!=Steinberg::Vst::Event::kNoteOffEvent ||
+         e.sampleOffset!=0)continue;
+      off[e.busIndex]=true;
+      if(e.busIndex==2 && e.noteOff.pitch==36)duplicate=true;
+    }
+    assert(off[0] && off[2] && off[3] && !off[1] && !duplicate);
+  }
+
   // Regression: project recall must apply every stored drum step to the LIVE
   // MIDI masks. A byte-identical getState roundtrip alone missed this defect.
   {
