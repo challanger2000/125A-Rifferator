@@ -209,6 +209,25 @@ int main() {
          afterVariate[static_cast<std::size_t>(i*5+1)]==
          beforeVariate[static_cast<std::size_t>(i*5+1)])++retained;
     assert(retained>=1);
+    // STOP is an active NoteOff command, not an empty step. The core
+    // generation Step::Off representation cannot distinguish the two.
+    // A conservative VARIATE must retain unchanged STOP commands.
+    Controller stopController;
+    assert(stopController.initialize(nullptr)==Steinberg::kResultOk);
+    for(int i=0;i<16;++i) {
+      assert(stopController.setParamNormalized(kGuitarStepBase+i,1.)==Steinberg::kResultOk);
+      assert(stopController.setParamNormalized(kGuitarArticulationBase+i,0.)==Steinberg::kResultOk);
+    }
+    stopController.runGuitarGeneration(GenerationCommand::Variate);
+    int retainedStops=0;
+    for(int i=0;i<16;++i) {
+      const bool active=stopController.getParamNormalized(kGuitarStepBase+i)>=0.5;
+      const bool stop=stopController.getParamNormalized(kGuitarArticulationBase+i)==0.;
+      assert(!stop || active);
+      if(stop && active)++retainedStops;
+    }
+    assert(retainedStops>=1);
+    assert(stopController.terminate()==Steinberg::kResultOk);
     assert(first.terminate()==Steinberg::kResultOk);
     assert(second.terminate()==Steinberg::kResultOk);
   }
