@@ -148,5 +148,69 @@ int main() {
   MemoryStream corrupt(snapshot.data(),static_cast<Steinberg::TSize>(snapshot.size()));
   assert(controller.setComponentState(&corrupt)!=Steinberg::kResultOk);
   near(controller.getParamNormalized(kBassMode),baseline);
+  // Real Controller generation bridge: same source state and same command
+  // count must produce identical new 16-step riffs. LOCK protects every
+  // field; Generate clears old DOUBLE only on unlocked steps, while Variate
+  // preserves existing stroke subdivision and offers conservative mutation.
+  {
+    Controller first,second;
+    assert(first.initialize(nullptr)==Steinberg::kResultOk);
+    assert(second.initialize(nullptr)==Steinberg::kResultOk);
+    auto init=[&](Controller& c){
+      assert(c.setParamNormalized(kGuitarStepBase,1.)==Steinberg::kResultOk);
+      assert(c.setParamNormalized(kGuitarArticulationBase,.8)==Steinberg::kResultOk);
+      assert(c.setParamNormalized(kGuitarDegreeBase,16./28.)==Steinberg::kResultOk);
+      assert(c.setParamNormalized(kGuitarDoubleBase,1.)==Steinberg::kResultOk);
+      assert(c.setParamNormalized(kGuitarLockBase,1.)==Steinberg::kResultOk);
+      assert(c.setParamNormalized(kGuitarDoubleBase+1,1.)==Steinberg::kResultOk);
+    };
+    init(first);init(second);
+    auto snapshot=[&](Controller& c) {
+      std::vector<double> v;
+      v.reserve(16*5);
+      for(int i=0;i<16;++i)for(auto base:{
+          kGuitarStepBase,kGuitarArticulationBase,kGuitarDegreeBase,
+          kGuitarLockBase,kGuitarDoubleBase})
+        v.push_back(c.getParamNormalized(base+i));
+      return v;
+    };
+    const auto original=snapshot(first);
+    first.runGuitarGeneration(GenerationCommand::Generate);
+    second.runGuitarGeneration(GenerationCommand::Generate);
+    const auto generated=snapshot(first);
+    assert(generated==snapshot(second));
+    assert(generated!=original); // genuine generation, not a dead button
+    for(int i=0;i<5;++i)assert(generated[i]==original[i]); // LOCK holds
+    assert(first.getParamNormalized(kGuitarDoubleBase+1)==0.);
+    int changed=0;
+    for(int i=1;i<16;++i)
+      changed+=(first.getParamNormalized(kGuitarStepBase+i)!=
+                second.getParamNormalized(kGuitarStepBase+i))?1:0;
+    assert(changed==0);
+    // A second seed differs, but is still deterministic across controllers.
+    first.runGuitarGeneration(GenerationCommand::Generate);
+    second.runGuitarGeneration(GenerationCommand::Generate);
+    assert(snapshot(first)==snapshot(second));
+    assert(snapshot(first)!=generated);
+    assert(first.setParamNormalized(kGuitarDoubleBase+1,1.)==Steinberg::kResultOk);
+    assert(second.setParamNormalized(kGuitarDoubleBase+1,1.)==Steinberg::kResultOk);
+    const auto beforeVariate=snapshot(first);
+    first.runGuitarGeneration(GenerationCommand::Variate);
+    second.runGuitarGeneration(GenerationCommand::Variate);
+    assert(snapshot(first)==snapshot(second));
+    for(int i=0;i<5;++i)assert(snapshot(first)[i]==original[i]);
+    assert(first.getParamNormalized(kGuitarDoubleBase+1)==1.);
+    // Variation may deliberately leave some steps unchanged (30% edit).
+    int retained=0;
+    const auto afterVariate=snapshot(first);
+    for(int i=1;i<16;++i)
+      if(afterVariate[static_cast<std::size_t>(i*5)]==
+         beforeVariate[static_cast<std::size_t>(i*5)] &&
+         afterVariate[static_cast<std::size_t>(i*5+1)]==
+         beforeVariate[static_cast<std::size_t>(i*5+1)])++retained;
+    assert(retained>=1);
+    assert(first.terminate()==Steinberg::kResultOk);
+    assert(second.terminate()==Steinberg::kResultOk);
+  }
   assert(controller.terminate()==Steinberg::kResultOk);
 }
