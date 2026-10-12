@@ -107,3 +107,4 @@
 2026-10-12 BUNDLE locked-step ON DOUBLE buttons consistent GUI feedback and regression
 2026-10-12 BUNDLE state restore legacy GUI step activation articulation degree lock regression
 2026-10-12 BUNDLE PM range controller clamp and out-of-default project restore ordering
+2026-10-12 BUNDLE GUI: PM 3-digit velocity + signed degree display widths and spacing
