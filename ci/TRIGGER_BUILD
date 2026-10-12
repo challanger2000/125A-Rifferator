@@ -125,3 +125,4 @@
 2026-10-12 VERIFY: two-stage FILL step edits then LOCK, saved-state fixture assertions; regression-only correction after #38253543438
 2026-10-12 BUNDLE: HYBRID harmony-root changes release held bass; untouched FOLLOW and EBM bus; real VST3 four-bus regression
 2026-10-12 BUNDLE: VST3 controller 100/150 zoom project-state persistence, malformed-stream rejection, release ledger refresh and controller-state regression
+2026-10-12 BUNDLE: connect real seeded Guitar GENERATE/VARIATE core, GUI command 722, preserve active STOP, respect LOCK, deterministic Controller and GUI trace regressions
