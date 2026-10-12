@@ -193,12 +193,23 @@ int main(){
     assert(std::memcmp(saved.getData(),again.getData(),saved.getSize())==0);
   }
 
-  // End-to-end VST3 event test: drum, chord and guitar DOUBLE edits
-  // must release only their own buses while four note streams are active.
-  for(int scenario=0;scenario<5;++scenario) {
-    const bool changeDrums=scenario==0 || scenario==2 || scenario==4;
-    const bool changeChords=scenario==1 || scenario==2 || scenario==4;
-    const bool changeGuitar=scenario==3 || scenario==4;
+  // End-to-end VST3 event test: every edit releases exactly those note
+  // buses whose musical data changes, never unrelated held voices.
+  // Exercise actual ProcessData parameter queues and EventList outputs.
+  for(int scenario=0;scenario<16;++scenario) {
+    const bool changeDrums=scenario==0 || scenario==2 || scenario==4 || scenario==14;
+    const bool changeChords=scenario==1 || scenario==2 || scenario==4 || scenario==15;
+    const bool changeDouble=scenario==3 || scenario==4;
+    const bool changeGuitarMatrix=scenario>=5 && scenario<=7 || scenario==14;
+    const bool changeRoot=scenario==12;
+    const bool changeGuitarGate=scenario==8;
+    const bool changeBass=scenario>=9 && scenario<=11 || scenario==15;
+    const bool changeFill=scenario==13;
+    const bool expectGuitar=changeDouble || changeGuitarMatrix ||
+       changeRoot || changeGuitarGate || changeFill;
+    const bool expectBass=changeGuitarMatrix || changeRoot ||
+       changeBass || changeFill;
+    const bool expectChords=changeChords || changeGuitarMatrix || changeRoot;
     Processor playing;
     Steinberg::Vst::ProcessSetup setup{};
     setup.processMode=Steinberg::Vst::kRealtime;
@@ -233,7 +244,16 @@ int main(){
     };
     if(changeDrums)change(kDrumStepBase,0.);
     if(changeChords)change(kChordsQuality,.25);
-    if(changeGuitar)change(kGuitarDoubleBase,1.);
+    if(changeDouble)change(kGuitarDoubleBase,1.);
+    if(scenario==5)change(kGuitarStepBase,0.);
+    if(scenario==6)change(kGuitarArticulationBase,.8);
+    if(scenario==7 || scenario==14)change(kGuitarDegreeBase,17./28.);
+    if(changeGuitarGate)change(kGuitarGate,.5);
+    if(scenario==9 || scenario==15)change(kBassGate,.5);
+    if(scenario==10)change(kBassVelocity,.5);
+    if(scenario==11)change(kBassEnabled,0.);
+    if(changeRoot)change(kRootPitch,52./127.);
+    if(changeFill)change(kFillIntensity,.5);
     Steinberg::Vst::EventList second(512);
     block.outputEvents=&second;
     block.inputParameterChanges=&edits;
@@ -244,11 +264,13 @@ int main(){
       Steinberg::Vst::Event e{};
       assert(second.getEvent(i,e)==Steinberg::kResultOk);
       if(e.type!=Steinberg::Vst::Event::kNoteOffEvent || e.sampleOffset!=0)continue;
-      assert(e.busIndex==0 || e.busIndex==2 || e.busIndex==3);
+      assert(e.busIndex>=0 && e.busIndex<4);
       seenOff[e.busIndex]=true;
     }
-    assert(seenOff[0]==changeGuitar && !seenOff[1]);
-    assert(seenOff[2]==changeDrums && seenOff[3]==changeChords);
+    assert(seenOff[0]==expectGuitar);
+    assert(seenOff[1]==expectBass);
+    assert(seenOff[2]==changeDrums);
+    assert(seenOff[3]==expectChords);
   }
 
   // Regression: project recall must apply every stored drum step to the LIVE
