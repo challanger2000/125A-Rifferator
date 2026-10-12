@@ -117,3 +117,4 @@
 2026-10-12 BUNDLE: isolated chord and guitar DOUBLE MIDI releases, combined-bus VST3 regression
 2026-10-12 BATCH: targeted guitar bass gate/root/fill releases, 16-case VST3 bus tests, limited host NoteOff retry
 2026-10-12 BUNDLE: preserve per-scheduler PPQ across host NoteOff backpressure; reject real seeks; 3 MIDI regression paths
+2026-10-12 BATCH: runtime LOCK masks pre-rendered FILL pitch on guitar/follow-bass, first MIDI callback after recall never dropped; scheduler and VST3 integration regressions
