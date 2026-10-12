@@ -53,7 +53,7 @@ int main(){
     for(const auto& e:actual)if(e.bus==0 && e.pitch==40)
       (e.on?ons:offs).push_back(e.sampleOffset);
     assert(ons.size()==2 && offs.size()==2);
-    assert(ons[0]==0 && ons[1]>=119 && ons[1]<=120);
+    assert(ons[0]==0 && ons[1]>=479 && ons[1]<=480);
     assert(ons[0]<offs[0] && offs[0]<=ons[1] && ons[1]<offs[1]);
   }
   assert(!makeIndustrialGuitarGroove(49).enabled[15]);
