@@ -130,7 +130,7 @@ public:
       viewOwner_=editor;
     }
     if(auto* control=dynamic_cast<VSTGUI::CControl*>(view)) {
-      if((control->getTag()>=500 && control->getTag()<596) || (control->getTag()>=700 && control->getTag()<=720) || (control->getTag()>=800 && control->getTag()<832) || (control->getTag()>=200 && control->getTag()<248) || (control->getTag()>=300 && control->getTag()<316) || (control->getTag()>=432 && control->getTag()<464) || (control->getTag()>=880 && control->getTag()<884))
+      if((control->getTag()>=500 && control->getTag()<596) || (control->getTag()>=700 && control->getTag()<=721) || (control->getTag()>=800 && control->getTag()<832) || (control->getTag()>=200 && control->getTag()<248) || (control->getTag()>=300 && control->getTag()<316) || (control->getTag()>=432 && control->getTag()<464) || (control->getTag()>=880 && control->getTag()<884))
         control->setListener(this);
       const auto tag=control->getTag();
       if(tag>=884 && tag<886) {
@@ -208,6 +208,25 @@ public:
       if(next==degree)return;
       const double value=static_cast<double>(next+13)/28.;
       beginEdit(id);setParamNormalized(id,value);performEdit(id,value);endEdit(id);
+      return;
+    }
+    if(command==721) {
+      // CLEAR PATTERN preserves locked cells and every global setting.
+      for(int step=0;step<16;++step) {
+        using namespace a125::rifferator;
+        if(getParamNormalized(kGuitarLockBase+step)>=0.5)continue;
+        const auto active=kGuitarStepBase+step;
+        if(getParamNormalized(active)>=0.5) {
+          beginEdit(active);setParamNormalized(active,0.);
+          performEdit(active,0.);endEdit(active);
+        }
+        const auto doubled=kGuitarDoubleBase+step;
+        if(getParamNormalized(doubled)>=0.5) {
+          beginEdit(doubled);setParamNormalized(doubled,0.);
+          performEdit(doubled,0.);endEdit(doubled);
+        }
+        refreshGuitarStep(step);
+      }
       return;
     }
     if(command==701 || command==702) {
