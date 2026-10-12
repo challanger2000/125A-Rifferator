@@ -33,6 +33,40 @@ int main(){
     assert(xml.substr(begin,end-begin).find("mouse-enabled=\"false\"")!=std::string::npos);
   }
 
+  // Every previously host-only core musical control must have two visible
+  // buttons and a non-clickable live value display in the bundled VSTGUI.
+  // All values are implemented with the *existing* VST3 parameter IDs.
+  for(int i=0;i<6;++i) {
+    const std::string bases[6]{"Root","GtrGate","BassGate",
+                               "Fill","BassVelocity","EbmStyle"};
+    for(const auto* suffix:{"Minus","Plus","Value"}) {
+      const auto control=bases[i]+suffix;
+      const int tag=std::string(suffix)=="Value"?912+i:
+        900+2*i+(std::string(suffix)=="Plus"?1:0);
+      const auto definition="<control-tag name=\""+control+"\" tag=\""+
+        std::to_string(tag)+"\"/>";
+      assert(xml.find(definition)!=std::string::npos);
+      const auto used="control-tag=\""+control+"\"";
+      const auto pos=xml.find(used);
+      assert(pos!=std::string::npos);
+      const auto end=xml.find("/>",pos);
+      assert(end!=std::string::npos);
+      const auto view=xml.substr(pos,end-pos);
+      assert(view.find("class=\"CTextButton\"")==std::string::npos ||
+             xml.rfind("<view",pos)!=std::string::npos);
+      if(std::string(suffix)=="Value")
+        assert(view.find("mouse-enabled=\"false\"")!=std::string::npos);
+    }
+  }
+  assert(xml.find("<control-tag name=\"DrumsEnabledAction\" tag=\"724\"/>")!=std::string::npos);
+  assert(xml.find("control-tag=\"DrumsEnabledAction\" origin=\"912, 582\"")!=std::string::npos);
+  assert(controller.find("applyMusicalStepCommand(command);")!=std::string::npos);
+  assert(controller.find("toggleDrumsEnabled();")!=std::string::npos);
+  assert(controller.find("if(id==musicalParam(i))")!=std::string::npos);
+  assert(controller.find("refreshMusicalDisplays();")!=std::string::npos);
+  assert(controller.find("control->getTag()==724")!=std::string::npos);
+  assert(controller.find("kRootPitch,kGuitarGate,kBassGate,kFillIntensity,kBassVelocity,kEbmStyle")!=std::string::npos);
+
   assert(xml.find("control-tag=\"ClearPattern\"")!=std::string::npos);
   // Numerical PM readouts are labels, not misleading interactive switches.
   for(const auto* name:{"PmMinValue","PmMaxValue"}) {
