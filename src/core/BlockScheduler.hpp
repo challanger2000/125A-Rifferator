@@ -41,6 +41,17 @@ class BlockScheduler {
 public:
   static constexpr int kCapacity=1024;
   void reset() noexcept { active_={}; haveExpected_=false; recoveryPending_=false; }
+  // When a host rejects a pending NoteOff, the processor may skip one
+  // otherwise continuous audio callback. Account for that time without
+  // scheduling new notes or treating the next callback as a transport seek.
+  // Real host jumps remain discontinuities; unresolved scheduler recovery
+  // must never be bypassed.
+  void advanceSkippedBlock(double startPpq,double endPpq) noexcept {
+    if(haveExpected_ && !recoveryPending_ &&
+       std::isfinite(startPpq) && std::isfinite(endPpq) &&
+       endPpq>startPpq && std::abs(startPpq-expectedPpq_)<=0.002)
+      expectedPpq_=endPpq;
+  }
   void setDrums(const std::vector<MidiNote>* notes) noexcept { drums_=notes; }
   void setChords(const std::vector<MidiNote>* notes) noexcept { chords_=notes; }
   template<class Sink>
