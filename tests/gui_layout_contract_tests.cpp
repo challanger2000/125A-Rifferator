@@ -16,12 +16,9 @@ int main(){
   const std::string processor((std::istreambuf_iterator<char>(processorFile)),
                                std::istreambuf_iterator<char>());
   assert(processor.find("step.doubled=false;")!=std::string::npos);
-  // Project restore must reconcile live articulation/degree/locks with the
-  // step snapshot used by later Save and Generate operations.
-  for(const auto* expression:{"steps_[i].articulation=static_cast<Articulation>(restoredArt[i])",
-                              "steps_[i].degree=restoredDegree[i]",
-                              "steps_[i].locked=restoredLocks[i]"})
-    assert(processor.find(expression)!=std::string::npos);
+  // Legacy Step snapshots and the separately stored live matrix must survive
+  // project restore without destructive reconciliation.
+  assert(processor.find("Preserve separately serialized Step snapshots verbatim")!=std::string::npos);
 
 
   assert(xml.find("title=\"DEGREE\"")!=std::string::npos);
