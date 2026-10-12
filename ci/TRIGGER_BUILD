@@ -84,3 +84,4 @@
 2026-10-12 full GUI audit stage: numeric degree layout contract fixes
 2026-10-12 degree label and GUI contract verification
 2026-10-12 verify musical-scale note mapping in live guitar scheduler
+2026-10-12 verify GUI controller wiring for 16 ON, 16 LOCK, and 48 drum switches
