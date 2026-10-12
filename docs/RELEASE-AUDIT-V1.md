@@ -15,9 +15,9 @@
 2. **SPEC-DRIFT — FAIL / blocker to signed-off feature scope.** `docs/PRODUCT-SPEC.md` still claims 2–32 steps, step-rate selection, independent randomization, and export/profile functionality as V1, whereas the present primary editor and MIDI engine operate on fixed 16-step grids. **Per-step DOUBLE is implemented** and covered by core/VST3 tests. Either implement each promised function with tests or explicitly amend and approve a narrower V1 scope before release. Do not advertise unimplemented features.
 3. **REALTIME-LEGACY — automated PASS, host pending.** `Processor::process` formerly wrote `steps_[index]` for high step indices after restoring legacy projects with fewer than 16 steps. Bounds guards and a dedicated **V1 one-step state + high-index automation + V9 save** regression now pass CI. This does not verify reopening a legacy song inside Studio One.
 4. **HOST-MIDI — NOT VERIFIED.** Four VST3 event output buses are declared and deterministic multi-bus scheduling passes CTest. Studio One routing to external or multi-timbral instruments, host bus activation, program/plugin reload and stuck-note torture remain unverified.
-5. **STATE/AUTOMATION — PARTIAL PASS.** Processor **V9** serialization/restore and Controller V9 normalized parameter sync have automated regressions. GUI zoom had no independent controller-state persistence and is being added in the current unverified batch. Arbitrary automation point density, interleaved restoration and host project reopen need further checks.
+5. **STATE/AUTOMATION — PARTIAL PASS.** Processor **V9** serialization/restore and Controller V9 parameter sync have automated regressions. The original zoom-only Controller state v1 passed CI; a new **v2 page+zoom state**, with backward read compatibility and malformed-state atomicity, is now implemented **but CI/Studio One restore pending**. Host project reopen and rapid automation still need independent QA.
 6. **TRANSPORT — PARTIAL PASS.** Deterministic Stop/Restart and note-flush scenarios pass core tests. Actual DAW loop/jump/offline, block-size change and external bass mode switch under load need an independent host gate.
-7. **GUI VISUAL — NOT VERIFIED.** The actual template is **1120×696 px**; 150% becomes **1680×1044 px** before Studio One window chrome, exceeding the earlier `GUI-V1-IMPLEMENTATION-CONTRACT.md` 1120×670 / 1680×1005 limit. GUI must be measured at 1920×1080 with native scaling and controls inspected.
+7. **GUI VISUAL — FAIL on old artifact; redesigned build pending.** User's actual Studio One screenshot of the prior 1120×696 single-page UI confirms severe overlap between LOCK/STEP ON/DOUBLE and PM/Root/Gate/Fill controls. The Guitar panel was only 345 px high yet its DOUBLE row extended through local y=361; automated flat geometry checks missed nested clipping. The new development design separates Guitar and Rhythm pages in a **1120×640 px** root, **1680×960 px** at 150%, adds page+zoom restore, and nested bounds/hitbox regressions. This has **NOT** passed a new CI/Studio One screenshot yet.
 8. **RELEASE PACKAGE — PARTIAL PASS.** Bundle name, one binary, `rifferator.uidesc` copied and template name checked in workflow. This does not prove GUI resource loading/attachment or 125A Plugin Tester pass.
 9. **PRODUCT-QUALITY — NOT VERIFIED.** Generated riff variety, PM/Power articulations with target sampled guitar, bass/harmony arrangement and practical playability require MIDI capture and listening through real target libraries.
 10. **PLATFORM — NOT VERIFIED beyond Windows CI.** No Mac compatibility claim. No independently verified Studio One version/Windows DPI host snapshot.
@@ -254,6 +254,49 @@ actual visible STANDARD BEAT/GENERATE/VARIATE commands, despite the
 - Corrected `docs/HOST-GUI-QA.md` to name the actual artifact **`125A Rifferator.vst3`**, not the internal `Rifferator.vst3` stage name; list four 0-based event-bus indices **0 Guitar / 1 Bass / 2 Drums / 3 Chords**, not misleading bus ordinals; distinguish active STOP (Guitar NoteOff) from empty OFF; cover every newer Generator, Gate, Style, Drum toggle and zoom-state control; specify actual 150% editor geometry **1680×1044** and 20 host editor reopen cycles.
 - Exact regression/host status remains independent: **automated MIDI, Controller/GUI-layout and Validator PASS; native Studio One GUI, MIDI bus routing, host project recall, Plugin Tester and signed-off V1 scope NOT VERIFIED**.
 - Documentation-only follow-up after #38293244458 intentionally requires **no new Windows Action**. Product binary and source code remain at that verified green baseline.
+
+## 2026-10-12 — Actual Studio One screenshot: cramped/clipped V1 GUI
+
+The user installed verified development artifact #38293244458 and provided a real
+Studio One screenshot. This independently establishes **native editor attachment
+and drawing succeed at 100%** for this particular session — superseding the
+earlier claim that no Rifferator editor can render at all. It does **not**
+establish readable layout, functional clicks, 150% fit or editor lifecycle.
+
+**Confirmed user-facing defect:** Root MIDI, PM MIN/MAX, gates and FILL
+overlap/obscure Guitar LOCK, STEP ON and DOUBLE; Bass/Chord/Drum controls
+are overcrowded in the lower half. Source confirms original Guitar panel
+`CViewContainer` height **345px** while its child DOUBLE widgets end at
+**361px**, hence panel clipping not caught by direct-root-only bounds checks.
+
+**Implemented corrective GUI redesign (NEW CI STILL PENDING):**
+- **Two mutually exclusive pages**: GUITAR (full 16-step matrix,
+  separate PM/Root/Guitar Gate/Bass Gate/FILL panel, spacious action buttons)
+  and BASS / CHORDS / DRUMS (separate, expanded Bass, Chord and GM Drum
+  control sections). New navigation tags 728/729; all prior VST3 parameter
+  and command IDs unchanged.
+- Guitar panel resized and DOUBLE moved fully inside its parent. Explicit
+  "STEP ON" and "DOUBLE" row labels clarify formerly unlabelled controls.
+- Editor reduced from **1120×696 to 1120×640** at 100%. At 150% content
+  measures **1680×960**, leaving more room for Studio One chrome on 1080p.
+- Page view containers start **below header y=106** so they cannot cover
+  navigation/zoom buttons. Hidden page is not intended to receive clicks.
+  Controller owns page views via `rifferator-page` UI attributes (same
+  verified pattern as Midiator details-page switching), caches are cleared
+  on editor close/owner change.
+- Versioned Controller state upgraded **v1→v2** (four 32-bit fields:
+  magic, version, zoom 100/150, page Guitar/Rhythm). v1 zoom-only projects
+  restore with Guitar page as default. Unknown page/zoom/version or
+  truncated streams fail atomically.
+- `rifferator_gui_layout` test strengthened to traverse **nested**
+  CViewContainer geometry and check interactive element intersections
+  **on each page**; the earlier flat bounds check was insufficient.
+- Current pre-build structural inspection of all **286 tagged widgets**
+  finds **no clipping and no same-page hitbox overlap**. Rendering,
+  native clicks, 150% fit and tab/zoom restore are still **NOT VERIFIED**
+  until new Windows CI and user Studio One screenshot.
+
+**No release-ready or editor-lifecycle PASS** is inferred from this change.
 
 ## Required completion gates
 - Fix host GUI visibility with reproducible diagnosis rather than speculative resource changes; 20 consecutive open/close/reopen cycles and restore.
