@@ -115,3 +115,4 @@
 2026-10-12 BATCH: fix short-loop STOP interaction with OPEN sustain; verify period wrap, repeated STOP, block-edge NoteOff
 2026-10-12 BUNDLE: drum-only MIDI flush and active multi-bus VST3 processor regression
 2026-10-12 BUNDLE: isolated chord and guitar DOUBLE MIDI releases, combined-bus VST3 regression
+2026-10-12 BATCH: targeted guitar bass gate/root/fill releases, 16-case VST3 bus tests, limited host NoteOff retry
