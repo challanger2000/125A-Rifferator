@@ -26,6 +26,9 @@ void Processor::prepareFillVariants() {
     for(auto& step:candidates) {
       step.articulation=Articulation::PalmMute;
       step.degree=1;
+      // DOUBLE belongs exclusively to the live block scheduler.
+      // Pre-rendering two hits here and retriggering each would output four.
+      step.doubled=false;
     }
     fillVariants_[static_cast<std::size_t>(index)]=arrange(candidates,config_,options,16);
   }
