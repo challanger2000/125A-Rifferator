@@ -358,19 +358,19 @@ int main(){
     Steinberg::Vst::EventList emitted(512);
     Steinberg::Vst::ProcessData block{};
     block.numSamples=6000;block.processContext=&ctx;block.outputEvents=&emitted;
-    // State restore requests a bass-mode flush; the first callback intentionally
-    // performs this transition without scheduling fresh NoteOns.
+    // Project recall must produce MIDI in its FIRST callback. Bass ownership
+    // handoff may release old notes, but cannot drop the downbeat entirely.
     assert(replay.process(block)==Steinberg::kResultOk);
-    assert(emitted.getEventCount()==0);
-    assert(replay.process(block)==Steinberg::kResultOk);
-    int kickOns=0,otherDrumOns=0;
+    int kickOns=0,otherDrumOns=0,guitarOns=0;
     for(Steinberg::int32 i=0;i<emitted.getEventCount();++i){
       Steinberg::Vst::Event e{};
       assert(emitted.getEvent(i,e)==Steinberg::kResultOk);
-      if(e.busIndex==2 && e.type==Steinberg::Vst::Event::kNoteOnEvent){
+      if(e.type!=Steinberg::Vst::Event::kNoteOnEvent)continue;
+      if(e.busIndex==0)++guitarOns;
+      if(e.busIndex==2){
         if(e.noteOn.pitch==36)++kickOns;else ++otherDrumOns;
       }
     }
-    assert(kickOns==1 && otherDrumOns==0);
+    assert(kickOns==1 && otherDrumOns==0 && guitarOns>0);
   }
 }
