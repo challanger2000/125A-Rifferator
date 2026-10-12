@@ -88,3 +88,4 @@
 2026-10-12 end-to-end six articulation MIDI velocity regression
 2026-10-12 implement UP DOUBLE half-step strokes, UI 16 controls, state and MIDI tests
 2026-10-12 fix DOUBLE test sample timeline and gui handler range
+2026-10-12 STOP guitar note-off distinct from empty step, full MIDI regression
