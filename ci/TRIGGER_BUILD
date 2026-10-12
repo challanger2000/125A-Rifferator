@@ -94,3 +94,4 @@
 2026-10-12 retain articulation velocity on second DOUBLE attack
 2026-10-12 configurable PM MIN MAX controls with backward-compatible state v9 and DOUBLE test
 2026-10-12 second double PM attack bounded velocity differentiation
+2026-10-12 double OPEN power chord root fifth MIDI regression
