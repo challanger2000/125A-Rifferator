@@ -42,6 +42,17 @@ public:
       button->invalid();
     }
   }
+  std::array<VSTGUI::CControl*,16> stepOnButtons_{};
+  std::array<VSTGUI::CControl*,16> lockButtons_{};
+  std::array<VSTGUI::CControl*,48> drumButtons_{};
+  void refreshSwitch(Steinberg::Vst::ParamID id) {
+    using namespace a125::rifferator;
+    VSTGUI::CControl* control=nullptr;
+    if(id>=kGuitarStepBase && id<kGuitarStepBase+16)control=stepOnButtons_[id-kGuitarStepBase];
+    else if(id>=kGuitarLockBase && id<kGuitarLockBase+16)control=lockButtons_[id-kGuitarLockBase];
+    else if(id>=kDrumStepBase && id<kDrumStepBase+48)control=drumButtons_[id-kDrumStepBase];
+    if(control){control->setValueNormalized(getParamNormalized(id)>=0.5?1.f:0.f);control->invalid();}
+  }
   std::array<VSTGUI::CTextButton*,16> degreeDisplays_{};
   void refreshDegree(int step) {
     if(step<0 || step>=16)return;
@@ -69,6 +80,9 @@ public:
       if(id==a125::rifferator::kBassMode || id==a125::rifferator::kChordsQuality || id==a125::rifferator::kChordsEnabled || id==a125::rifferator::kBassEnabled || id==a125::rifferator::kChordsMode) refreshCommands();
       if(id>=a125::rifferator::kGuitarStepBase && id<a125::rifferator::kGuitarStepBase+16)refreshGuitarStep(static_cast<int>(id-a125::rifferator::kGuitarStepBase));
       if(id>=a125::rifferator::kGuitarArticulationBase && id<a125::rifferator::kGuitarArticulationBase+16)refreshGuitarStep(static_cast<int>(id-a125::rifferator::kGuitarArticulationBase));
+      if((id>=a125::rifferator::kGuitarStepBase && id<a125::rifferator::kGuitarStepBase+16) ||
+         (id>=a125::rifferator::kGuitarLockBase && id<a125::rifferator::kGuitarLockBase+16) ||
+         (id>=a125::rifferator::kDrumStepBase && id<a125::rifferator::kDrumStepBase+48))refreshSwitch(id);
       if(id>=a125::rifferator::kGuitarDegreeBase && id<a125::rifferator::kGuitarDegreeBase+16)refreshDegree(static_cast<int>(id-a125::rifferator::kGuitarDegreeBase));
     }
     return result;
@@ -81,6 +95,9 @@ public:
       for(auto& row:guitarCells_)row.fill(nullptr);
       commandButtons_.fill(nullptr);
       degreeDisplays_.fill(nullptr);
+      stepOnButtons_.fill(nullptr);
+      lockButtons_.fill(nullptr);
+      drumButtons_.fill(nullptr);
     }
   }
   VSTGUI::CView* verifyView(VSTGUI::CView* view,
@@ -91,11 +108,18 @@ public:
       for(auto& row:guitarCells_)row.fill(nullptr);
       commandButtons_.fill(nullptr);
       degreeDisplays_.fill(nullptr);
+      stepOnButtons_.fill(nullptr);
+      lockButtons_.fill(nullptr);
+      drumButtons_.fill(nullptr);
       viewOwner_=editor;
     }
     if(auto* control=dynamic_cast<VSTGUI::CControl*>(view)) {
-      if((control->getTag()>=500 && control->getTag()<596) || (control->getTag()>=700 && control->getTag()<=720) || (control->getTag()>=800 && control->getTag()<832))
+      if((control->getTag()>=500 && control->getTag()<596) || (control->getTag()>=700 && control->getTag()<=720) || (control->getTag()>=800 && control->getTag()<832) || (control->getTag()>=200 && control->getTag()<248) || (control->getTag()>=300 && control->getTag()<316) || (control->getTag()>=432 && control->getTag()<448))
         control->setListener(this);
+      const auto tag=control->getTag();
+      if(tag>=200 && tag<248) {drumButtons_[tag-200]=control;refreshSwitch(tag);}
+      if(tag>=300 && tag<316) {stepOnButtons_[tag-300]=control;refreshSwitch(tag);}
+      if(tag>=432 && tag<448) {lockButtons_[tag-432]=control;refreshSwitch(tag);}
       if(control->getTag()>=850 && control->getTag()<866) {
         degreeDisplays_[static_cast<std::size_t>(control->getTag()-850)]=dynamic_cast<VSTGUI::CTextButton*>(control);
         refreshDegree(control->getTag()-850);
@@ -120,6 +144,13 @@ public:
     // processor articulation remains selected until another row is chosen.
     if(command>=500 && command<596 && control->getValueNormalized()<=0.5f) {
       refreshGuitarStep((command-500)%16);
+      return;
+    }
+    if((command>=200 && command<248) || (command>=300 && command<316) ||
+       (command>=432 && command<448)) {
+      const auto id=static_cast<Steinberg::Vst::ParamID>(command);
+      const double value=control->getValueNormalized()>=0.5?1.:0.;
+      beginEdit(id);setParamNormalized(id,value);performEdit(id,value);endEdit(id);
       return;
     }
     if(control->getValueNormalized()<=0.5f)return;
