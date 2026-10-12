@@ -1,6 +1,7 @@
 #include "RifferatorProcessor.hpp"
 #include "RifferatorParameters.hpp"
 #include "core/IndustrialGuitarGroove.hpp"
+#include "core/RiffGeneration.hpp"
 #include "pluginterfaces/base/ibstream.h"
 #include <array>
 #include <algorithm>
@@ -23,6 +24,59 @@ class Controller final : public Steinberg::Vst::EditControllerEx1,
                          public VSTGUI::IControlListener {
 public:
   unsigned generateCount_{};
+  // Both GUI commands run on the control thread, never in process().
+  // Existing core generation preserves every locked step. The MIDI engine
+  // receives only ordinary, stable VST3 step parameter edits.
+  void runGuitarGeneration(a125::rifferator::GenerationCommand command) {
+    using namespace a125::rifferator;
+    std::vector<Step> current;
+    current.reserve(16);
+    for(int i=0;i<16;++i) {
+      const auto index=static_cast<std::size_t>(i);
+      const bool enabled=getParamNormalized(kGuitarStepBase+i)>=0.5;
+      const int art=std::clamp(static_cast<int>(std::lround(
+        getParamNormalized(kGuitarArticulationBase+i)*5.)),0,5);
+      const int degree=std::clamp(static_cast<int>(std::lround(
+        getParamNormalized(kGuitarDegreeBase+i)*28.))-13,-13,15);
+      const bool doubled=getParamNormalized(kGuitarDoubleBase+i)>=0.5;
+      const bool locked=getParamNormalized(kGuitarLockBase+i)>=0.5;
+      current.push_back({static_cast<Articulation>(enabled?art:0),
+                         degree,doubled,locked});
+      (void)index;
+    }
+    RandomOptions options;
+    // Distinct and reproducible (per session) seeds; no more three-preset
+    // rotation. Keep V1 melody root-focused unless pitch randomization is
+    // explicitly exposed as a separate user control.
+    options.seed=0x125A2026u ^ ((++generateCount_)*0x9E3779B9u);
+    options.densityPercent=80;
+    options.pmPercent=80;
+    options.noisePercent=3;
+    options.harmonicPercent=2;
+    options.randomRhythm=true;
+    options.randomArticulation=true;
+    options.randomPitch=false;
+    const auto result=generateGuitar(current,options,command,30);
+    const auto publish=[&](Steinberg::Vst::ParamID id,double normalized) {
+      if(std::abs(getParamNormalized(id)-normalized)<1.e-9)return;
+      beginEdit(id);
+      setParamNormalized(id,normalized);
+      performEdit(id,normalized);
+      endEdit(id);
+    };
+    for(int i=0;i<16;++i) {
+      const auto j=static_cast<std::size_t>(i);
+      if(current[j].locked)continue;
+      const auto& step=result[j];
+      publish(kGuitarStepBase+i,step.articulation==Articulation::Off?0.:1.);
+      publish(kGuitarArticulationBase+i,
+              static_cast<int>(step.articulation)/5.);
+      publish(kGuitarDegreeBase+i,(step.degree+13)/28.);
+      // GENERATE starts a new pattern with no stale double strokes.
+      // VARIATE preserves the existing stroke subdivision.
+      if(command==GenerationCommand::Generate)publish(kGuitarDoubleBase+i,0.);
+    }
+  }
   VSTGUI::VST3Editor* activeEditor_{};
   VSTGUI::VST3Editor* viewOwner_{};
   std::array<VSTGUI::CControl*,21> commandButtons_{};
@@ -304,24 +358,10 @@ public:
       send(id,getParamNormalized(id)>=0.5?0.:1.);
       return;
     }
-    if(control->getTag()==700) {
-      // Generate is a controller action, never an audio-thread allocation.
-      const auto groove=a125::rifferator::makeIndustrialGuitarGroove(
-          (++generateCount_%3==0)?85u:(generateCount_%2==0?50u:0u));
-      for(int i=0;i<16;++i) {
-        using namespace a125::rifferator;
-        if(getParamNormalized(kGuitarLockBase+i)>=0.5)continue;
-        const auto j=static_cast<std::size_t>(i);
-        const auto edit=[&](Steinberg::Vst::ParamID id,double v) {
-          beginEdit(id);setParamNormalized(id,v);performEdit(id,v);endEdit(id);
-        };
-        edit(kGuitarStepBase+i,groove.enabled[j]?1.:0.);
-        edit(kGuitarArticulationBase+i,groove.articulation[j]/5.);
-        edit(kGuitarDegreeBase+i,(groove.degrees[j]+13)/28.);
-        // A newly generated riff must not inherit stale DOUBLE triggers
-        // from its predecessor. Locked steps retain all their properties.
-        edit(kGuitarDoubleBase+i,0.);
-      }
+    if(command==700 || command==722) {
+      runGuitarGeneration(command==700?
+        a125::rifferator::GenerationCommand::Generate:
+        a125::rifferator::GenerationCommand::Variate);
       return;
     }
     const int tag=control->getTag();
