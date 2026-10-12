@@ -303,7 +303,7 @@
   <view class="CTextLabel" origin="16, 168" size="116, 25" title="SOFT" font="Small" font-color="Text" transparent="true"/>
   <view class="CTextLabel" origin="16, 199" size="116, 25" title="OPEN" font="Small" font-color="Text" transparent="true"/>
   <view class="CTextLabel" origin="16, 230" size="116, 25" title="HARMONIC" font="Small" font-color="Text" transparent="true"/>
-  <view class="CTextLabel" origin="16, 261" size="116, 25" title="PITCH" font="Small" font-color="Text" transparent="true"/>
+  <view class="CTextLabel" origin="16, 261" size="116, 25" title="DEGREE" font="Small" font-color="Text" transparent="true"/>
   <view class="CTextLabel" origin="16, 292" size="116, 25" title="LOCK" font="Small" font-color="Text" transparent="true"/>
   <view class="CTextLabel" origin="151, 44" size="45, 25" title="01" font="Small" font-color="Accent" text-alignment="center" transparent="true"/>
   <view class="CTextLabel" origin="207, 44" size="45, 25" title="02" font="Small" font-color="Accent" text-alignment="center" transparent="true"/>
