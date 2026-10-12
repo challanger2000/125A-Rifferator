@@ -55,6 +55,14 @@ public:
     else if(id>=kDrumStepBase && id<kDrumStepBase+48)control=drumButtons_[id-kDrumStepBase];
     if(control){control->setValueNormalized(getParamNormalized(id)>=0.5?1.f:0.f);control->invalid();}
   }
+  std::array<VSTGUI::CTextButton*,2> pmDisplays_{};
+  void refreshPmDisplays() {
+    const Steinberg::Vst::ParamID ids[2]{a125::rifferator::kPmMin,a125::rifferator::kPmMax};
+    for(int i=0;i<2;++i)if(auto* display=pmDisplays_[static_cast<std::size_t>(i)]) {
+      const int velocity=1+static_cast<int>(std::lround(getParamNormalized(ids[i])*126.));
+      display->setTitle(std::to_string(velocity).c_str());display->invalid();
+    }
+  }
   std::array<VSTGUI::CTextButton*,16> degreeDisplays_{};
   void refreshDegree(int step) {
     if(step<0 || step>=16)return;
@@ -79,6 +87,7 @@ public:
   Steinberg::tresult PLUGIN_API setParamNormalized(Steinberg::Vst::ParamID id,Steinberg::Vst::ParamValue value) override {
     const auto result=EditControllerEx1::setParamNormalized(id,value);
     if(result==Steinberg::kResultOk) {
+      if(id==a125::rifferator::kPmMin || id==a125::rifferator::kPmMax)refreshPmDisplays();
       if(id==a125::rifferator::kBassMode || id==a125::rifferator::kChordsQuality || id==a125::rifferator::kChordsEnabled || id==a125::rifferator::kBassEnabled || id==a125::rifferator::kChordsMode) refreshCommands();
       if(id>=a125::rifferator::kGuitarStepBase && id<a125::rifferator::kGuitarStepBase+16)refreshGuitarStep(static_cast<int>(id-a125::rifferator::kGuitarStepBase));
       if(id>=a125::rifferator::kGuitarArticulationBase && id<a125::rifferator::kGuitarArticulationBase+16)refreshGuitarStep(static_cast<int>(id-a125::rifferator::kGuitarArticulationBase));
@@ -101,6 +110,7 @@ public:
       stepOnButtons_.fill(nullptr);
       lockButtons_.fill(nullptr);
       doubleButtons_.fill(nullptr);
+      pmDisplays_.fill(nullptr);
       drumButtons_.fill(nullptr);
     }
   }
@@ -115,13 +125,18 @@ public:
       stepOnButtons_.fill(nullptr);
       lockButtons_.fill(nullptr);
       doubleButtons_.fill(nullptr);
+      pmDisplays_.fill(nullptr);
       drumButtons_.fill(nullptr);
       viewOwner_=editor;
     }
     if(auto* control=dynamic_cast<VSTGUI::CControl*>(view)) {
-      if((control->getTag()>=500 && control->getTag()<596) || (control->getTag()>=700 && control->getTag()<=720) || (control->getTag()>=800 && control->getTag()<832) || (control->getTag()>=200 && control->getTag()<248) || (control->getTag()>=300 && control->getTag()<316) || (control->getTag()>=432 && control->getTag()<464))
+      if((control->getTag()>=500 && control->getTag()<596) || (control->getTag()>=700 && control->getTag()<=720) || (control->getTag()>=800 && control->getTag()<832) || (control->getTag()>=200 && control->getTag()<248) || (control->getTag()>=300 && control->getTag()<316) || (control->getTag()>=432 && control->getTag()<464) || (control->getTag()>=880 && control->getTag()<884))
         control->setListener(this);
       const auto tag=control->getTag();
+      if(tag>=884 && tag<886) {
+        pmDisplays_[static_cast<std::size_t>(tag-884)]=dynamic_cast<VSTGUI::CTextButton*>(control);
+        refreshPmDisplays();
+      }
       if(tag>=200 && tag<248) {drumButtons_[tag-200]=control;refreshSwitch(tag);}
       if(tag>=300 && tag<316) {stepOnButtons_[tag-300]=control;refreshSwitch(tag);}
       if(tag>=432 && tag<448) {lockButtons_[tag-432]=control;refreshSwitch(tag);}
@@ -171,6 +186,18 @@ public:
       return;
     }
     if(control->getValueNormalized()<=0.5f)return;
+    if(command>=880 && command<884) {
+      const bool isMin=command<882;
+      const auto id=isMin?a125::rifferator::kPmMin:a125::rifferator::kPmMax;
+      const auto other=isMin?a125::rifferator::kPmMax:a125::rifferator::kPmMin;
+      int velocity=1+static_cast<int>(std::lround(getParamNormalized(id)*126.));
+      const int limit=1+static_cast<int>(std::lround(getParamNormalized(other)*126.));
+      velocity=std::clamp(velocity+((command%2)==0?-1:1),1,127);
+      velocity=isMin?std::min(velocity,limit):std::max(velocity,limit);
+      const double value=static_cast<double>(velocity-1)/126.;
+      beginEdit(id);setParamNormalized(id,value);performEdit(id,value);endEdit(id);
+      return;
+    }
     if(command>=800 && command<832) {
       const int step=(command-800)%16;
       const auto lock=a125::rifferator::kGuitarLockBase+step;
