@@ -19,8 +19,6 @@ int main(){
 
   assert(xml.find("title=\"DEGREE\"")!=std::string::npos);
   assert(xml.find("control-tag=\"ClearPattern\"")!=std::string::npos);
-  assert(controller.find("command==721")!=std::string::npos);
-  assert(controller.find("kGuitarLockBase+step")!=std::string::npos);
 
   // GUI wiring regression: every visible switch must have the controller
   // handler that publishes its VST3 parameter edit (not a dead decoration).
@@ -28,6 +26,8 @@ int main(){
   assert(controllerFile.good());
   const std::string controller((std::istreambuf_iterator<char>(controllerFile)),
                                std::istreambuf_iterator<char>());
+  assert(controller.find("command==721")!=std::string::npos);
+  assert(controller.find("kGuitarLockBase+step")!=std::string::npos);
   for(const auto* expr: {"command>=200 && command<248",
                          "command>=300 && command<316",
                          "command>=432 && command<464",
