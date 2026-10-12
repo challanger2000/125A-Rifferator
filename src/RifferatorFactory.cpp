@@ -707,6 +707,42 @@ public:
     parameters.addParameter(STR16("Hat 16"),nullptr,1,1.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kDrumStepBase+47);
     return Steinberg::kResultOk;
   }
+  // VST3 stores edit-controller state independently from the processor's
+  // musical project snapshot. Preserve the user's 100/150% GUI zoom across
+  // Studio One project reopen without changing the existing processor ABI.
+  Steinberg::tresult PLUGIN_API getState(Steinberg::IBStream* stream) override {
+    using namespace Steinberg;
+    if(!stream)return kResultFalse;
+    constexpr uint32 magic=0x315A4652u; // "RFZ1" (little endian)
+    constexpr uint32 version=1u;
+    const uint32 zoom=zoomFactor_>=1.25?150u:100u;
+    const uint32 fields[3]{magic,version,zoom};
+    for(const auto field:fields) {
+      int32 written=0;
+      if(stream->write(&field,sizeof(field),&written)!=kResultOk ||
+         written!=sizeof(field))return kResultFalse;
+    }
+    return kResultOk;
+  }
+  Steinberg::tresult PLUGIN_API setState(Steinberg::IBStream* stream) override {
+    using namespace Steinberg;
+    if(!stream)return kResultFalse;
+    uint32 fields[3]{};
+    for(auto& field:fields) {
+      int32 read=0;
+      if(stream->read(&field,sizeof(field),&read)!=kResultOk ||
+         read!=sizeof(field))return kResultFalse;
+    }
+    if(fields[0]!=0x315A4652u || fields[1]!=1u ||
+       (fields[2]!=100u && fields[2]!=150u))return kResultFalse;
+    // Validate everything before publishing any editor/UI changes.
+    zoomFactor_=fields[2]==150u?1.5:1.0;
+    auto* editor=viewOwner_?viewOwner_:activeEditor_;
+    if(editor && std::abs(editor->getZoomFactor()-zoomFactor_)>1.e-9)
+      editor->setZoomFactor(zoomFactor_);
+    refreshCommands();
+    return kResultOk;
+  }
   Steinberg::tresult PLUGIN_API setComponentState(Steinberg::IBStream* state) override {
     using namespace Steinberg;
     using namespace Steinberg::Vst;
