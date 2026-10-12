@@ -1,5 +1,33 @@
 # 125A Rifferator V1 — Product Contract (development)
-Status: SPECIFIED, not built or QA approved.
+Status: **ACTIVE V1 PRODUCT CONTRACT / DEVELOPMENT**. Windows development
+build and automated core/GUI-layout tests passed CI #38293244458
+(29/29 CTest, Steinberg Validator 537/537), but **real Studio One GUI,
+MIDI bus routing, 125A Plugin Tester and full release QA are NOT VERIFIED**.
+The requirements below remain binding until implemented or explicitly
+re-scoped by the product owner; a green CI result never removes them.
+
+## Implementation tracking (as of CI #38293244458)
+
+| V1 requirement | Current development evidence | Release disposition |
+| --- | --- | --- |
+| 16-step Guitar grid, PM/OPEN/NOISE/SOFT/HARMONIC, STOP, DEGREE, LOCK, DOUBLE | Controller parameter commands, scheduler, state and MIDI event regressions in 29/29 passing CTests | Automated PASS; Studio One GUI/target sample-library check pending |
+| Guitar GENERATE/VARIATE and CLEAR | Seeded core generator connected to GUI; conservative VARIATE preserves unchanged STOP and LOCK; CI PASS | Automated PASS; Studio One click/highlight behavior pending |
+| FOLLOW, EBM, HYBRID bass; EBM style/gate/velocity | Dedicated bus 1, Controller GUI actions and Processor regressions; CI PASS | Automated PASS; Studio One 4-bus routing pending |
+| Three GM Drum rows, global ON/OFF, STANDARD/GENERATE/VARIATE | Dedicated bus 2, GUI/controller/seed regressions; CI PASS | Automated PASS; real host check pending |
+| Chords and quality/mode (additional current feature) | Dedicated bus 3 with MIDI/state regressions; CI PASS | Automated PASS; real host check pending |
+| PM MIN/MAX, Root MIDI, Guitar/Bass Gate, Fill intensity | Front-panel parameter controls and processor regression; CI PASS | Automated PASS; target instrument/musical validation pending |
+| 100/150% GUI, zoom state | Versioned controller state tested; UIDESC template and bundle resources validated in CI | **HOST-GUI BLOCKER** until actual Studio One native editor opens and reopens; 150% content is 1680×1044 before host chrome |
+| 2–32 steps, 1/4–1/32 selectable clock grid and paging | 16-step front panel; internal source includes length-generic arrangement functions but no full user-facing 32-step editor/rate controls | **NOT IMPLEMENTED as specified** |
+| Independent seeded randomization toggles for rhythm/articulation/pitch/fill | Generator core supports options; GUI exposes Generate/Variate with fixed configured choices, not independent switches | **NOT IMPLEMENTED as specified** |
+| Fill every 4/8/16 bars user choice | Core FillOptions supports interval; exposed GUI controls intensity only | **NOT IMPLEMENTED as specified** |
+| Velocity profile editor/save profiles, user bass octave offset | Core contains velocity bands/offset; GUI exposes PM bounds and bass velocity but not all per-articulation thresholds, profile save, or octave offset editor | **NOT IMPLEMENTED as specified** |
+| Separate Guitar/Bass SMF export | No approved end-to-end export implementation demonstrated | **NOT VERIFIED / NOT IMPLEMENTED** |
+| Drum LOCK independently per step (GUI-specific contract) | Generator accepts locks in core; V1 UI has no drum lock controls/persisted drum lock state | **NOT IMPLEMENTED** |
+
+See `docs/RELEASE-AUDIT-V1.md` for defect/evidence tracking and
+`docs/HOST-GUI-QA.md` for the exact native DAW acceptance protocol.
+
+
 
 ## Purpose
 A compact metal/NDH MIDI riff generator with guitar as master pattern and a derived monophonic bass output. No audio synthesis and no copied Kontakt scripts. Musical inspiration: Thrash DI riffmaker.
@@ -32,4 +60,4 @@ These are MIDI velocity bands, NOT guaranteed power-chord voicings: instrument d
 
 ## QA gates
 Verify event ordering, boundary cases and rest handling, DOUBLE, articulation velocity confinement, deterministic randomness, scale pitch, bass follower invariant, offline vs realtime, state/preset recall, tempo/position jumps, MIDI event bus negotiation, VST3 Validator and 125A release QA.
-No build, validator or host QA claims exist yet.
+Current automated Windows evidence is recorded above; **no completed Studio One host QA or 125A release approval exists yet**.
