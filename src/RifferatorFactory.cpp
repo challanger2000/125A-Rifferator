@@ -85,6 +85,42 @@ public:
       if(command==GenerationCommand::Generate)publish(kGuitarDoubleBase+i,0.);
     }
   }
+  unsigned drumGenerationCount_{};
+  void publishDrumSteps(const a125::rifferator::DrumPattern& pattern) {
+    using namespace a125::rifferator;
+    const std::array<std::array<bool,16>,3> rows{
+      pattern.kick,pattern.snare,pattern.hat};
+    for(int row=0;row<3;++row)for(int step=0;step<16;++step) {
+      const auto id=kDrumStepBase+row*16+step;
+      const double value=rows[static_cast<std::size_t>(row)]
+                              [static_cast<std::size_t>(step)]?1.:0.;
+      if((getParamNormalized(id)>=0.5)==(value>=0.5))continue;
+      beginEdit(id);setParamNormalized(id,value);
+      performEdit(id,value);endEdit(id);
+    }
+  }
+  void runDrumGeneration(a125::rifferator::GenerationCommand command) {
+    using namespace a125::rifferator;
+    DrumPattern original;
+    for(int step=0;step<16;++step) {
+      const auto i=static_cast<std::size_t>(step);
+      original.kick[i]=getParamNormalized(kDrumStepBase+step)>=0.5;
+      original.snare[i]=getParamNormalized(kDrumStepBase+16+step)>=0.5;
+      original.hat[i]=getParamNormalized(kDrumStepBase+32+step)>=0.5;
+    }
+    original.enabled=getParamNormalized(kDrumEnabled)>=0.5;
+    DrumGenerationOptions options;
+    options.seed=0x125A2026u ^ (++drumGenerationCount_*0x9E3779B9u);
+    options.variationPercent=25;
+    // Drum-lock UI is not part of this V1 editor. Do not invent hidden
+    // locks or silently reuse guitar lock IDs for independent drum steps.
+    const DrumLocks noDrumLocks{};
+    publishDrumSteps(generateDrums(original,noDrumLocks,options,command));
+  }
+  void restoreStandardDrums() {
+    publishDrumSteps(a125::rifferator::DrumPattern::standard());
+    // The drum ON/OFF switch is global and intentionally remains unchanged.
+  }
   VSTGUI::VST3Editor* activeEditor_{};
   VSTGUI::VST3Editor* viewOwner_{};
   std::array<VSTGUI::CControl*,25> commandButtons_{};
@@ -280,7 +316,7 @@ public:
       viewOwner_=editor;
     }
     if(auto* control=dynamic_cast<VSTGUI::CControl*>(view)) {
-      if((control->getTag()>=500 && control->getTag()<596) || (control->getTag()>=700 && control->getTag()<=722) || (control->getTag()>=800 && control->getTag()<832) || (control->getTag()>=200 && control->getTag()<248) || (control->getTag()>=300 && control->getTag()<316) || (control->getTag()>=432 && control->getTag()<464) || (control->getTag()>=880 && control->getTag()<884) || (control->getTag()>=900 && control->getTag()<912) || control->getTag()==724)
+      if((control->getTag()>=500 && control->getTag()<596) || (control->getTag()>=700 && control->getTag()<=727) || (control->getTag()>=800 && control->getTag()<832) || (control->getTag()>=200 && control->getTag()<248) || (control->getTag()>=300 && control->getTag()<316) || (control->getTag()>=432 && control->getTag()<464) || (control->getTag()>=880 && control->getTag()<884) || (control->getTag()>=900 && control->getTag()<912) || control->getTag()==724)
         control->setListener(this);
       const auto tag=control->getTag();
       if(tag>=912 && tag<918) {
@@ -437,6 +473,16 @@ public:
     }
     if(command==724) {
       toggleDrumsEnabled();
+      return;
+    }
+    if(command==725) {
+      restoreStandardDrums();
+      return;
+    }
+    if(command==726 || command==727) {
+      runDrumGeneration(command==726?
+        a125::rifferator::GenerationCommand::Generate:
+        a125::rifferator::GenerationCommand::Variate);
       return;
     }
     if(command==700 || command==722) {
