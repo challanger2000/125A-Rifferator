@@ -143,6 +143,37 @@
 - Manual gates remain: actual Studio One GUI visibility and repeated editor lifecycle, multibus routing with target guitar/bass instruments, transport/loop/automation torture, project save/reopen at both zoom factors, 125A Plugin Tester, musical assessment and release-artifact SHA freeze.
 - **Decision unchanged: BLOCKED / NOT FINAL.** Do not publish or call the plugin ready solely on CI PASS.
 
+## 2026-10-12 — Functional GUI command trace and generator integration
+
+A source/GUI trace found a feature that was implemented in the core but
+not wired into its visible command: `RiffGeneration.hpp` already provided
+seeded `generateGuitar()` with `Generate` and conservative `Variate`;
+the actual `GuitarGenerate` controller branch instead rotated through
+three fixed `makeIndustrialGuitarGroove(0/50/85)` patterns.
+
+The development branch now routes both GUI commands through the existing
+off-audio-thread core generator. The action tags and verification chain:
+
+| Visible action / UI tag | Controller handling | Real parameter changes | Musical output / proof |
+| --- | --- | --- | --- |
+| GENERATE GUITAR / 700 | `runGuitarGeneration(Generate)` with advancing seeded RNG | Unlocked Guitar Step 300–315, Art 400–415, Degree 416–431, DOUBLE reset 448–463 | Scheduler guitar bus 0 and FOLLOW bass bus 1 via existing validated automation path; GUI command/Controller regression added; DAW click pending |
+| VARIATE GUITAR / 722 | `runGuitarGeneration(Variate)`, conservative 30% mutation proposal | Same step/art/degree params on unlocked steps; preserves DOUBLE | Existing generator unit test plus new controller seeded/LOCK regression; physical GUI pending |
+| LOCK 432–447 | Controller `setParamNormalized` and Processor final-LOCK precedence | Step arrays immune to Generate/Variate when LOCK=ON | Existing VST3 processor state and MIDI tests; host automation still pending |
+| PM MIN/MAX 880–883 | Controller changes kPmMin 112 / kPmMax 113 | Processor bounds and articulation velocity profile | Real Processor velocity tests CI PASS |
+| DOUBLE 448–463 | Controller publishes kGuitarDoubleBase+step | Guitar bus 0 + FOLLOW bass bus 1 | Real Processor NoteOff/retrigger tests CI PASS |
+| CLEAR PATTERN / 721 | Controller clears only unlocked Step/DOUBLE | Guitar NoteOff and FOLLOW bass release | Static GUI/controller contract; real DAW button QA pending |
+| Zoom 100/150 / 701–702 | Controller zoom plus independent controller state | GUI only, no MIDI edits | Serialized zoom CI PASS; attached/editor lifecycle pending |
+
+The exact UI control surface is still **16 Guitar columns**, with **16 Degree
+values and locks, 16 DOUBLE toggles, 96 articulation cells and 48 Drum
+toggles**; this patch does **not** implement the originally specified
+32-step editor, per-step clock-rate selector, MIDI SMF export, or independent
+randomization option toggles. These require implementation or **explicit
+product-owner scope acceptance**, not silent removal.
+
+**Current bundle status:** IMPLEMENTED / CI pending. Full GUI, automation,
+sample library and four-bus DAW end-to-end QA remain NOT VERIFIED.
+
 ## Required completion gates
 - Fix host GUI visibility with reproducible diagnosis rather than speculative resource changes; 20 consecutive open/close/reopen cycles and restore.
 - Compare the editor creation/resource contracts against authoritative 125A Midiator Final and validate expected studio rendering.
