@@ -11,6 +11,7 @@ void* moduleHandle=nullptr;
 #include <cassert>
 #include <cmath>
 #include <cstring>
+#include <cstdint>
 #include <vector>
 using namespace a125::rifferator;
 using Steinberg::MemoryStream;
