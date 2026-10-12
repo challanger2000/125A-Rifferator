@@ -282,6 +282,9 @@ public:
         edit(kGuitarStepBase+i,groove.enabled[j]?1.:0.);
         edit(kGuitarArticulationBase+i,groove.articulation[j]/5.);
         edit(kGuitarDegreeBase+i,(groove.degrees[j]+13)/28.);
+        // A newly generated riff must not inherit stale DOUBLE triggers
+        // from its predecessor. Locked steps retain all their properties.
+        edit(kGuitarDoubleBase+i,0.);
       }
       return;
     }
