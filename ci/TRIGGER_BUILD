@@ -122,3 +122,4 @@
 2026-10-12 BATCH: FOLLOW bass inherits guitar DOUBLE strikes; deterministic PM MIN/MAX velocity accents; VST3 processor and core regression audit
 2026-10-12 BUNDLE: FOLLOW DOUBLE bass release, deterministic final LOCK automation precedence and EBM independence regressions
 2026-10-12 VERIFY: update NoteOff backpressure regression for correctly released FOLLOW Bass after DOUBLE edit; no duplicate Drum NoteOff
+2026-10-12 VERIFY: two-stage FILL step edits then LOCK, saved-state fixture assertions; regression-only correction after #38253543438
