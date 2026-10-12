@@ -27,6 +27,14 @@ int main(){
   const std::string controller((std::istreambuf_iterator<char>(controllerFile)),
                                std::istreambuf_iterator<char>());
   assert(controller.find("command==721")!=std::string::npos);
+  // GENERATE resets previous DOUBLE triggers only after the LOCK guard.
+  const auto generateStart=controller.find("if(control->getTag()==700)");
+  const auto generateEnd=controller.find("const int tag=control->getTag();",generateStart);
+  assert(generateStart!=std::string::npos && generateEnd!=std::string::npos);
+  const auto generateCode=controller.substr(generateStart,generateEnd-generateStart);
+  assert(generateCode.find("kGuitarLockBase+i")<generateCode.find("edit(kGuitarDoubleBase+i,0.)"));
+  assert(generateCode.find("edit(kGuitarDoubleBase+i,0.)")!=std::string::npos);
+
   assert(controller.find("kGuitarLockBase+step")!=std::string::npos);
   for(const auto* expr: {"command>=200 && command<248",
                          "command>=300 && command<316",
