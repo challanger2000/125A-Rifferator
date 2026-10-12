@@ -20,6 +20,25 @@ int main(){
   constexpr int expected[6]{0,20,50,95,115,127};
   for(int step=0;step<16;++step)for(int art=0;art<6;++art)
     assert(guitarStepVelocity(step,art)==expected[art]);
+  // Full MIDI-path regression: each UI articulation selection must change
+  // the actual NoteOn velocity emitted by the scheduler, not just a helper.
+  for(int art=0;art<6;++art) {
+    Pair one;
+    one.guitar.push_back({0,200,40,110,240});
+    LiveControls selected;
+    selected.guitarSteps.fill(false);
+    selected.guitarSteps[0]=true;
+    selected.guitarArticulation[0]=art;
+    BlockScheduler engine;
+    std::vector<ScheduledMidiEvent> actual;
+    engine.process(one,0.,0.25,960,61440,
+      [&](ScheduledMidiEvent e){actual.push_back(e);return true;},true,selected);
+    int ons=0;
+    for(const auto& e:actual)if(e.bus==0 && e.on) {
+      ++ons;assert(e.velocity==expected[art]);
+    }
+    assert(ons==(art==0?0:art==4?2:1));
+  }
   assert(!makeIndustrialGuitarGroove(49).enabled[15]);
   assert(makeIndustrialGuitarGroove(50).enabled[15]);
   Pair pair;
