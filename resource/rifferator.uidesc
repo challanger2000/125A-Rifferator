@@ -341,7 +341,7 @@
  <view class="CTextButton" control-tag="Action701" origin="967, 17" size="58, 28" title="100%" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
  <view class="CTextButton" control-tag="Action702" origin="1030, 17" size="58, 28" title="150%" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
  <view class="CTextLabel" origin="360, 14" size="400, 38" title="125A RIFFERATOR" font="Title" font-color="Text" text-alignment="center" transparent="true"/>
- <view class="CTextLabel" origin="360, 49" size="400, 20" title="THE INDUSTRIAL RIFF MACHINE" font="Small" font-color="Accent" text-alignment="center" transparent="true"/>
+ <view class="CTextLabel" origin="360, 53" size="400, 20" title="THE INDUSTRIAL RIFF MACHINE" font="Small" font-color="Accent" text-alignment="center" transparent="true"/>
  <view class="CTextButton" control-tag="GuitarPage" origin="35, 75" size="170, 29" title="GUITAR" font="Normal" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
  <view class="CTextButton" control-tag="RhythmPage" origin="217, 75" size="260, 29" title="BASS / CHORDS / DRUMS" font="Normal" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
  <view class="CViewContainer" rifferator-page="guitar" origin="0, 106" size="1120, 534" transparent="true">
@@ -569,15 +569,15 @@
  </view>
  <view class="CViewContainer" origin="22, 389" size="1076, 76" background-color="Panel" transparent="false"></view>
 
- <view class="CTextLabel" origin="45, 391" size="230, 20" title="PM VELOCITY" font="Small" font-color="Accent" transparent="true"/>
+ <view class="CTextLabel" origin="45, 387" size="230, 20" title="PM VELOCITY" font="Small" font-color="Accent" transparent="true"/>
  <view class="CTextButton" control-tag="PmMinMinus" origin="45, 425" size="25, 27" title="-" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
  <view class="CTextButton" control-tag="PmMinValue" origin="75, 425" size="47, 27" title="30" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" mouse-enabled="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
  <view class="CTextButton" control-tag="PmMinPlus" origin="127, 425" size="25, 27" title="+" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
  <view class="CTextButton" control-tag="PmMaxMinus" origin="165, 425" size="25, 27" title="-" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
  <view class="CTextButton" control-tag="PmMaxValue" origin="195, 425" size="47, 27" title="50" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" mouse-enabled="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
  <view class="CTextButton" control-tag="PmMaxPlus" origin="247, 425" size="25, 27" title="+" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
- <view class="CTextLabel" origin="74, 408" size="62, 15" title="MIN" font="Small" font-color="Text" transparent="true"/>
- <view class="CTextLabel" origin="194, 408" size="62, 15" title="MAX" font="Small" font-color="Text" transparent="true"/>
+ <view class="CTextLabel" origin="74, 410" size="62, 15" title="MIN" font="Small" font-color="Text" transparent="true"/>
+ <view class="CTextLabel" origin="194, 410" size="62, 15" title="MAX" font="Small" font-color="Text" transparent="true"/>
  <view class="CTextLabel" origin="309, 391" size="145, 20" title="ROOT MIDI" font="Small" font-color="Text" transparent="true"/>
  <view class="CTextButton" control-tag="RootMinus" origin="309, 425" size="25, 27" title="-" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
  <view class="CTextButton" control-tag="RootValue" origin="339, 425" size="55, 27" title="40" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" mouse-enabled="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
