@@ -85,6 +85,26 @@ public:
     }
   }
   Steinberg::tresult PLUGIN_API setParamNormalized(Steinberg::Vst::ParamID id,Steinberg::Vst::ParamValue value) override {
+    using namespace a125::rifferator;
+    // A host may automate step controls directly, bypassing valueChanged().
+    // The processor already rejects edits to locked steps; prevent the host
+    // display/controller from silently drifting away from the MIDI engine.
+    int step=-1;
+    if(id>=kGuitarStepBase && id<kGuitarStepBase+16)
+      step=static_cast<int>(id-kGuitarStepBase);
+    else if(id>=kGuitarArticulationBase && id<kGuitarArticulationBase+16)
+      step=static_cast<int>(id-kGuitarArticulationBase);
+    else if(id>=kGuitarDegreeBase && id<kGuitarDegreeBase+16)
+      step=static_cast<int>(id-kGuitarDegreeBase);
+    else if(id>=kGuitarDoubleBase && id<kGuitarDoubleBase+16)
+      step=static_cast<int>(id-kGuitarDoubleBase);
+    if(step>=0 && getParamNormalized(kGuitarLockBase+step)>=0.5) {
+      refreshGuitarStep(step);
+      if(id>=kGuitarStepBase && id<kGuitarStepBase+16)refreshSwitch(id);
+      if(id>=kGuitarDoubleBase && id<kGuitarDoubleBase+16)refreshSwitch(id);
+      if(id>=kGuitarDegreeBase && id<kGuitarDegreeBase+16)refreshDegree(step);
+      return Steinberg::kResultOk;
+    }
     // Match the processor's PM interval constraints even for DAW automation.
     // Otherwise the host GUI could display an invalid, non-playable range.
     if(id==a125::rifferator::kPmMin || id==a125::rifferator::kPmMax) {
@@ -770,6 +790,12 @@ public:
     } else {
       restoreMax();restoreMin();
     }
+    // An older project may have left steps locked in the current controller.
+    // After validating the incoming state, clear existing locks first so that
+    // full project recall can replace every step even if it was locked before.
+    // The incoming lock flags are restored only after their step values.
+    for(int i=0;i<16;++i)
+      setParamNormalized(a125::rifferator::kGuitarLockBase+i,0.);
     // The processor owns the pattern. The controller only synchronizes
     // the automatable parameter values presented to the host/GUI.
     setParamNormalized(a125::rifferator::kChordsQuality,quality/4.);
