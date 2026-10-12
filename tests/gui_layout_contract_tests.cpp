@@ -51,9 +51,10 @@ int main(){
       assert(pos!=std::string::npos);
       const auto end=xml.find("/>",pos);
       assert(end!=std::string::npos);
-      const auto view=xml.substr(pos,end-pos);
-      assert(view.find("class=\"CTextButton\"")==std::string::npos ||
-             xml.rfind("<view",pos)!=std::string::npos);
+      const auto viewStart=xml.rfind("<view",pos);
+      assert(viewStart!=std::string::npos && viewStart<pos);
+      const auto view=xml.substr(viewStart,end-viewStart);
+      assert(view.find("class=\"CTextButton\"")!=std::string::npos);
       if(std::string(suffix)=="Value")
         assert(view.find("mouse-enabled=\"false\"")!=std::string::npos);
     }
@@ -84,6 +85,12 @@ int main(){
   assert(controller.find("if(id==musicalParam(i))")!=std::string::npos);
   assert(controller.find("refreshMusicalDisplays();")!=std::string::npos);
   assert(controller.find("control->getTag()==724")!=std::string::npos);
+  // New view cache must be invalidated on both close and owner switch.
+  const auto viewStart=controller.find("VSTGUI::CView* verifyView(");
+  const auto viewEnd=controller.find("void valueChanged(",viewStart);
+  assert(viewStart!=std::string::npos && viewEnd!=std::string::npos);
+  assert(controller.substr(viewStart,viewEnd-viewStart).find(
+    "musicalDisplays_.fill(nullptr);")!=std::string::npos);
   assert(controller.find("kRootPitch,kGuitarGate,kBassGate,kFillIntensity,kBassVelocity,kEbmStyle")!=std::string::npos);
 
 
