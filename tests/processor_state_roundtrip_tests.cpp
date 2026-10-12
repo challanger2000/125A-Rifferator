@@ -193,11 +193,12 @@ int main(){
     assert(std::memcmp(saved.getData(),again.getData(),saved.getSize())==0);
   }
 
-  // End-to-end VST3 event test: drum edits, chord edits and both together
-  // must release only their own buses while a guitar note is still held.
-  for(int scenario=0;scenario<3;++scenario) {
-    const bool changeDrums=scenario!=1;
-    const bool changeChords=scenario!=0;
+  // End-to-end VST3 event test: drum, chord and guitar DOUBLE edits
+  // must release only their own buses while four note streams are active.
+  for(int scenario=0;scenario<5;++scenario) {
+    const bool changeDrums=scenario==0 || scenario==2 || scenario==4;
+    const bool changeChords=scenario==1 || scenario==2 || scenario==4;
+    const bool changeGuitar=scenario==3 || scenario==4;
     Processor playing;
     Steinberg::Vst::ProcessSetup setup{};
     setup.processMode=Steinberg::Vst::kRealtime;
@@ -224,7 +225,7 @@ int main(){
     }
     assert(seenOn[0] && seenOn[1] && seenOn[2] && seenOn[3]);
 
-    Steinberg::Vst::ParameterChanges edits(2);
+    Steinberg::Vst::ParameterChanges edits(3);
     auto change=[&](Steinberg::Vst::ParamID id,double value) {
       Steinberg::int32 queueIndex=0,pointIndex=0;
       auto* q=edits.addParameterData(id,queueIndex);
@@ -232,6 +233,7 @@ int main(){
     };
     if(changeDrums)change(kDrumStepBase,0.);
     if(changeChords)change(kChordsQuality,.25);
+    if(changeGuitar)change(kGuitarDoubleBase,1.);
     Steinberg::Vst::EventList second(512);
     block.outputEvents=&second;
     block.inputParameterChanges=&edits;
@@ -242,10 +244,10 @@ int main(){
       Steinberg::Vst::Event e{};
       assert(second.getEvent(i,e)==Steinberg::kResultOk);
       if(e.type!=Steinberg::Vst::Event::kNoteOffEvent || e.sampleOffset!=0)continue;
-      assert(e.busIndex==2 || e.busIndex==3);
+      assert(e.busIndex==0 || e.busIndex==2 || e.busIndex==3);
       seenOff[e.busIndex]=true;
     }
-    assert(!seenOff[0] && !seenOff[1]);
+    assert(seenOff[0]==changeGuitar && !seenOff[1]);
     assert(seenOff[2]==changeDrums && seenOff[3]==changeChords);
   }
 
