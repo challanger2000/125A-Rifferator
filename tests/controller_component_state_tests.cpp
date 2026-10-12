@@ -231,5 +231,48 @@ int main() {
     assert(first.terminate()==Steinberg::kResultOk);
     assert(second.terminate()==Steinberg::kResultOk);
   }
+  // Previously host-only MIDI controls now have explicit GUI +/- actions.
+  // Check all six mappings, both endpoints, meaningful ranges, VST3
+  // normalization, and non-wrapping step increments without a native window.
+  {
+    Controller controls;
+    assert(controls.initialize(nullptr)==Steinberg::kResultOk);
+    constexpr int minimum[6]{0,0,0,0,1,0};
+    constexpr int maximum[6]{127,100,100,100,127,4};
+    for(int i=0;i<6;++i) {
+      const auto param=Controller::musicalParam(i);
+      assert(controls.setParamNormalized(
+        param,Controller::musicalNormalized(i,minimum[i]))==Steinberg::kResultOk);
+      assert(Controller::musicalValue(i,controls.getParamNormalized(param))==minimum[i]);
+      controls.applyMusicalStepCommand(900+2*i); // cannot decrease below min
+      assert(Controller::musicalValue(i,controls.getParamNormalized(param))==minimum[i]);
+      controls.applyMusicalStepCommand(901+2*i);
+      assert(Controller::musicalValue(i,controls.getParamNormalized(param))==minimum[i]+1);
+      controls.applyMusicalStepCommand(900+2*i);
+      assert(Controller::musicalValue(i,controls.getParamNormalized(param))==minimum[i]);
+      assert(controls.setParamNormalized(
+        param,Controller::musicalNormalized(i,maximum[i]))==Steinberg::kResultOk);
+      controls.applyMusicalStepCommand(901+2*i);
+      assert(Controller::musicalValue(i,controls.getParamNormalized(param))==maximum[i]);
+      controls.applyMusicalStepCommand(900+2*i);
+      assert(Controller::musicalValue(i,controls.getParamNormalized(param))==maximum[i]-1);
+      controls.applyMusicalStepCommand(901+2*i);
+      assert(Controller::musicalValue(i,controls.getParamNormalized(param))==maximum[i]);
+    }
+    controls.applyMusicalStepCommand(899);controls.applyMusicalStepCommand(912);
+    near(controls.getParamNormalized(kRootPitch),1.);
+    assert(controls.getParamNormalized(kDrumEnabled)>=0.5);
+    controls.toggleDrumsEnabled();
+    near(controls.getParamNormalized(kDrumEnabled),0.);
+    controls.toggleDrumsEnabled();
+    near(controls.getParamNormalized(kDrumEnabled),1.);
+    // Host automation and state restore share the same parameter values;
+    // no additional private GUI-only copy is created by +/- commands.
+    assert(controls.setParamNormalized(kRootPitch,53./127.)==Steinberg::kResultOk);
+    assert(Controller::musicalValue(0,controls.getParamNormalized(kRootPitch))==53);
+    assert(controls.setParamNormalized(kFillIntensity,.75)==Steinberg::kResultOk);
+    assert(Controller::musicalValue(3,controls.getParamNormalized(kFillIntensity))==75);
+    assert(controls.terminate()==Steinberg::kResultOk);
+  }
   assert(controller.terminate()==Steinberg::kResultOk);
 }
