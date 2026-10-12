@@ -573,20 +573,30 @@ int main(){
     assert(step>=8 && step<16 && delta!=0);
     auto playFill=[&](bool locked) {
       Processor playing;
-      Steinberg::Vst::ParameterChanges changes(4);
+      Steinberg::Vst::ParameterChanges changes(3);
       auto edit=[&](Steinberg::Vst::ParamID id,double value){
         Steinberg::int32 qi=0,pi=0;
         auto* q=changes.addParameterData(id,qi);
         assert(q && q->addPoint(0,value,pi)==Steinberg::kResultOk);
       };
+      // Set up the selected step BEFORE applying LOCK. In the VST3 host,
+      // cross-parameter queues in one block have no prescribed order and
+      // final LOCK=ON intentionally rejects all concurrent step changes.
       edit(kFillIntensity,1.);
       edit(kGuitarStepBase+step,1.);
       edit(kGuitarDegreeBase+step,16./28.); // degree 3
-      edit(kGuitarLockBase+step,locked?1.:0.);
       Steinberg::Vst::ProcessData setupBlock{};
       setupBlock.numSamples=0;
       setupBlock.inputParameterChanges=&changes;
       assert(playing.process(setupBlock)==Steinberg::kResultOk);
+      if(locked) {
+        Steinberg::Vst::ParameterChanges lockChange(1);
+        Steinberg::int32 qi=0,pi=0;
+        auto* q=lockChange.addParameterData(kGuitarLockBase+step,qi);
+        assert(q && q->addPoint(0,1.,pi)==Steinberg::kResultOk);
+        setupBlock.inputParameterChanges=&lockChange;
+        assert(playing.process(setupBlock)==Steinberg::kResultOk);
+      }
       Steinberg::Vst::ProcessSetup setup{};
       setup.processMode=Steinberg::Vst::kRealtime;
       setup.symbolicSampleSize=Steinberg::Vst::kSample32;
