@@ -70,6 +70,23 @@
   GUI attachment, real MIDI bus routing and full release acceptance remain
   **NOT VERIFIED**.
 
+## 2026-10-12 — CI #38252685179 backpressure assertion correction
+
+- Windows CI #38252685179 completed 28/29 CTests; the only failure was
+  `rifferator_processor_state` at the backpressure regression. The test
+  still asserted **no FOLLOW Bass NoteOff** after a live DOUBLE edit.
+- This contradicted the newly adopted contract: DOUBLE changes both
+  Guitar and FOLLOW Bass MIDI timing, and therefore both buses must release
+  their held notes before the next event. The EBM/HYBRID bass remains
+  independent.
+- The regression now explicitly checks that the retry callback releases
+  Guitar, FOLLOW Bass (pitch 28), remaining Drum and Chord notes, while
+  the already accepted kick 36 NoteOff is **not** sent a second time.
+- This was a stale test oracle, not evidence that releasing FOLLOW Bass is
+  incorrect. Keep release semantics and associated assertions aligned when
+  a feature's MIDI ownership changes.
+- **Status:** new CI pending; no completed DAW or release QA verdict.
+
 ## Required completion gates
 - Fix host GUI visibility with reproducible diagnosis rather than speculative resource changes; 20 consecutive open/close/reopen cycles and restore.
 - Compare the editor creation/resource contracts against authoritative 125A Midiator Final and validate expected studio rendering.
