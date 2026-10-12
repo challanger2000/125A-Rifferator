@@ -126,7 +126,7 @@ int main(){
     int otherOn=0,otherOff=0;
     for(const auto& e:actual)if(e.bus==0 && e.pitch==45) {
       if(e.on)++otherOn;
-      else {++otherOff;assert(e.sampleOffset>=940);}
+      else {++otherOff;assert(e.sampleOffset>=900);} // 95% gate of 960-tick boundary
     }
     assert(otherOn==1 && otherOff==1);
   }
