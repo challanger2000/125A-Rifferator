@@ -114,3 +114,4 @@
 2026-10-12 BUNDLE: STOP every bar, sustained OPEN over empty steps, legacy tests, duplicate-run concurrency
 2026-10-12 BATCH: fix short-loop STOP interaction with OPEN sustain; verify period wrap, repeated STOP, block-edge NoteOff
 2026-10-12 BUNDLE: drum-only MIDI flush and active multi-bus VST3 processor regression
+2026-10-12 BUNDLE: isolated chord and guitar DOUBLE MIDI releases, combined-bus VST3 regression
