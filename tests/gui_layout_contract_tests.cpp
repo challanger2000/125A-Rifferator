@@ -26,9 +26,18 @@ int main(){
     const auto end=xml.find("/>",begin);
     assert(end!=std::string::npos);
     assert(xml.substr(begin,end-begin).find("size=\"28, 19\"")!=std::string::npos);
+    assert(xml.substr(begin,end-begin).find("mouse-enabled=\"false\"")!=std::string::npos);
   }
 
   assert(xml.find("control-tag=\"ClearPattern\"")!=std::string::npos);
+  // Numerical PM readouts are labels, not misleading interactive switches.
+  for(const auto* name:{"PmMinValue","PmMaxValue"}) {
+    const auto begin=xml.find(std::string("control-tag=\"")+name+"\" origin=");
+    assert(begin!=std::string::npos);
+    const auto end=xml.find("/>",begin);
+    assert(end!=std::string::npos);
+    assert(xml.substr(begin,end-begin).find("mouse-enabled=\"false\"")!=std::string::npos);
+  }
   // 1..127 must fit without clipping in both velocity displays.
   assert(xml.find("control-tag=\"PmMinValue\" origin=\"157, 382\" size=\"48, 24\"")!=std::string::npos);
   assert(xml.find("control-tag=\"PmMaxValue\" origin=\"296, 382\" size=\"48, 24\"")!=std::string::npos);
