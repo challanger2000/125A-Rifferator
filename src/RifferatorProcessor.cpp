@@ -105,6 +105,22 @@ tresult PLUGIN_API Processor::process(ProcessData& data) {
       bassFlushPending_=true;
       chordFlushPending_=true;
     };
+    // VST3 parameter queues have no semantic ordering across different IDs.
+    // Resolve final LOCK states before applying ANY matrix edits. A locked
+    // step is immutable within this entire callback, regardless of whether
+    // its LOCK queue appears before or after articulation/degree/DOUBLE.
+    for(int i=0;i<data.inputParameterChanges->getParameterCount();++i) {
+      auto* queue=data.inputParameterChanges->getParameterData(i);
+      if(!queue || queue->getPointCount()<=0)continue;
+      const auto id=queue->getParameterId();
+      if(id<kGuitarLockBase || id>=kGuitarLockBase+16)continue;
+      int32 offset=0;ParamValue value=0;
+      if(queue->getPoint(queue->getPointCount()-1,offset,value)!=kResultOk ||
+         !std::isfinite(value))continue;
+      const auto step=static_cast<std::size_t>(id-kGuitarLockBase);
+      live_.guitarLocks[step]=value>=0.5;
+      if(step<steps_.size())steps_[step].locked=live_.guitarLocks[step];
+    }
     for(int i=0;i<data.inputParameterChanges->getParameterCount();++i) {
       auto* queue=data.inputParameterChanges->getParameterData(i);
       if(!queue || queue->getPointCount()<=0)continue;
@@ -170,12 +186,8 @@ tresult PLUGIN_API Processor::process(ProcessData& data) {
         }
         continue;
       }
-      if(id>=kGuitarLockBase && id<kGuitarLockBase+16) {
-        const auto index=static_cast<std::size_t>(id-kGuitarLockBase);
-        live_.guitarLocks[index]=value>=0.5;
-        if(index<steps_.size())steps_[index].locked=live_.guitarLocks[index];
-        continue;
-      }
+      if(id>=kGuitarLockBase && id<kGuitarLockBase+16)
+        continue; // applied atomically before step edits above
       if(id>=kGuitarArticulationBase && id<kGuitarArticulationBase+16) {
         const auto index=static_cast<std::size_t>(id-kGuitarArticulationBase);
         const int articulation=std::clamp(static_cast<int>(std::lround(value*5.)),0,5);
