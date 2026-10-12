@@ -509,14 +509,9 @@ tresult PLUGIN_API Processor::setState(IBStream* stream) {
   live_.guitarArticulation=restoredArt;
   live_.guitarDegree=restoredDegree;
   live_.guitarLocks=restoredLocks;
-  // Reconcile the historical Step snapshot with the restored live matrix.
-  // Subsequent save/generate operations must see the same articulation,
-  // degree and lock values as the actual scheduler.
-  for(std::size_t i=0;i<steps_.size() && i<16;++i) {
-    steps_[i].articulation=static_cast<Articulation>(restoredArt[i]);
-    steps_[i].degree=restoredDegree[i];
-    steps_[i].locked=restoredLocks[i];
-  }
+  // Preserve separately serialized Step snapshots verbatim. V5+ live
+  // guitar arrays intentionally coexist with the historical step records;
+  // overwriting either breaks lossless project roundtrips.
   live_.pmMin=restoredPmMin;
   live_.pmMax=restoredPmMax;
   live_.guitarGate=config_.guitarGate;
