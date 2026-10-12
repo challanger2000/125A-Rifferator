@@ -301,6 +301,17 @@ int main(){
   assert(xml.find("<control-tag name=\"RhythmPage\" tag=\"729\"/>")!=std::string::npos);
   assert(controller.find("attributes.getAttributeValue(\"rifferator-page\")")!=std::string::npos);
   assert(controller.find("if(command==728 || command==729)")!=std::string::npos);
+  // Zoom and page tabs are exclusive selectors, not "toggle off" controls.
+  // A second click must reselect the active one before the generic
+  // non-pressed-button early return can suppress the UI update.
+  const auto actionStart=controller.find("void valueChanged(");
+  const auto navigation=controller.find("if(command==728 || command==729)",actionStart);
+  const auto zoomSelect=controller.find("if(command==701 || command==702)",actionStart);
+  const auto releaseSkip=controller.find(
+    "if(control->getValueNormalized()<=0.5f)return;",actionStart);
+  assert(actionStart!=std::string::npos && navigation!=std::string::npos &&
+         zoomSelect!=std::string::npos && releaseSkip!=std::string::npos);
+  assert(navigation<releaseSkip && zoomSelect<releaseSkip);
   assert(controller.find("guitarPageView_->setVisible(!rhythmPageSelected_)")!=std::string::npos);
   assert(controller.find("rhythmPageView_->setVisible(rhythmPageSelected_)")!=std::string::npos);
 
