@@ -27,6 +27,20 @@ int main(){
   int noteOns=0,noteOffs=0;
   for(auto e:events)if(e.bus==0){if(e.on){assert(e.pitch==47);++noteOns;}else ++noteOffs;}
   assert(noteOns==1 && noteOffs==1);
+  // Changing the musical scale must alter emitted notes for non-root degrees.
+  scheduler.reset();events.clear();
+  controls.guitarDegree[0]=3;
+  controls.scale={0,2,3,5,7,8,10}; // natural minor: third = +3
+  scheduler.process(arrangement.midi,0.,0.25,960,arrangement.periodTicks,sink,true,controls);
+  bool minorThird=false;
+  for(const auto& e:events)if(e.bus==0 && e.on && e.pitch==50)minorThird=true;
+  assert(minorThird);
+  scheduler.reset();events.clear();
+  controls.scale={0,2,4,5,7,9,11}; // major: third = +4
+  scheduler.process(arrangement.midi,0.,0.25,960,arrangement.periodTicks,sink,true,controls);
+  bool majorThird=false;
+  for(const auto& e:events)if(e.bus==0 && e.on && e.pitch==51)majorThird=true;
+  assert(majorThird);
   scheduler.reset();events.clear();
   controls.guitarSteps[0]=false;
   controls.guitarArticulation[0]=0;
