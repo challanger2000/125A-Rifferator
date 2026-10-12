@@ -97,3 +97,4 @@
 2026-10-12 double OPEN power chord root fifth MIDI regression
 2026-10-12 library FIFTH single MIDI note normal and DOUBLE regression
 2026-10-12 update obsolete fifth regression to single trigger note
+2026-10-12 defensive PM clamp host automation regression
