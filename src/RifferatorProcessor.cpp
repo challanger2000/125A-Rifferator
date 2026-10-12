@@ -159,7 +159,13 @@ tresult PLUGIN_API Processor::process(ProcessData& data) {
         const auto index=static_cast<std::size_t>(id-kGuitarDoubleBase);
         if(!live_.guitarLocks[index] && index<steps_.size()) {
           const bool doubled=value>=0.5;
-          if(steps_[index].doubled!=doubled)guitarFlushPending_=true;
+          if(steps_[index].doubled!=doubled) {
+            guitarFlushPending_=true;
+            // DOUBLE is shared by guitar and FOLLOW bass. When an
+            // already-playing step changes, both sets of held notes must
+            // receive their NoteOff. EBM/HYBRID own an independent rhythm.
+            if(activeBassMode_==0)bassFlushPending_=true;
+          }
           steps_[index].doubled=doubled;
         }
         continue;
