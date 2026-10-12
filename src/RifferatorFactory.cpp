@@ -921,9 +921,9 @@ public:
     using namespace Steinberg;
     if(!stream)return kResultFalse;
     constexpr uint32 magic=0x315A4652u; // "RFZ1" (little endian)
-    constexpr uint32 version=1u;
+    constexpr uint32 version=2u;
     const uint32 zoom=zoomFactor_>=1.25?150u:100u;
-    const uint32 fields[3]{magic,version,zoom};
+    const uint32 fields[4]{magic,version,zoom,rhythmPageSelected_?1u:0u};
     for(auto field:fields) {
       int32 written=0;
       if(stream->write(&field,sizeof(field),&written)!=kResultOk ||
@@ -940,10 +940,20 @@ public:
       if(stream->read(&field,sizeof(field),&read)!=kResultOk ||
          read!=sizeof(field))return kResultFalse;
     }
-    if(fields[0]!=0x315A4652u || fields[1]!=1u ||
+    if(fields[0]!=0x315A4652u || (fields[1]!=1u && fields[1]!=2u) ||
        (fields[2]!=100u && fields[2]!=150u))return kResultFalse;
-    // Validate everything before publishing any editor/UI changes.
+    // Legacy v1 stored only zoom. New v2 independently stores the selected
+    // GUI page so Studio One can restore the user's working surface.
+    uint32 page=0;
+    if(fields[1]>=2u) {
+      int32 read=0;
+      if(stream->read(&page,sizeof(page),&read)!=kResultOk ||
+         read!=sizeof(page) || page>1u)return kResultFalse;
+    }
+    // Publish only after every field was read and validated. A truncated
+    // project cannot corrupt zoom/page or a currently attached editor.
     zoomFactor_=fields[2]==150u?1.5:1.0;
+    selectPage(page==1u);
     auto* editor=viewOwner_?viewOwner_:activeEditor_;
     if(editor && std::abs(editor->getZoomFactor()-zoomFactor_)>1.e-9)
       editor->setZoomFactor(zoomFactor_);
