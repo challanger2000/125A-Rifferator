@@ -127,3 +127,4 @@
 2026-10-12 BUNDLE: VST3 controller 100/150 zoom project-state persistence, malformed-stream rejection, release ledger refresh and controller-state regression
 2026-10-12 BUNDLE: connect real seeded Guitar GENERATE/VARIATE core, GUI command 722, preserve active STOP, respect LOCK, deterministic Controller and GUI trace regressions
 2026-10-12 BATCH: expose Root MIDI/Guitar Gate/Bass Gate/Fill/Bass Velocity/EBM Style numeric VST3 controls and Drums ON/OFF; GUI lifecycle, layout, automation, bounds regression
+2026-10-12 BUNDLE: wire existing GM STANDARD BEAT, seeded GENERATE DRUMS, conservative VARIATE DRUMS; preserve Drums Enabled; GUI/controller state and layout regressions
