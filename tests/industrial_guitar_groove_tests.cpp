@@ -60,6 +60,82 @@ int main(){
     assert(ons[0]==0 && ons[1]>=479 && ons[1]<=480);
     assert(ons[0]<offs[0] && offs[0]<=ons[1] && ons[1]<offs[1]);
   }
+  // FOLLOW bass must inherit both DOUBLE strokes with independent gate,
+  // velocity and NoteOffs. External EBM bass must not be double-triggered.
+  {
+    Pair phrase;
+    phrase.guitar.push_back({0,200,40,50,240});
+    phrase.bass.push_back({0,200,28,100,240});
+    LiveControls c;
+    c.guitarSteps.fill(false);
+    c.guitarSteps[0]=true;c.guitarArticulation[0]=2;
+    c.guitarDouble[0]=true;
+    c.bassVelocity=104;
+    c.guitarGate=95;c.bassGate=60;
+    BlockScheduler s;
+    std::vector<ScheduledMidiEvent> events;
+    auto run=[&](){
+      s.reset();events.clear();
+      s.process(phrase,0.,.25,960,61440,
+        [&](ScheduledMidiEvent e){events.push_back(e);return true;},true,c);
+    };
+    run();
+    int guitarOns=0,guitarOffs=0,bassOns=0,bassOffs=0;
+    std::vector<int> bassOnAt,bassOffAt;
+    for(const auto& e:events) {
+      if(e.bus==0){guitarOns+=e.on;guitarOffs+=!e.on;}
+      if(e.bus==1) {
+        assert(e.pitch==28);
+        if(e.on){assert(e.velocity==104);bassOnAt.push_back(e.sampleOffset);++bassOns;}
+        else {bassOffAt.push_back(e.sampleOffset);++bassOffs;}
+      }
+    }
+    assert(guitarOns==2 && guitarOffs==2);
+    assert(bassOns==2 && bassOffs==2);
+    assert(bassOnAt[0]==0 && bassOnAt[1]==480);
+    assert(bassOffAt[0]==288 && bassOffAt[1]==768);
+    c.guitarDouble[0]=false;run();
+    bassOns=bassOffs=0;
+    for(const auto& e:events)if(e.bus==1)(e.on?bassOns:bassOffs)++;
+    assert(bassOns==1 && bassOffs==1);
+    c.guitarDouble[0]=true;c.externalBassMode=true;run();
+    for(const auto& e:events)assert(e.bus!=1);
+    c.externalBassMode=false;c.bassEnabled=false;run();
+    for(const auto& e:events)assert(e.bus!=1);
+    c.bassEnabled=true;c.guitarArticulation[0]=5;run();
+    for(const auto& e:events)assert(e.bus!=1);
+  }
+  // PM MIN/MAX must affect actual velocities, not merely clamp a fixed 50.
+  // Accents stay deterministic and remain strictly inside the Heavier PM zone.
+  {
+    Pair pair;
+    pair.guitar.push_back({0,220,40,50,240});
+    pair.guitar.push_back({240,460,40,50,480});
+    LiveControls c;
+    c.guitarSteps.fill(false);
+    c.guitarSteps[0]=true;c.guitarSteps[1]=true;
+    c.guitarArticulation[0]=2;c.guitarArticulation[1]=2;
+    c.pmMin=30;c.pmMax=50;
+    auto velocities=[&](){
+      BlockScheduler sched;
+      std::vector<int> values;
+      sched.process(pair,0.,.5,960,61440,
+        [&](ScheduledMidiEvent e){
+          if(e.bus==0 && e.on)values.push_back(e.velocity);
+          return true;
+        },true,c);
+      return values;
+    };
+    assert((velocities()==std::vector<int>{50,35}));
+    c.pmMin=40;
+    assert((velocities()==std::vector<int>{50,42}));
+    c.pmMin=30;c.pmMax=60;
+    assert((velocities()==std::vector<int>{60,37}));
+    c.pmMin=40;c.pmMax=40;
+    assert((velocities()==std::vector<int>{40,40}));
+    c.pmMin=1;c.pmMax=127;
+    for(const int velocity:velocities())assert(velocity>=1 && velocity<=127);
+  }
   // A sustained OPEN note must still retrigger at half a 16th step.
   {
     Pair longNote;longNote.guitar.push_back({0,800,40,115,960});
