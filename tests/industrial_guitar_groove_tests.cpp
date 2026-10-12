@@ -45,13 +45,14 @@ int main(){
     LiveControls selected;
     selected.guitarSteps.fill(false);selected.guitarSteps[0]=true;
     selected.guitarArticulation[0]=2;selected.guitarDouble[0]=true;
+    selected.pmMin=30;selected.pmMax=40;
     BlockScheduler engine;
     std::vector<ScheduledMidiEvent> actual;
     engine.process(one,0.,0.25,960,61440,
       [&](ScheduledMidiEvent e){actual.push_back(e);return true;},true,selected);
     std::vector<int> ons,offs;
     for(const auto& e:actual)if(e.bus==0 && e.pitch==40) {
-      if(e.on)assert(e.velocity==50); // both PM attacks remain inside PM zone
+      if(e.on)assert(e.velocity>=30 && e.velocity<=40); // both PM attacks stay in configured zone
       (e.on?ons:offs).push_back(e.sampleOffset);
     }
     assert(ons.size()==2 && offs.size()==2);
