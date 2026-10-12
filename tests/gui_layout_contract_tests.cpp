@@ -25,6 +25,7 @@ int main(){
 
   assert(xml.find("title=\"PITCH\"")==std::string::npos);
   // A selected matrix cell must be able to clear its own active step.
+  assert(controller.find("std::abs(editor->getZoomFactor()-zoomFactor_)>1.e-9")!=std::string::npos);
   assert(controller.find("current==art")!=std::string::npos);
   assert(controller.find("setParamNormalized(id,0.);performEdit(id,0.)")!=std::string::npos);
 
