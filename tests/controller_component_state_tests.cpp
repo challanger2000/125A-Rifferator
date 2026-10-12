@@ -53,13 +53,38 @@ int main() {
   near(controller.getParamNormalized(kChordsMode),1.);
   near(controller.getParamNormalized(kChordsQuality),1.);
   near(controller.getParamNormalized(kHybridRootBase),53./128.);
+  // Locked-step DAW automation must NOT diverge from the processor: every
+  // guitar matrix field stays unchanged, while the lock itself can be toggled.
+  assert(controller.setParamNormalized(kGuitarStepBase,1.)==Steinberg::kResultOk);
+  assert(controller.setParamNormalized(kGuitarArticulationBase,.4)==Steinberg::kResultOk);
+  assert(controller.setParamNormalized(kGuitarDegreeBase,0.)==Steinberg::kResultOk);
+  assert(controller.setParamNormalized(kGuitarDoubleBase,1.)==Steinberg::kResultOk);
+  near(controller.getParamNormalized(kGuitarStepBase),0.);
+  near(controller.getParamNormalized(kGuitarArticulationBase),.8);
+  near(controller.getParamNormalized(kGuitarDegreeBase),20./28.);
+  near(controller.getParamNormalized(kGuitarDoubleBase),0.);
+  assert(controller.setParamNormalized(kGuitarLockBase,0.)==Steinberg::kResultOk);
+  assert(controller.setParamNormalized(kGuitarArticulationBase,.4)==Steinberg::kResultOk);
+  near(controller.getParamNormalized(kGuitarArticulationBase),.4);
+  assert(controller.setParamNormalized(kGuitarLockBase,1.)==Steinberg::kResultOk);
   // Controller's public host automation entry point updates normalized values.
   assert(controller.setParamNormalized(kBassMode,.5)==Steinberg::kResultOk);
   near(controller.getParamNormalized(kBassMode),.5);
   assert(controller.setParamNormalized(kChordsQuality,.25)==Steinberg::kResultOk);
   near(controller.getParamNormalized(kChordsQuality),.25);
-  assert(controller.setParamNormalized(kGuitarArticulationBase,.4)==Steinberg::kResultOk);
-  near(controller.getParamNormalized(kGuitarArticulationBase),.4);
+  assert(controller.setParamNormalized(kGuitarArticulationBase+1,.4)==Steinberg::kResultOk);
+  near(controller.getParamNormalized(kGuitarArticulationBase+1),.4);
+  // A second *valid* project must fully replace prior locked state. Restoring
+  // step parameters before clearing locks silently lost user values.
+  write32(active,1);write32(art,5);write32(degree,-4);write32(locks,1);
+  write32(13,1); // first Step's DOUBLE snapshot (word 11 + offset 2)
+  MemoryStream nextProject(snapshot.data(),static_cast<Steinberg::TSize>(snapshot.size()));
+  assert(controller.setComponentState(&nextProject)==Steinberg::kResultOk);
+  near(controller.getParamNormalized(kGuitarStepBase),1.);
+  near(controller.getParamNormalized(kGuitarArticulationBase),1.);
+  near(controller.getParamNormalized(kGuitarDegreeBase),9./28.);
+  near(controller.getParamNormalized(kGuitarDoubleBase),1.);
+  near(controller.getParamNormalized(kGuitarLockBase),1.);
   const double baseline=controller.getParamNormalized(kBassMode);
   write32(bass+20,99); // reject malformed trailing field atomically
   MemoryStream corrupt(snapshot.data(),static_cast<Steinberg::TSize>(snapshot.size()));
