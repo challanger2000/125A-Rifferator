@@ -12,6 +12,8 @@
 #include "vstgui/lib/controls/cbuttons.h"
 #include "vstgui/uidescription/uiattributes.h"
 #include <cstring>
+#include <string>
+#include <cmath>
 
 namespace {
 const Steinberg::FUID processorUid(0x125A4601,0x52494646,0x45524154,0x4F520100);
@@ -40,6 +42,16 @@ public:
       button->invalid();
     }
   }
+  std::array<VSTGUI::CTextButton*,16> degreeDisplays_{};
+  void refreshDegree(int step) {
+    if(step<0 || step>=16)return;
+    if(auto* button=degreeDisplays_[static_cast<std::size_t>(step)]) {
+      const int degree=std::clamp(static_cast<int>(std::lround(
+        getParamNormalized(a125::rifferator::kGuitarDegreeBase+step)*28.))-13,-13,15);
+      button->setTitle(std::to_string(degree).c_str());
+      button->invalid();
+    }
+  }
   double zoomFactor_{1.};
   std::array<std::array<VSTGUI::CControl*,16>,6> guitarCells_{};
   void refreshGuitarStep(int step) {
@@ -57,6 +69,7 @@ public:
       if(id==a125::rifferator::kBassMode || id==a125::rifferator::kChordsQuality || id==a125::rifferator::kChordsEnabled || id==a125::rifferator::kBassEnabled || id==a125::rifferator::kChordsMode) refreshCommands();
       if(id>=a125::rifferator::kGuitarStepBase && id<a125::rifferator::kGuitarStepBase+16)refreshGuitarStep(static_cast<int>(id-a125::rifferator::kGuitarStepBase));
       if(id>=a125::rifferator::kGuitarArticulationBase && id<a125::rifferator::kGuitarArticulationBase+16)refreshGuitarStep(static_cast<int>(id-a125::rifferator::kGuitarArticulationBase));
+      if(id>=a125::rifferator::kGuitarDegreeBase && id<a125::rifferator::kGuitarDegreeBase+16)refreshDegree(static_cast<int>(id-a125::rifferator::kGuitarDegreeBase));
     }
     return result;
   }
@@ -67,6 +80,7 @@ public:
       // Never retain pointers after this editor destroys its views.
       for(auto& row:guitarCells_)row.fill(nullptr);
       commandButtons_.fill(nullptr);
+      degreeDisplays_.fill(nullptr);
     }
   }
   VSTGUI::CView* verifyView(VSTGUI::CView* view,
@@ -76,11 +90,16 @@ public:
     if(viewOwner_!=editor) {
       for(auto& row:guitarCells_)row.fill(nullptr);
       commandButtons_.fill(nullptr);
+      degreeDisplays_.fill(nullptr);
       viewOwner_=editor;
     }
     if(auto* control=dynamic_cast<VSTGUI::CControl*>(view)) {
-      if((control->getTag()>=500 && control->getTag()<596) || (control->getTag()>=700 && control->getTag()<=720))
+      if((control->getTag()>=500 && control->getTag()<596) || (control->getTag()>=700 && control->getTag()<=720) || (control->getTag()>=800 && control->getTag()<832))
         control->setListener(this);
+      if(control->getTag()>=850 && control->getTag()<866) {
+        degreeDisplays_[static_cast<std::size_t>(control->getTag()-850)]=dynamic_cast<VSTGUI::CTextButton*>(control);
+        refreshDegree(control->getTag()-850);
+      }
       if(control->getTag()>=701 && control->getTag()<=720) {
         commandButtons_[static_cast<std::size_t>(control->getTag()-700)]=control;
         refreshCommands();
@@ -104,6 +123,18 @@ public:
       return;
     }
     if(control->getValueNormalized()<=0.5f)return;
+    if(command>=800 && command<832) {
+      const int step=(command-800)%16;
+      const auto lock=a125::rifferator::kGuitarLockBase+step;
+      if(getParamNormalized(lock)>=0.5)return;
+      const auto id=a125::rifferator::kGuitarDegreeBase+step;
+      const int degree=std::clamp(static_cast<int>(std::lround(getParamNormalized(id)*28.))-13,-13,15);
+      const int next=std::clamp(degree+(command<816?-1:1),-13,15);
+      if(next==degree)return;
+      const double value=static_cast<double>(next+13)/28.;
+      beginEdit(id);setParamNormalized(id,value);performEdit(id,value);endEdit(id);
+      return;
+    }
     if(command==701 || command==702) {
       zoomFactor_=command==701?1.:1.5;
       // Use the attached view owner when available, not a potentially stale
