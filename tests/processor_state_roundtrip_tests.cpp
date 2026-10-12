@@ -306,7 +306,7 @@ int main(){
     const bool changeFill=scenario==13;
     const bool expectGuitar=changeDouble || changeGuitarMatrix ||
        changeRoot || changeGuitarGate || changeFill;
-    const bool expectBass=changeGuitarMatrix || changeRoot ||
+    const bool expectBass=changeDouble || changeGuitarMatrix || changeRoot ||
        changeBass || changeFill;
     const bool expectChords=changeChords || changeGuitarMatrix || changeRoot;
     Processor playing;
