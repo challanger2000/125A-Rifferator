@@ -145,11 +145,22 @@ public:
   void valueChanged(VSTGUI::CControl* control) override {
     if(!control)return;
     const int command=control->getTag();
-    // A radio-like matrix cell can emit OFF when its selected button is
-    // clicked again. Never leave the visual selection deactivated: the
-    // processor articulation remains selected until another row is chosen.
+    // A second click on the selected articulation clears the step.
+    // Clicking an unselected cell OFF must not erase another selection.
     if(command>=500 && command<596 && control->getValueNormalized()<=0.5f) {
-      refreshGuitarStep((command-500)%16);
+      const int step=(command-500)%16;
+      const int art=(command-500)/16;
+      using namespace a125::rifferator;
+      if(getParamNormalized(kGuitarLockBase+step)>=0.5) {
+        refreshGuitarStep(step);return;
+      }
+      const int current=std::clamp(static_cast<int>(
+        std::lround(getParamNormalized(kGuitarArticulationBase+step)*5.)),0,5);
+      if(getParamNormalized(kGuitarStepBase+step)>=0.5 && current==art) {
+        const auto id=kGuitarStepBase+step;
+        beginEdit(id);setParamNormalized(id,0.);performEdit(id,0.);endEdit(id);
+      }
+      refreshGuitarStep(step);
       return;
     }
     if((command>=200 && command<248) || (command>=300 && command<316) ||
