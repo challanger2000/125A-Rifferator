@@ -81,6 +81,9 @@ int main(){
   assert(generationCode.find("generateGuitar(current,options,command,30)")!=std::string::npos);
   assert(generationCode.find("if(current[j].locked)continue;")!=std::string::npos);
   assert(generationCode.find("options.randomPitch=false;")!=std::string::npos);
+  // An unchanged active STOP must not collapse to an empty cell during
+  // conservative VARIATE; it is a distinct live MIDI NoteOff command.
+  assert(generationCode.find("const bool preserveStop=")!=std::string::npos);
   assert(generationCode.find("publish(kGuitarDoubleBase+i,0.)")!=std::string::npos);
   assert(controller.find("if(command==700 || command==722)")!=std::string::npos);
   assert(controller.find("(control->getTag()>=700 && control->getTag()<=722)")!=std::string::npos);
