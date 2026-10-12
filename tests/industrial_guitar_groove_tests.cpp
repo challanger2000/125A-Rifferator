@@ -112,14 +112,14 @@ int main(){
   std::vector<ScheduledMidiEvent> events;
   auto sink=[&](const ScheduledMidiEvent& e){events.push_back(e);return true;};
   scheduler.process(pair,0.,0.25,960,61440,sink,true,live);
-  bool root=false,fifth=false;
-  for(const auto& e:events)if(e.on){if(e.pitch==40)root=true;if(e.pitch==47)fifth=true;assert(e.bus==0);}
-  assert(root&&fifth);
-  // Both notes have already received their scheduled NoteOff within
-  // this complete quarter-note block; flush should emit nothing further.
-  root=false;fifth=false;
-  for(const auto& e:events)if(!e.on){if(e.pitch==40)root=true;if(e.pitch==47)fifth=true;}
-  assert(root&&fifth);
+  int notesOn=0,notesOff=0;
+  // FIFTH is produced inside the sampled guitar library, not as extra MIDI.
+  for(const auto& e:events) {
+    assert(e.bus==0 && e.pitch==40);
+    if(e.on)++notesOn;else ++notesOff;
+  }
+  assert(notesOn==1 && notesOff==1);
+  // Trigger already received its scheduled NoteOff; flush must be empty.
   events.clear();
   assert(scheduler.flush(sink,0));
   assert(events.empty());
