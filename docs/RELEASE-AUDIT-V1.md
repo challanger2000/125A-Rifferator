@@ -174,6 +174,47 @@ product-owner scope acceptance**, not silent removal.
 **Current bundle status:** IMPLEMENTED / CI pending. Full GUI, automation,
 sample library and four-bus DAW end-to-end QA remain NOT VERIFIED.
 
+## 2026-10-12 — Host-only parameters made accessible in V1 editor
+
+**Traceability finding:** Six existing VST3 parameters were registered,
+processed and available through host automation but were inaccessible from
+the delivered VSTGUI surface: `Root MIDI`, `Guitar Gate`, `Bass Gate`,
+`Fill Intensity`, `Bass Velocity` and `EBM Style`. The global `Drums
+Enabled` parameter also lacked a user-facing switch. Source existence
+and green core CI were therefore not sufficient evidence of a finished
+interactive instrument.
+
+The development branch now exposes the previously missing controls in
+unused space without increasing the 1120×696 base editor dimensions:
+
+| UI elements | Controller → existing VST3 parameter | Range / value feedback | Processor consequence |
+| --- | --- | --- | --- |
+| Root MIDI ± / tags 900,901; display 912 | kRootPitch=103 | MIDI note 0..127 | Guitar, FOLLOW bass and inferred harmony root |
+| Guitar Gate ± / 902,903; display 913 | kGuitarGate=100 | 0..100% | Guitar duration, 0% suppresses note |
+| Bass Gate ± / 904,905; display 914 | kBassGate=101 | 0..100% | FOLLOW or external bass duration |
+| Fill Intensity ± / 906,907; display 915 | kFillIntensity=105 | 0..100%; 0% OFF | Prepared 16-bar fill intensity |
+| Bass Velocity ± / 908,909; display 916 | kBassVelocity=104 | MIDI 1..127 | Bus 1 velocity, no GUI-only value copy |
+| EBM Style ± / 910,911; display 917 | kEbmStyle=108 | CLASSIC/CHROMATIC/OCTAVE/INDUSTRIAL/ROLLING | Selects prepared independent EBM rhythm/style |
+| Drums ON/OFF / tag 724 | kDrumEnabled=106 | Off/On with selected-state feedback | Mutes/releases bus 2; 48 step cells remain editable |
+
+The controller uses the existing `beginEdit → setParamNormalized →
+performEdit → endEdit` protocol. All six numeric controls clamp at
+their documented endpoints, refresh from host automation and Processor
+state restore, and reset cached VSTGUI view pointers on editor close or
+owner change. A dedicated Controller CTest checks all minimums/maximums,
+step increments, normalized values, external parameter updates and the
+Drums Enabled toggle. A GUI-layout contract checks every tag, every
+read-only display, listener wiring, and the action-to-parameter bridge.
+A static rectangular-layout check found **no newly introduced overlaps
+or views outside 1120×696**, but this does not prove rendered placement
+or click handling in Studio One.
+
+**Status:** IMPLEMENTED, Windows CI pending; actual Studio One
+editor attach, mouse click, parameter automation, host MIDI routing and
+save/reopen remain **NOT VERIFIED**. No new parameter IDs or musical
+Processor state fields. Other product-contract gaps (32-step paging,
+resolution selector, optional random toggles, exports) remain open.
+
 ## Required completion gates
 - Fix host GUI visibility with reproducible diagnosis rather than speculative resource changes; 20 consecutive open/close/reopen cycles and restore.
 - Compare the editor creation/resource contracts against authoritative 125A Midiator Final and validate expected studio rendering.
