@@ -194,6 +194,8 @@ public:
     // preceding NoteOn and this STOP occur within one audio block.
     const double periodPpq=static_cast<double>(period)/960.0;
     for(int step=0;step<16;++step) {
+      // Do not wrap STOP commands from steps outside a shorter pattern.
+      if(static_cast<int64_t>(step)*240>=period)break;
       if(!live.guitarSteps[static_cast<std::size_t>(step)] ||
          live.guitarArticulation[static_cast<std::size_t>(step)]!=0)continue;
       const double phase=static_cast<double>(step*240)/960.0;
