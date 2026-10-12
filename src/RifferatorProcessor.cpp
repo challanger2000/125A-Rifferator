@@ -152,7 +152,7 @@ tresult PLUGIN_API Processor::process(ProcessData& data) {
         const auto index=static_cast<std::size_t>(id-kGuitarDoubleBase);
         if(!live_.guitarLocks[index] && index<steps_.size()) {
           const bool doubled=value>=0.5;
-          if(steps_[index].doubled!=doubled)flushOnNextProcess_=true;
+          if(steps_[index].doubled!=doubled)guitarFlushPending_=true;
           steps_[index].doubled=doubled;
         }
         continue;
@@ -272,6 +272,7 @@ tresult PLUGIN_API Processor::process(ProcessData& data) {
     flushOnNextProcess_=false;
     drumFlushPending_=false;
     chordFlushPending_=false;
+    guitarFlushPending_=false;
   } else {
     // Local edits must only release notes from their own output bus.
     // Failed NoteOffs remain pending until a future callback accepts them.
@@ -282,6 +283,10 @@ tresult PLUGIN_API Processor::process(ProcessData& data) {
     if(chordFlushPending_) {
       if(!scheduler_.flushBus(3,sink,0))return kResultOk;
       chordFlushPending_=false;
+    }
+    if(guitarFlushPending_) {
+      if(!scheduler_.flushBus(0,sink,0))return kResultOk;
+      guitarFlushPending_=false;
     }
   }
   const auto* ctx=data.processContext;
