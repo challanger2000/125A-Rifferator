@@ -24,6 +24,10 @@ int main(){
                          "refreshSwitch(id)"})assert(controller.find(expr)!=std::string::npos);
 
   assert(xml.find("title=\"PITCH\"")==std::string::npos);
+  // A selected matrix cell must be able to clear its own active step.
+  assert(controller.find("current==art")!=std::string::npos);
+  assert(controller.find("setParamNormalized(id,0.);performEdit(id,0.)")!=std::string::npos);
+
   for(int step=0;step<16;++step) {
     const auto tag=std::string("<control-tag name=\"GDouble")+std::to_string(step)+"\" tag=\""+std::to_string(448+step)+"\"/>";
     assert(xml.find(tag)!=std::string::npos);
