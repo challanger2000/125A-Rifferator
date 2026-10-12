@@ -193,6 +193,60 @@ int main(){
     assert(std::memcmp(saved.getData(),snapshot.data(),snapshot.size())==0);
   }
 
+  // Different parameter queues have no reliable cross-ID ordering. Both
+  // orders of LOCK + guitar edits must produce IDENTICAL state: locking a
+  // step rejects all new edits; unlocking it permits the same edits.
+  // This is the per-block final-lock policy (not sample-accurate lock timing).
+  {
+    auto run=[&](bool lockedInitially,bool lockFirst) {
+      Processor processor;
+      Steinberg::Vst::ProcessData block{};
+      block.numSamples=0;
+      if(lockedInitially) {
+        Steinberg::Vst::ParameterChanges initial(1);
+        Steinberg::int32 qi=0,pi=0;
+        auto* q=initial.addParameterData(kGuitarLockBase,qi);
+        assert(q && q->addPoint(0,1.,pi)==Steinberg::kResultOk);
+        block.inputParameterChanges=&initial;
+        assert(processor.process(block)==Steinberg::kResultOk);
+      }
+      Steinberg::Vst::ParameterChanges edits(5);
+      auto edit=[&](Steinberg::Vst::ParamID id,double value) {
+        Steinberg::int32 qi=0,pi=0;
+        auto* q=edits.addParameterData(id,qi);
+        assert(q && q->addPoint(0,value,pi)==Steinberg::kResultOk);
+      };
+      if(lockFirst)edit(kGuitarLockBase,lockedInitially?0.:1.);
+      edit(kGuitarStepBase,0.);
+      edit(kGuitarArticulationBase,.8);
+      edit(kGuitarDegreeBase,20./28.);
+      edit(kGuitarDoubleBase,1.);
+      if(!lockFirst)edit(kGuitarLockBase,lockedInitially?0.:1.);
+      block.inputParameterChanges=&edits;
+      assert(processor.process(block)==Steinberg::kResultOk);
+      MemoryStream snapshot;
+      assert(processor.getState(&snapshot)==Steinberg::kResultOk);
+      const auto* bytes=static_cast<const char*>(snapshot.getData());
+      const auto word=[&](std::size_t offset) {
+        std::int32_t v=0;
+        assert((offset+1)*4<=static_cast<std::size_t>(snapshot.getSize()));
+        std::memcpy(&v,bytes+offset*4,4);return v;
+      };
+      const std::size_t base=11u+16u*4u+49u;
+      return std::array<std::int32_t,5>{
+        word(base),word(base+16u),word(base+32u),word(base+48u),word(13u)
+      };
+    };
+    const auto lockedFirst=run(false,true);
+    const auto lockedLast=run(false,false);
+    assert(lockedFirst==lockedLast);
+    assert((lockedFirst==std::array<std::int32_t,5>{1,2,1,1,0}));
+    const auto unlockedFirst=run(true,true);
+    const auto unlockedLast=run(true,false);
+    assert(unlockedFirst==unlockedLast);
+    assert((unlockedFirst==std::array<std::int32_t,5>{0,4,7,0,1}));
+  }
+
   // Fast host automation contract: this V1 processor applies the last valid
   // point in each parameter queue once per block, including zero-sample flushes.
   // Lock/step interleaving must not corrupt serialized state.
@@ -221,8 +275,8 @@ int main(){
     };
     assert(getWord(6)==75 && getWord(7)==63);
     const std::size_t base=11u+16u*4u+49u;
-    assert(getWord(base)==1);               // final step enabled
-    assert(getWord(base+16u)==4);           // final articulation
+    assert(getWord(base)==1);               // step remains at its default
+    assert(getWord(base+16u)==2);           // same-block LOCK wins over articulation
     assert(getWord(base+48u)==1);           // final lock
     Processor replay;
     assert(saved.seek(0,Steinberg::IBStream::kIBSeekSet,nullptr)==Steinberg::kResultOk);
