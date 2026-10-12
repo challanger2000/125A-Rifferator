@@ -184,7 +184,7 @@ public:
       // A locked guitar step rejects both ON/OFF and DOUBLE edits.
       // Restore the GUI immediately as the processor rejects those edits too.
       if(((command>=300 && command<316) || (command>=448 && command<464)) &&
-         getParamNormalized(a125::rifferator::kGuitarLockBase+(command%16))>=0.5) {
+         getParamNormalized(a125::rifferator::kGuitarLockBase+((command>=448?command-448:command-300)))>=0.5) {
         refreshSwitch(id);
         return;
       }
