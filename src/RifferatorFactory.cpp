@@ -188,7 +188,8 @@ public:
       // Use the attached view owner when available, not a potentially stale
       // pointer left by a previously opened host editor.
       auto* editor=viewOwner_?viewOwner_:activeEditor_;
-      if(editor)editor->setZoomFactor(zoomFactor_);
+      if(editor && std::abs(editor->getZoomFactor()-zoomFactor_)>1.e-9)
+        editor->setZoomFactor(zoomFactor_);
       refreshCommands();
       return;
     }
