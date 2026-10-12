@@ -699,14 +699,15 @@ public:
        fill>100)return kResultFalse;
     // Validate the entire serialized riff before publishing parameter values.
     // A truncated pattern must never partially restore the controller.
-    std::array<uint32_t,32> storedDouble{};
+    std::array<uint32_t,32> storedDouble{},storedArt{},storedLocks{};
+    std::array<int32_t,32> storedDegree{};
     for(uint32_t i=0;i<count;++i) {
       std::array<uint32_t,4> step{};
       for(auto& value:step)if(!read32(value))return kResultFalse;
       const int32_t degree=static_cast<int32_t>(step[1]);
       if(step[0]>5 || degree<-13 || degree>15 ||
          step[2]>1 || step[3]>1)return kResultFalse;
-      storedDouble[i]=step[2];
+      storedDouble[i]=step[2];storedArt[i]=step[0];storedDegree[i]=degree;storedLocks[i]=step[3];
     }
     std::array<uint32_t,49> drumValues{};
     if(version>=3) {
@@ -770,17 +771,20 @@ public:
     for(int i=0;i<16;++i)
       setParamNormalized(a125::rifferator::kGuitarDoubleBase+i,
         storedDouble[static_cast<std::size_t>(i%count)]?1.:0.);
-    if(version>=4) {
-      for(int i=0;i<16;++i)setParamNormalized(a125::rifferator::kGuitarStepBase+i,guitarActive[static_cast<std::size_t>(i)]?1.:0.);
+    for(int i=0;i<16;++i) {
+      const auto j=static_cast<std::size_t>(i%count);
+      const bool enabled=version>=4?guitarActive[static_cast<std::size_t>(i)]!=0:storedArt[j]!=0;
+      setParamNormalized(a125::rifferator::kGuitarStepBase+i,enabled?1.:0.);
     }
-    if(version>=5) {
-      for(int i=0;i<16;++i) {
-        const auto j=static_cast<std::size_t>(i);
-        setParamNormalized(a125::rifferator::kGuitarArticulationBase+i,guitarArt[j]/5.);
-        setParamNormalized(a125::rifferator::kGuitarDegreeBase+i,
-                           (static_cast<int32_t>(guitarDegrees[j])+13)/28.);
-        setParamNormalized(a125::rifferator::kGuitarLockBase+i,guitarLocks[j]?1.:0.);
-      }
+    for(int i=0;i<16;++i) {
+      const auto j=static_cast<std::size_t>(i);
+      const auto legacy=static_cast<std::size_t>(i%count);
+      const int32_t degree=version>=5?static_cast<int32_t>(guitarDegrees[j]):storedDegree[legacy];
+      setParamNormalized(a125::rifferator::kGuitarArticulationBase+i,
+        (version>=5?guitarArt[j]:storedArt[legacy])/5.);
+      setParamNormalized(a125::rifferator::kGuitarDegreeBase+i,(degree+13)/28.);
+      setParamNormalized(a125::rifferator::kGuitarLockBase+i,
+        (version>=5?guitarLocks[j]:storedLocks[legacy])?1.:0.);
     }
     if(version>=3) {
       setParamNormalized(a125::rifferator::kDrumEnabled,drumValues[0]?1.:0.);
