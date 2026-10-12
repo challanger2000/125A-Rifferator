@@ -86,12 +86,12 @@ int main() {
   near(controller.getParamNormalized(kGuitarDegreeBase),9./28.);
   near(controller.getParamNormalized(kGuitarDoubleBase),1.);
   near(controller.getParamNormalized(kGuitarLockBase),1.);
-  // VST3 controller state is independent of the musical Processor snapshot.
-  // GUI zoom must survive project reopen at both supported factors and
-  // malformed/truncated state must never overwrite the existing setting.
+  // Controller v2 keeps the last active GUI page plus zoom, independently
+  // of Processor V9 musical state. Legacy v1 (zoom-only) remains readable.
+  // Malformed values or truncated streams must not change EITHER property.
   MemoryStream zoomDefault;
   assert(controller.getState(&zoomDefault)==Steinberg::kResultOk);
-  assert(zoomDefault.getSize()==3*static_cast<Steinberg::TSize>(sizeof(std::uint32_t)));
+  assert(zoomDefault.getSize()==4*static_cast<Steinberg::TSize>(sizeof(std::uint32_t)));
   std::vector<unsigned char> zoomData(
     reinterpret_cast<const unsigned char*>(zoomDefault.getData()),
     reinterpret_cast<const unsigned char*>(zoomDefault.getData())+zoomDefault.getSize());
@@ -102,45 +102,75 @@ int main() {
   const auto putZoomWord=[&](int index,std::uint32_t value) {
     std::memcpy(zoomData.data()+index*sizeof(value),&value,sizeof(value));
   };
-  assert(zoomWord(0)==0x315A4652u && zoomWord(1)==1u && zoomWord(2)==100u);
-  putZoomWord(2,150u);
+  assert(zoomWord(0)==0x315A4652u && zoomWord(1)==2u &&
+         zoomWord(2)==100u && zoomWord(3)==0u);
+  controller.selectPage(true);
+  assert(controller.rhythmPageSelected_);
+  MemoryStream selectedRhythm;
+  assert(controller.getState(&selectedRhythm)==Steinberg::kResultOk);
+  std::uint32_t savedPage=0;
+  std::memcpy(&savedPage,static_cast<const char*>(selectedRhythm.getData())+
+              3*sizeof(savedPage),sizeof(savedPage));
+  assert(savedPage==1u);
+  putZoomWord(2,150u);putZoomWord(3,1u);
   MemoryStream zoom150(zoomData.data(),static_cast<Steinberg::TSize>(zoomData.size()));
   assert(controller.setState(&zoom150)==Steinberg::kResultOk);
+  assert(controller.rhythmPageSelected_);
   MemoryStream zoomPersisted;
   assert(controller.getState(&zoomPersisted)==Steinberg::kResultOk);
   assert(std::memcmp(zoomPersisted.getData(),zoomData.data(),zoomData.size())==0);
-  const auto assertZoom150=[&]() {
+  const auto assertZoom150Rhythm=[&]() {
     MemoryStream verify;
     assert(controller.getState(&verify)==Steinberg::kResultOk);
     assert(verify.getSize()==static_cast<Steinberg::TSize>(zoomData.size()));
-    std::uint32_t v=0;
-    std::memcpy(&v,static_cast<const char*>(verify.getData())+2*sizeof(v),sizeof(v));
-    assert(v==150u);
+    std::uint32_t words[4]{};
+    std::memcpy(words,verify.getData(),sizeof(words));
+    assert(words[2]==150u && words[3]==1u);
+    assert(controller.rhythmPageSelected_);
   };
   putZoomWord(2,125u);
   MemoryStream invalidZoom(zoomData.data(),static_cast<Steinberg::TSize>(zoomData.size()));
   assert(controller.setState(&invalidZoom)!=Steinberg::kResultOk);
-  assertZoom150();
-  putZoomWord(2,150u);putZoomWord(1,2u);
+  assertZoom150Rhythm();
+  putZoomWord(2,150u);putZoomWord(1,3u);
   MemoryStream futureZoom(zoomData.data(),static_cast<Steinberg::TSize>(zoomData.size()));
   assert(controller.setState(&futureZoom)!=Steinberg::kResultOk);
-  assertZoom150();
-  putZoomWord(1,1u);putZoomWord(0,0u);
+  assertZoom150Rhythm();
+  putZoomWord(1,2u);putZoomWord(0,0u);
   MemoryStream badMagic(zoomData.data(),static_cast<Steinberg::TSize>(zoomData.size()));
   assert(controller.setState(&badMagic)!=Steinberg::kResultOk);
-  assertZoom150();
-  putZoomWord(0,0x315A4652u);
+  assertZoom150Rhythm();
+  putZoomWord(0,0x315A4652u);putZoomWord(3,9u);
+  MemoryStream badPage(zoomData.data(),static_cast<Steinberg::TSize>(zoomData.size()));
+  assert(controller.setState(&badPage)!=Steinberg::kResultOk);
+  assertZoom150Rhythm();
+  putZoomWord(3,1u);
   MemoryStream shortZoom(zoomData.data(),static_cast<Steinberg::TSize>(zoomData.size()-1));
   assert(controller.setState(&shortZoom)!=Steinberg::kResultOk);
-  assertZoom150();
+  assertZoom150Rhythm();
   assert(controller.setState(nullptr)!=Steinberg::kResultOk);
-  assertZoom150();
-  putZoomWord(2,100u);
+  assertZoom150Rhythm();
+  // Backward compatibility: old projects have 3 controller words (v1).
+  // Their default active page is Guitar, while 150% zoom is retained.
+  putZoomWord(1,1u);
+  MemoryStream legacyZoom(zoomData.data(),
+                         3*static_cast<Steinberg::TSize>(sizeof(std::uint32_t)));
+  assert(controller.setState(&legacyZoom)==Steinberg::kResultOk);
+  assert(!controller.rhythmPageSelected_);
+  MemoryStream migrated;
+  assert(controller.getState(&migrated)==Steinberg::kResultOk);
+  std::uint32_t migratedFields[4]{};
+  std::memcpy(migratedFields,migrated.getData(),sizeof(migratedFields));
+  assert(migratedFields[1]==2u && migratedFields[2]==150u &&
+         migratedFields[3]==0u);
+  // Explicitly restore new v2 Guitar/100% after the legacy migration.
+  putZoomWord(1,2u);putZoomWord(2,100u);putZoomWord(3,0u);
   MemoryStream zoom100(zoomData.data(),static_cast<Steinberg::TSize>(zoomData.size()));
   assert(controller.setState(&zoom100)==Steinberg::kResultOk);
   MemoryStream backTo100;
   assert(controller.getState(&backTo100)==Steinberg::kResultOk);
   assert(std::memcmp(backTo100.getData(),zoomData.data(),zoomData.size())==0);
+  assert(!controller.rhythmPageSelected_);
   // Zoom operations must not alter unrelated processor-state parameters.
   near(controller.getParamNormalized(kGuitarLockBase),1.);
   const double baseline=controller.getParamNormalized(kBassMode);
