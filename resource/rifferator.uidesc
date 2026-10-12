@@ -313,7 +313,7 @@
  <view class="CViewContainer" origin="22, 70" size="1076, 345" background-color="Panel" transparent="false">
   <view class="CTextLabel" origin="16, 12" size="500, 24" title="GUITAR  |  16-STEP RIFF MATRIX" font="Normal" font-color="Accent" transparent="true"/>
   <view class="CTextLabel" origin="16, 44" size="116, 25" title="STEP" font="Small" font-color="Text" transparent="true"/>
-  <view class="CTextLabel" origin="16, 75" size="116, 25" title="REST" font="Small" font-color="Text" transparent="true"/>
+  <view class="CTextLabel" origin="16, 75" size="116, 25" title="STOP" font="Small" font-color="Text" transparent="true"/>
   <view class="CTextLabel" origin="16, 106" size="116, 25" title="NOISE" font="Small" font-color="Text" transparent="true"/>
   <view class="CTextLabel" origin="16, 137" size="116, 25" title="PALM MUTE" font="Small" font-color="Text" transparent="true"/>
   <view class="CTextLabel" origin="16, 168" size="116, 25" title="SOFT" font="Small" font-color="Text" transparent="true"/>
@@ -531,7 +531,7 @@
   <view class="CTextButton" control-tag="GCell5_15" origin="991, 230" size="43, 24" title="&#x2022;" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
  </view>
  <view class="CTextButton" control-tag="GuitarGenerate" origin="34, 424" size="185, 32" title="GENERATE GUITAR" font="Normal" text-color="Text" text-color-highlighted="Accent" frame-color="Accent" frame-color-highlighted="Accent" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
- <view class="CTextLabel" origin="233, 426" size="825, 26" title="INDUSTRIAL RIFF  |  PM / POWER / REST  |  LOCKED STEPS PROTECTED" font="Small" font-color="Text" transparent="true"/>
+ <view class="CTextLabel" origin="233, 426" size="825, 26" title="INDUSTRIAL RIFF  |  PM / POWER / STOP  |  LOCKED STEPS PROTECTED" font="Small" font-color="Text" transparent="true"/>
   <view class="CTextLabel" origin="25, 462" size="1020, 22" title="BASS  |  ROOT-FOCUSED EBM COMPANION" font="Normal" font-color="Accent" transparent="true"/>
  <view class="CTextButton" control-tag="Action710" origin="33, 488" size="104, 28" title="FOLLOW" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
  <view class="CTextButton" control-tag="Action711" origin="144, 488" size="104, 28" title="EBM" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
