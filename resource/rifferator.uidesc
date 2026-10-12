@@ -176,6 +176,22 @@
   <control-tag name="GCell5_15" tag="595"/>
   <control-tag name="GArt0" tag="400"/>
   <control-tag name="GDegree0" tag="416"/>
+  <control-tag name="GDouble0" tag="448"/>
+  <control-tag name="GDouble1" tag="449"/>
+  <control-tag name="GDouble2" tag="450"/>
+  <control-tag name="GDouble3" tag="451"/>
+  <control-tag name="GDouble4" tag="452"/>
+  <control-tag name="GDouble5" tag="453"/>
+  <control-tag name="GDouble6" tag="454"/>
+  <control-tag name="GDouble7" tag="455"/>
+  <control-tag name="GDouble8" tag="456"/>
+  <control-tag name="GDouble9" tag="457"/>
+  <control-tag name="GDouble10" tag="458"/>
+  <control-tag name="GDouble11" tag="459"/>
+  <control-tag name="GDouble12" tag="460"/>
+  <control-tag name="GDouble13" tag="461"/>
+  <control-tag name="GDouble14" tag="462"/>
+  <control-tag name="GDouble15" tag="463"/>
   <control-tag name="GLock0" tag="432"/>
   <control-tag name="GArt1" tag="401"/>
   <control-tag name="GDegree1" tag="417"/>
@@ -322,21 +338,37 @@
   <view class="CTextLabel" origin="935, 44" size="45, 25" title="15" font="Small" font-color="Accent" text-alignment="center" transparent="true"/>
   <view class="CTextLabel" origin="991, 44" size="45, 25" title="16" font="Small" font-color="Accent" text-alignment="center" transparent="true"/>
   <view class="CTextButton" control-tag="GuitarActive0" origin="151, 329" size="43, 14" title="ON" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
+  <view class="CTextButton" control-tag="GDouble0" origin="151, 347" size="43, 14" title="2x" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
   <view class="CTextButton" control-tag="GuitarActive1" origin="207, 329" size="43, 14" title="ON" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
+  <view class="CTextButton" control-tag="GDouble1" origin="207, 347" size="43, 14" title="2x" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
   <view class="CTextButton" control-tag="GuitarActive2" origin="263, 329" size="43, 14" title="ON" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
+  <view class="CTextButton" control-tag="GDouble2" origin="263, 347" size="43, 14" title="2x" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
   <view class="CTextButton" control-tag="GuitarActive3" origin="319, 329" size="43, 14" title="ON" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
+  <view class="CTextButton" control-tag="GDouble3" origin="319, 347" size="43, 14" title="2x" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
   <view class="CTextButton" control-tag="GuitarActive4" origin="375, 329" size="43, 14" title="ON" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
+  <view class="CTextButton" control-tag="GDouble4" origin="375, 347" size="43, 14" title="2x" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
   <view class="CTextButton" control-tag="GuitarActive5" origin="431, 329" size="43, 14" title="ON" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
+  <view class="CTextButton" control-tag="GDouble5" origin="431, 347" size="43, 14" title="2x" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
   <view class="CTextButton" control-tag="GuitarActive6" origin="487, 329" size="43, 14" title="ON" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
+  <view class="CTextButton" control-tag="GDouble6" origin="487, 347" size="43, 14" title="2x" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
   <view class="CTextButton" control-tag="GuitarActive7" origin="543, 329" size="43, 14" title="ON" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
+  <view class="CTextButton" control-tag="GDouble7" origin="543, 347" size="43, 14" title="2x" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
   <view class="CTextButton" control-tag="GuitarActive8" origin="599, 329" size="43, 14" title="ON" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
+  <view class="CTextButton" control-tag="GDouble8" origin="599, 347" size="43, 14" title="2x" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
   <view class="CTextButton" control-tag="GuitarActive9" origin="655, 329" size="43, 14" title="ON" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
+  <view class="CTextButton" control-tag="GDouble9" origin="655, 347" size="43, 14" title="2x" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
   <view class="CTextButton" control-tag="GuitarActive10" origin="711, 329" size="43, 14" title="ON" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
+  <view class="CTextButton" control-tag="GDouble10" origin="711, 347" size="43, 14" title="2x" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
   <view class="CTextButton" control-tag="GuitarActive11" origin="767, 329" size="43, 14" title="ON" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
+  <view class="CTextButton" control-tag="GDouble11" origin="767, 347" size="43, 14" title="2x" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
   <view class="CTextButton" control-tag="GuitarActive12" origin="823, 329" size="43, 14" title="ON" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
+  <view class="CTextButton" control-tag="GDouble12" origin="823, 347" size="43, 14" title="2x" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
   <view class="CTextButton" control-tag="GuitarActive13" origin="879, 329" size="43, 14" title="ON" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
+  <view class="CTextButton" control-tag="GDouble13" origin="879, 347" size="43, 14" title="2x" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
   <view class="CTextButton" control-tag="GuitarActive14" origin="935, 329" size="43, 14" title="ON" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
+  <view class="CTextButton" control-tag="GDouble14" origin="935, 347" size="43, 14" title="2x" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
   <view class="CTextButton" control-tag="GuitarActive15" origin="991, 329" size="43, 14" title="ON" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
+  <view class="CTextButton" control-tag="GDouble15" origin="991, 347" size="43, 14" title="2x" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
   <view class="CTextButton" control-tag="DegreeMinus0" origin="151, 265" size="12, 19" title="-" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
   <view class="CTextButton" control-tag="DegreeValue0" origin="163, 265" size="19, 19" title="1" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
   <view class="CTextButton" control-tag="DegreePlus0" origin="182, 265" size="12, 19" title="+" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
