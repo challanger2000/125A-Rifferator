@@ -44,6 +44,7 @@ private:
   bool drumFlushPending_{};
   bool chordFlushPending_{};
   bool guitarFlushPending_{};
+  bool bassFlushPending_{};
   LiveControls live_{};
   int preparedRootMidi_{40};
 };
