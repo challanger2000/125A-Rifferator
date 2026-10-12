@@ -4,19 +4,20 @@
 
 ## Baseline
 - Repository: `challanger2000/125A-Rifferator`, branch `develop/v1.0.0`.
-- Most recent validated pre-audit binary: workflow #38165400049, 29/29 CTest PASS, Steinberg validator 537/537 PASS.
+- Earlier pre-audit baseline: workflow #38165400049, 29/29 CTest PASS, Steinberg validator 537/537 PASS.
+- Latest independently confirmed green development baseline: workflow [#38255712530](https://github.com/challanger2000/125A-Rifferator/actions/runs/38255712530), commit `1b1ff8ab5296a1293509f23b7b3e830f4f5c627f`. This verifies automated CI, **not** the attached Studio One editor.
 - Windows delivery bundle renamed `125A Rifferator.vst3`; matching internal binary and packaged `rifferator.uidesc` verified by CI.
 - User reports the intended editor **does not appear in Studio One**, including after #38164929473. The host GUI defect remains OPEN, irrespective of SDK validator pass.
-- The Steinberg/VSTGUI editor differs from the working 125A Midiator, which uses `AspectRatioVST3Editor`. A change to that editor was compiled in #38165400049 but **not established as a host fix**.
+- The current editor now uses `AspectRatioVST3Editor`, as does the working 125A Midiator. No VST3 host-attached GUI rendering PASS has been established for Rifferator.
 
 ## Confirmed release blockers and inconsistencies
 1. **HOST-GUI — FAIL / blocker.** Visual editor appearance, lifecycle and editor reopen have not passed Studio One acceptance; user reports the expected surface missing. Must reproduce and inspect actual attached window and resource resolution. Earlier hostless CTest segfaulted and was withdrawn; it does not constitute host verification.
-2. **SPEC-DRIFT — FAIL / blocker to signed-off feature scope.** `docs/PRODUCT-SPEC.md` still claims 2–32 steps, step-rate selection, per-step DOUBLE, independent randomization and export/profile functionality as V1, whereas present primary editor and MIDI engine operate on fixed 16-step grids. Either implement each promised function with tests or explicitly amend and approve a narrower V1 scope before release. Do not advertise unimplemented features.
-3. **REALTIME-LEGACY — corrected, retest pending.** `Processor::process` formerly wrote `steps_[index]` on automation changes for all 16 slots despite serialized V1–V8 count accepting 1–32; legacy states under 16 steps could write past the vector. Added bounds guards in current development branch. Needs a dedicated saved-short-state + automation reproducer.
+2. **SPEC-DRIFT — FAIL / blocker to signed-off feature scope.** `docs/PRODUCT-SPEC.md` still claims 2–32 steps, step-rate selection, independent randomization, and export/profile functionality as V1, whereas the present primary editor and MIDI engine operate on fixed 16-step grids. **Per-step DOUBLE is implemented** and covered by core/VST3 tests. Either implement each promised function with tests or explicitly amend and approve a narrower V1 scope before release. Do not advertise unimplemented features.
+3. **REALTIME-LEGACY — automated PASS, host pending.** `Processor::process` formerly wrote `steps_[index]` for high step indices after restoring legacy projects with fewer than 16 steps. Bounds guards and a dedicated **V1 one-step state + high-index automation + V9 save** regression now pass CI. This does not verify reopening a legacy song inside Studio One.
 4. **HOST-MIDI — NOT VERIFIED.** Four VST3 event output buses are declared and deterministic multi-bus scheduling passes CTest. Studio One routing to external or multi-timbral instruments, host bus activation, program/plugin reload and stuck-note torture remain unverified.
-5. **STATE/AUTOMATION — PARTIAL PASS.** Processor V8 serialization/restore and Controller V8 normalized parameter sync have automated regressions; arbitrary automation point density, interleaved restoration and host project reopen need further checks.
+5. **STATE/AUTOMATION — PARTIAL PASS.** Processor **V9** serialization/restore and Controller V9 normalized parameter sync have automated regressions. GUI zoom had no independent controller-state persistence and is being added in the current unverified batch. Arbitrary automation point density, interleaved restoration and host project reopen need further checks.
 6. **TRANSPORT — PARTIAL PASS.** Deterministic Stop/Restart and note-flush scenarios pass core tests. Actual DAW loop/jump/offline, block-size change and external bass mode switch under load need an independent host gate.
-7. **GUI VISUAL — NOT VERIFIED.** UI metadata says 1120×695; 150% implies 1680×1042.5 before Studio One chrome and exceeds the earlier `GUI-V1-IMPLEMENTATION-CONTRACT.md` 1120×670 / 1680×1005 limit. GUI must be measured at 1920×1080 with native scaling and controls inspected.
+7. **GUI VISUAL — NOT VERIFIED.** The actual template is **1120×696 px**; 150% becomes **1680×1044 px** before Studio One window chrome, exceeding the earlier `GUI-V1-IMPLEMENTATION-CONTRACT.md` 1120×670 / 1680×1005 limit. GUI must be measured at 1920×1080 with native scaling and controls inspected.
 8. **RELEASE PACKAGE — PARTIAL PASS.** Bundle name, one binary, `rifferator.uidesc` copied and template name checked in workflow. This does not prove GUI resource loading/attachment or 125A Plugin Tester pass.
 9. **PRODUCT-QUALITY — NOT VERIFIED.** Generated riff variety, PM/Power articulations with target sampled guitar, bass/harmony arrangement and practical playability require MIDI capture and listening through real target libraries.
 10. **PLATFORM — NOT VERIFIED beyond Windows CI.** No Mac compatibility claim. No independently verified Studio One version/Windows DPI host snapshot.
@@ -112,6 +113,27 @@
 - **Corrected:** Explicit harmony-root changes release Chords, and additionally release Bass if the *currently active* bass mode is HYBRID. FOLLOW and independent EBM Bass must not be cut by an unrelated chord/harmony-root parameter edit; guitar and drums are unaffected.
 - **Regression:** A real VST3 Processor/host EventList test starts held Chord and Bass voices, automates the same explicit root under FOLLOW/EBM/HYBRID, then compares NoteOffs on all four event buses.
 - **Status:** implementation and regression added; this batch is **CI pending**. Real Studio One multi-bus/GUI QA is not verified.
+
+## 2026-10-12 — Controller zoom state and host acceptance
+
+- **Found:** 100%/150% editor zoom was held only in a transient
+  `Controller::zoomFactor_` variable; the VST3 Controller did not implement
+  `getState/setState`. Reopening a saved song with a fresh controller could
+  reset the editor to 100% even if the session had been saved at 150%.
+- **Implemented:** independent versioned Controller state with three 32-bit
+  words (magic `RFZ1`, version 1, zoom 100 or 150); complete validation
+  before changing UI state, reapplication to an attached editor, and update
+  of its zoom indicators. Processor V9 musical snapshot remains unchanged,
+  preserving musical preset/project state layout.
+- **Automated tests:** Controller default 100%, 150% save/restore, back to
+  100%, invalid magic, unknown version, invalid zoom, truncated stream and
+  null stream. Malformed input cannot change the prior zoom or musical
+  parameter values.
+- **Status:** new CI **pending**, and real Studio One project save/reopen
+  including 150% selection is **NOT VERIFIED**. At 150%, nominal editor
+  height is 1044 px **plus host chrome**, potentially exceeding a
+  1920×1080 screen. Do not claim full visual fit or lifecycle PASS until
+  measured in the DAW.
 
 ## Required completion gates
 - Fix host GUI visibility with reproducible diagnosis rather than speculative resource changes; 20 consecutive open/close/reopen cycles and restore.
