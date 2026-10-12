@@ -79,6 +79,20 @@ int main(){
       assert(ons==(doubled?2:1) && offs==(doubled?2:1));
     }
   }
+  // An out-of-period STOP must not wrap into an eight-step pattern.
+  {
+    Pair held;held.guitar.push_back({0,1800,40,115,1920});
+    LiveControls controls;
+    controls.guitarSteps.fill(false);
+    controls.guitarSteps[0]=true;controls.guitarArticulation[0]=4;
+    controls.guitarSteps[12]=true;controls.guitarArticulation[12]=0;
+    BlockScheduler engine;
+    std::vector<ScheduledMidiEvent> actual;
+    engine.process(held,0.,2.,1920,1920,
+      [&](ScheduledMidiEvent e){actual.push_back(e);return true;},true,controls);
+    for(const auto& e:actual)
+      assert(!(e.bus==0 && !e.on && e.sampleOffset==960));
+  }
   // STOP releases a long OPEN at step 2; an empty step does not.
   {
     Pair held;held.guitar.push_back({0,950,40,115,960});
