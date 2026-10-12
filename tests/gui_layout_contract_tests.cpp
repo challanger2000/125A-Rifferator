@@ -67,14 +67,24 @@ int main(){
   assert(controller.find("command>=448?command-448:command-300")!=std::string::npos);
   assert(controller.find("refreshSwitch(id);")!=std::string::npos);
 
-  // GENERATE resets previous DOUBLE triggers only after the LOCK guard.
-  const auto generateStart=controller.find("if(control->getTag()==700)");
-  const auto generateEnd=controller.find("const int tag=control->getTag();",generateStart);
-  assert(generateStart!=std::string::npos && generateEnd!=std::string::npos);
-  const auto generateCode=controller.substr(generateStart,generateEnd-generateStart);
-  assert(generateCode.find("kGuitarLockBase+i")<generateCode.find("edit(kGuitarDoubleBase+i,0.)"));
-  assert(generateCode.find("edit(kGuitarDoubleBase+i,0.)")!=std::string::npos);
-
+  // Both commands must invoke the existing seeded guitar generation
+  // engine, never the former three-pattern demo rotation. The controller
+  // applies results through VST3 parameter edits outside process().
+  assert(xml.find("<control-tag name=\"GuitarGenerate\" tag=\"700\"/>")!=std::string::npos);
+  assert(xml.find("<control-tag name=\"GuitarVariate\" tag=\"722\"/>")!=std::string::npos);
+  assert(xml.find("control-tag=\"GuitarVariate\" origin=\"422, 424\" size=\"180, 32\"")!=std::string::npos);
+  const auto generation=controller.find("void runGuitarGeneration(");
+  assert(generation!=std::string::npos);
+  const auto generationEnd=controller.find("VSTGUI::VST3Editor* activeEditor_",generation);
+  assert(generationEnd!=std::string::npos);
+  const auto generationCode=controller.substr(generation,generationEnd-generation);
+  assert(generationCode.find("generateGuitar(current,options,command,30)")!=std::string::npos);
+  assert(generationCode.find("if(current[j].locked)continue;")!=std::string::npos);
+  assert(generationCode.find("options.randomPitch=false;")!=std::string::npos);
+  assert(generationCode.find("publish(kGuitarDoubleBase+i,0.)")!=std::string::npos);
+  assert(controller.find("if(command==700 || command==722)")!=std::string::npos);
+  assert(controller.find("(control->getTag()>=700 && control->getTag()<=722)")!=std::string::npos);
+  assert(controller.find("makeIndustrialGuitarGroove(")==std::string::npos);
   assert(controller.find("kGuitarLockBase+step")!=std::string::npos);
   for(const auto* expr: {"command>=200 && command<248",
                          "command>=300 && command<316",
