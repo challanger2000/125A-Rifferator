@@ -181,6 +181,13 @@ public:
     if((command>=200 && command<248) || (command>=300 && command<316) ||
        (command>=432 && command<464)) {
       const auto id=static_cast<Steinberg::Vst::ParamID>(command);
+      // A locked guitar step rejects both ON/OFF and DOUBLE edits.
+      // Restore the GUI immediately as the processor rejects those edits too.
+      if(((command>=300 && command<316) || (command>=448 && command<464)) &&
+         getParamNormalized(a125::rifferator::kGuitarLockBase+(command%16))>=0.5) {
+        refreshSwitch(id);
+        return;
+      }
       const double value=control->getValueNormalized()>=0.5?1.:0.;
       beginEdit(id);setParamNormalized(id,value);performEdit(id,value);endEdit(id);
       return;
