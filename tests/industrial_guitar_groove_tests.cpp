@@ -50,12 +50,13 @@ int main(){
     std::vector<ScheduledMidiEvent> actual;
     engine.process(one,0.,0.25,960,61440,
       [&](ScheduledMidiEvent e){actual.push_back(e);return true;},true,selected);
-    std::vector<int> ons,offs;
+    std::vector<int> ons,offs,velocities;
     for(const auto& e:actual)if(e.bus==0 && e.pitch==40) {
-      if(e.on)assert(e.velocity>=30 && e.velocity<=40); // both PM attacks stay in configured zone
+      if(e.on){assert(e.velocity>=30 && e.velocity<=40);velocities.push_back(e.velocity);}
       (e.on?ons:offs).push_back(e.sampleOffset);
     }
     assert(ons.size()==2 && offs.size()==2);
+    assert(velocities.size()==2 && velocities[0]==40 && velocities[1]==37);
     assert(ons[0]==0 && ons[1]>=479 && ons[1]<=480);
     assert(ons[0]<offs[0] && offs[0]<=ons[1] && ons[1]<offs[1]);
   }
