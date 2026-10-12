@@ -56,6 +56,26 @@ int main(){
     assert(ons[0]==0 && ons[1]>=479 && ons[1]<=480);
     assert(ons[0]<offs[0] && offs[0]<=ons[1] && ons[1]<offs[1]);
   }
+  // STOP releases a long OPEN at step 2; an empty step does not.
+  {
+    Pair held;held.guitar.push_back({0,950,40,115,960});
+    LiveControls controls;
+    controls.guitarSteps.fill(false);
+    controls.guitarSteps[0]=true;controls.guitarArticulation[0]=4;
+    controls.guitarSteps[1]=true;controls.guitarArticulation[1]=0;
+    BlockScheduler engine;
+    std::vector<ScheduledMidiEvent> actual;
+    engine.process(held,0.,0.5,960,61440,
+      [&](ScheduledMidiEvent e){actual.push_back(e);return true;},true,controls);
+    bool stopped=false;
+    for(const auto& e:actual)if(e.bus==0 && !e.on && e.pitch==40 && e.sampleOffset==480)stopped=true;
+    assert(stopped);
+    controls.guitarSteps[1]=false;
+    engine.reset();actual.clear();
+    engine.process(held,0.,0.5,960,61440,
+      [&](ScheduledMidiEvent e){actual.push_back(e);return true;},true,controls);
+    for(const auto& e:actual)assert(!(e.bus==0 && !e.on && e.sampleOffset==480));
+  }
   assert(!makeIndustrialGuitarGroove(49).enabled[15]);
   assert(makeIndustrialGuitarGroove(50).enabled[15]);
   Pair pair;
