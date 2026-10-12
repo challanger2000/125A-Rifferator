@@ -43,6 +43,7 @@ private:
   bool flushOnNextProcess_{};
   bool drumFlushPending_{};
   bool chordFlushPending_{};
+  bool guitarFlushPending_{};
   LiveControls live_{};
   int preparedRootMidi_{40};
 };
