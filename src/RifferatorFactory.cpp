@@ -72,7 +72,7 @@ public:
     const auto art=std::clamp(static_cast<int>(getParamNormalized(a125::rifferator::kGuitarArticulationBase+step)*5.+0.5),0,5);
     const bool enabled=getParamNormalized(a125::rifferator::kGuitarStepBase+step)>=0.5;
     for(int row=0;row<6;++row)if(auto* cell=guitarCells_[static_cast<std::size_t>(row)][static_cast<std::size_t>(step)]) {
-      cell->setValueNormalized(row==(enabled?art:0)?1.f:0.f);
+      cell->setValueNormalized((enabled && row==art)?1.f:0.f);
       cell->invalid();
     }
   }
@@ -233,11 +233,11 @@ public:
     const int art=(tag-500)/16;
     const auto id=a125::rifferator::kGuitarArticulationBase+step;
     if(getParamNormalized(a125::rifferator::kGuitarLockBase+step)>=0.5)return;
-    // A selected articulation activates the step; REST deactivates it.
+    // STOP is an active guitar-only NoteOff command; an empty step is OFF.
     // Both parameters must be published, otherwise a previously silent
     // generated step remains silent after selecting Palm Mute or OPEN.
     const auto activeId=a125::rifferator::kGuitarStepBase+step;
-    const double enabled=art==0?0.:1.;
+    const double enabled=1.;
     beginEdit(activeId);
     setParamNormalized(activeId,enabled);
     performEdit(activeId,enabled);
@@ -335,7 +335,7 @@ public:
     parameters.addParameter(STR16("Guitar Step 16"),nullptr,1,0.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kGuitarStepBase+15);
     {
       auto* art=new StringListParameter(STR16("Guitar Art 01"),a125::rifferator::kGuitarArticulationBase+0);
-      art->appendString(STR16("REST"));
+      art->appendString(STR16("STOP"));
       art->appendString(STR16("NOISE"));
       art->appendString(STR16("PALM"));
       art->appendString(STR16("SOFT"));
@@ -349,7 +349,7 @@ public:
     parameters.addParameter(STR16("Guitar Lock 01"),nullptr,1,0.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kGuitarLockBase+0);
     {
       auto* art=new StringListParameter(STR16("Guitar Art 02"),a125::rifferator::kGuitarArticulationBase+1);
-      art->appendString(STR16("REST"));
+      art->appendString(STR16("STOP"));
       art->appendString(STR16("NOISE"));
       art->appendString(STR16("PALM"));
       art->appendString(STR16("SOFT"));
@@ -363,7 +363,7 @@ public:
     parameters.addParameter(STR16("Guitar Lock 02"),nullptr,1,0.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kGuitarLockBase+1);
     {
       auto* art=new StringListParameter(STR16("Guitar Art 03"),a125::rifferator::kGuitarArticulationBase+2);
-      art->appendString(STR16("REST"));
+      art->appendString(STR16("STOP"));
       art->appendString(STR16("NOISE"));
       art->appendString(STR16("PALM"));
       art->appendString(STR16("SOFT"));
@@ -377,7 +377,7 @@ public:
     parameters.addParameter(STR16("Guitar Lock 03"),nullptr,1,0.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kGuitarLockBase+2);
     {
       auto* art=new StringListParameter(STR16("Guitar Art 04"),a125::rifferator::kGuitarArticulationBase+3);
-      art->appendString(STR16("REST"));
+      art->appendString(STR16("STOP"));
       art->appendString(STR16("NOISE"));
       art->appendString(STR16("PALM"));
       art->appendString(STR16("SOFT"));
@@ -391,7 +391,7 @@ public:
     parameters.addParameter(STR16("Guitar Lock 04"),nullptr,1,0.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kGuitarLockBase+3);
     {
       auto* art=new StringListParameter(STR16("Guitar Art 05"),a125::rifferator::kGuitarArticulationBase+4);
-      art->appendString(STR16("REST"));
+      art->appendString(STR16("STOP"));
       art->appendString(STR16("NOISE"));
       art->appendString(STR16("PALM"));
       art->appendString(STR16("SOFT"));
@@ -405,7 +405,7 @@ public:
     parameters.addParameter(STR16("Guitar Lock 05"),nullptr,1,0.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kGuitarLockBase+4);
     {
       auto* art=new StringListParameter(STR16("Guitar Art 06"),a125::rifferator::kGuitarArticulationBase+5);
-      art->appendString(STR16("REST"));
+      art->appendString(STR16("STOP"));
       art->appendString(STR16("NOISE"));
       art->appendString(STR16("PALM"));
       art->appendString(STR16("SOFT"));
@@ -419,7 +419,7 @@ public:
     parameters.addParameter(STR16("Guitar Lock 06"),nullptr,1,0.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kGuitarLockBase+5);
     {
       auto* art=new StringListParameter(STR16("Guitar Art 07"),a125::rifferator::kGuitarArticulationBase+6);
-      art->appendString(STR16("REST"));
+      art->appendString(STR16("STOP"));
       art->appendString(STR16("NOISE"));
       art->appendString(STR16("PALM"));
       art->appendString(STR16("SOFT"));
@@ -433,7 +433,7 @@ public:
     parameters.addParameter(STR16("Guitar Lock 07"),nullptr,1,0.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kGuitarLockBase+6);
     {
       auto* art=new StringListParameter(STR16("Guitar Art 08"),a125::rifferator::kGuitarArticulationBase+7);
-      art->appendString(STR16("REST"));
+      art->appendString(STR16("STOP"));
       art->appendString(STR16("NOISE"));
       art->appendString(STR16("PALM"));
       art->appendString(STR16("SOFT"));
@@ -447,7 +447,7 @@ public:
     parameters.addParameter(STR16("Guitar Lock 08"),nullptr,1,0.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kGuitarLockBase+7);
     {
       auto* art=new StringListParameter(STR16("Guitar Art 09"),a125::rifferator::kGuitarArticulationBase+8);
-      art->appendString(STR16("REST"));
+      art->appendString(STR16("STOP"));
       art->appendString(STR16("NOISE"));
       art->appendString(STR16("PALM"));
       art->appendString(STR16("SOFT"));
@@ -461,7 +461,7 @@ public:
     parameters.addParameter(STR16("Guitar Lock 09"),nullptr,1,0.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kGuitarLockBase+8);
     {
       auto* art=new StringListParameter(STR16("Guitar Art 10"),a125::rifferator::kGuitarArticulationBase+9);
-      art->appendString(STR16("REST"));
+      art->appendString(STR16("STOP"));
       art->appendString(STR16("NOISE"));
       art->appendString(STR16("PALM"));
       art->appendString(STR16("SOFT"));
@@ -475,7 +475,7 @@ public:
     parameters.addParameter(STR16("Guitar Lock 10"),nullptr,1,0.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kGuitarLockBase+9);
     {
       auto* art=new StringListParameter(STR16("Guitar Art 11"),a125::rifferator::kGuitarArticulationBase+10);
-      art->appendString(STR16("REST"));
+      art->appendString(STR16("STOP"));
       art->appendString(STR16("NOISE"));
       art->appendString(STR16("PALM"));
       art->appendString(STR16("SOFT"));
@@ -489,7 +489,7 @@ public:
     parameters.addParameter(STR16("Guitar Lock 11"),nullptr,1,0.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kGuitarLockBase+10);
     {
       auto* art=new StringListParameter(STR16("Guitar Art 12"),a125::rifferator::kGuitarArticulationBase+11);
-      art->appendString(STR16("REST"));
+      art->appendString(STR16("STOP"));
       art->appendString(STR16("NOISE"));
       art->appendString(STR16("PALM"));
       art->appendString(STR16("SOFT"));
@@ -503,7 +503,7 @@ public:
     parameters.addParameter(STR16("Guitar Lock 12"),nullptr,1,0.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kGuitarLockBase+11);
     {
       auto* art=new StringListParameter(STR16("Guitar Art 13"),a125::rifferator::kGuitarArticulationBase+12);
-      art->appendString(STR16("REST"));
+      art->appendString(STR16("STOP"));
       art->appendString(STR16("NOISE"));
       art->appendString(STR16("PALM"));
       art->appendString(STR16("SOFT"));
@@ -517,7 +517,7 @@ public:
     parameters.addParameter(STR16("Guitar Lock 13"),nullptr,1,0.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kGuitarLockBase+12);
     {
       auto* art=new StringListParameter(STR16("Guitar Art 14"),a125::rifferator::kGuitarArticulationBase+13);
-      art->appendString(STR16("REST"));
+      art->appendString(STR16("STOP"));
       art->appendString(STR16("NOISE"));
       art->appendString(STR16("PALM"));
       art->appendString(STR16("SOFT"));
@@ -531,7 +531,7 @@ public:
     parameters.addParameter(STR16("Guitar Lock 14"),nullptr,1,0.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kGuitarLockBase+13);
     {
       auto* art=new StringListParameter(STR16("Guitar Art 15"),a125::rifferator::kGuitarArticulationBase+14);
-      art->appendString(STR16("REST"));
+      art->appendString(STR16("STOP"));
       art->appendString(STR16("NOISE"));
       art->appendString(STR16("PALM"));
       art->appendString(STR16("SOFT"));
@@ -545,7 +545,7 @@ public:
     parameters.addParameter(STR16("Guitar Lock 15"),nullptr,1,0.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kGuitarLockBase+14);
     {
       auto* art=new StringListParameter(STR16("Guitar Art 16"),a125::rifferator::kGuitarArticulationBase+15);
-      art->appendString(STR16("REST"));
+      art->appendString(STR16("STOP"));
       art->appendString(STR16("NOISE"));
       art->appendString(STR16("PALM"));
       art->appendString(STR16("SOFT"));
