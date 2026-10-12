@@ -6,6 +6,11 @@ on:
       - develop/v1.0.0
     paths:
       - ci/TRIGGER_BUILD
+# Duplicate push deliveries for an identical commit should never execute
+# two paid Windows builds in parallel.
+concurrency:
+  group: rifferator-${{ github.workflow }}-${{ github.ref }}-${{ github.sha }}
+  cancel-in-progress: true
 jobs:
   build-and-core-tests:
     runs-on: windows-2022
