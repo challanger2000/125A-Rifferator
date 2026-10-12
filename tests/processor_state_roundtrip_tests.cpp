@@ -529,17 +529,25 @@ int main(){
     block.inputParameterChanges=nullptr;
     ctx.projectTimeMusic=.05;
     assert(playing.process(block)==Steinberg::kResultOk);
-    bool off[4]{};
-    bool duplicate=false;
+    int released[4]{};
+    int bass28Off=0,duplicateKick36=0;
     for(Steinberg::int32 i=0;i<retry.getEventCount();++i) {
       Steinberg::Vst::Event e{};
       assert(retry.getEvent(i,e)==Steinberg::kResultOk);
       if(e.type!=Steinberg::Vst::Event::kNoteOffEvent ||
          e.sampleOffset!=0)continue;
-      off[e.busIndex]=true;
-      if(e.busIndex==2 && e.noteOff.pitch==36)duplicate=true;
+      assert(e.busIndex>=0 && e.busIndex<4);
+      ++released[e.busIndex];
+      if(e.busIndex==1 && e.noteOff.pitch==28)++bass28Off;
+      if(e.busIndex==2 && e.noteOff.pitch==36)++duplicateKick36;
     }
-    assert(off[0] && off[2] && off[3] && !off[1] && !duplicate);
+    // DOUBLE now belongs to guitar AND FOLLOW bass. After the host accepts
+    // only the kick NoteOff, retry MUST release both musical voices and the
+    // remaining drum/chord voices. Previously this test incorrectly expected
+    // the bass to remain active and rejected the intentional release.
+    assert(released[0]>=1 && released[1]>=1 &&
+           released[2]>=1 && released[3]>=1);
+    assert(bass28Off==1 && duplicateKick36==0);
   }
 
   // End-to-end live LOCK: pre-rendered FILL transposition must be masked
