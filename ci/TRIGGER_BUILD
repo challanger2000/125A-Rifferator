@@ -99,3 +99,4 @@
 2026-10-12 update obsolete fifth regression to single trigger note
 2026-10-12 defensive PM clamp host automation regression
 2026-10-12 STOP events restricted to active pattern period regression
+2026-10-12 double sustained open midpoint bounded to 16th grid step
