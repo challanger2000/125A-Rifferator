@@ -155,12 +155,15 @@ public:
           // start, followed by a second stroke halfway through the step.
           // Each gets its own NoteOff and must never spill into the next step.
           if(bus==0 && live.guitarDouble[static_cast<std::size_t>((note.startTick/240)%16)]) {
-            const int64_t half=std::max<int64_t>(1,(note.boundaryTick-note.startTick)/2);
+            // DOUBLE retriggers halfway through its 16th grid step,
+            // not halfway through the duration of a sustained OPEN note.
+            const int64_t stepEnd=std::min<int64_t>(note.boundaryTick,note.startTick+240);
+            const int64_t half=std::max<int64_t>(1,(stepEnd-note.startTick)/2);
             const int64_t midpoint=note.startTick+half;
             const int64_t firstOff=std::max<int64_t>(note.startTick+1,
               std::min<int64_t>(midpoint,note.startTick+half*gate/100));
             const int64_t secondOff=std::max<int64_t>(midpoint+1,
-              std::min<int64_t>(note.boundaryTick,midpoint+(note.boundaryTick-midpoint)*gate/100));
+              std::min<int64_t>(stepEnd,midpoint+(stepEnd-midpoint)*gate/100));
             // The guitar library owns PM and FIFTH voicings: trigger one
             // MIDI pitch per attack; never synthesize an extra fifth.
             push(cycle+static_cast<double>(firstOff)/960.0,false);
