@@ -388,6 +388,22 @@ public:
   void valueChanged(VSTGUI::CControl* control) override {
     if(!control)return;
     const int command=control->getTag();
+    // Navigation/zoom are exclusive selectors, never off/on toggles.
+    // Even a second click on the selected button restores its highlight.
+    if(command==728 || command==729) {
+      selectPage(command==729);
+      return;
+    }
+    if(command==701 || command==702) {
+      zoomFactor_=command==701?1.:1.5;
+      // Use the attached view owner when available, not a potentially stale
+      // pointer left by a previously opened host editor.
+      auto* editor=viewOwner_?viewOwner_:activeEditor_;
+      if(editor && std::abs(editor->getZoomFactor()-zoomFactor_)>1.e-9)
+        editor->setZoomFactor(zoomFactor_);
+      refreshCommands();
+      return;
+    }
     // A second click on the selected articulation clears the step.
     // Clicking an unselected cell OFF must not erase another selection.
     if(command>=500 && command<596 && control->getValueNormalized()<=0.5f) {
@@ -464,16 +480,7 @@ public:
       }
       return;
     }
-    if(command==701 || command==702) {
-      zoomFactor_=command==701?1.:1.5;
-      // Use the attached view owner when available, not a potentially stale
-      // pointer left by a previously opened host editor.
-      auto* editor=viewOwner_?viewOwner_:activeEditor_;
-      if(editor && std::abs(editor->getZoomFactor()-zoomFactor_)>1.e-9)
-        editor->setZoomFactor(zoomFactor_);
-      refreshCommands();
-      return;
-    }
+
     const auto send=[&](Steinberg::Vst::ParamID id,double value) {
       beginEdit(id);
       setParamNormalized(id,value);
@@ -511,10 +518,7 @@ public:
       toggleDrumsEnabled();
       return;
     }
-    if(command==728 || command==729) {
-      selectPage(command==729);
-      return;
-    }
+
     if(command==725) {
       restoreStandardDrums();
       return;
