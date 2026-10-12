@@ -93,3 +93,4 @@
 2026-10-12 suppress redundant zoom resize and check controller guard
 2026-10-12 retain articulation velocity on second DOUBLE attack
 2026-10-12 configurable PM MIN MAX controls with backward-compatible state v9 and DOUBLE test
+2026-10-12 second double PM attack bounded velocity differentiation
