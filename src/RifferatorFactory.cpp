@@ -275,6 +275,8 @@ public:
   Steinberg::tresult PLUGIN_API initialize(Steinberg::FUnknown* context) override {
     using namespace Steinberg::Vst;
     if(EditControllerEx1::initialize(context)!=Steinberg::kResultOk) return Steinberg::kResultFalse;
+    parameters.addParameter(STR16("PM MIN"),nullptr,126,29.0/126.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kPmMin);
+    parameters.addParameter(STR16("PM MAX"),nullptr,126,49.0/126.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kPmMax);
     parameters.addParameter(STR16("Guitar Gate"),STR16("%"),0,0.95,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kGuitarGate);
     parameters.addParameter(STR16("Bass Gate"),STR16("%"),0,0.95,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kBassGate);
     {
@@ -630,7 +632,7 @@ public:
     };
     uint32_t magic=0,version=0,count=0;
     if(!read32(magic)||!read32(version)||!read32(count) ||
-       magic!=0x31524641u || (version!=1 && version!=2 && version!=3 && version!=4 && version!=5 && version!=6 && version!=7 && version!=8) ||
+       magic!=0x31524641u || (version!=1 && version!=2 && version!=3 && version!=4 && version!=5 && version!=6 && version!=7 && version!=8 && version!=9) ||
        count<1 || count>32) return kResultFalse;
     std::array<uint32_t,7> values{};
     for(auto& v:values)if(!read32(v))return kResultFalse;
@@ -689,6 +691,11 @@ public:
     }
     uint32_t quality=0;
     if(version>=8 && (!read32(quality)||quality>4))return kResultFalse;
+    uint32_t pmMin=30,pmMax=50;
+    if(version>=9 && (!read32(pmMin)||!read32(pmMax)||
+        pmMin<1||pmMax>127||pmMin>pmMax))return kResultFalse;
+    setParamNormalized(a125::rifferator::kPmMin,(pmMin-1)/126.);
+    setParamNormalized(a125::rifferator::kPmMax,(pmMax-1)/126.);
     // The processor owns the pattern. The controller only synchronizes
     // the automatable parameter values presented to the host/GUI.
     setParamNormalized(a125::rifferator::kChordsQuality,quality/4.);
