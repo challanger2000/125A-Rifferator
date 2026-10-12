@@ -27,6 +27,10 @@ int main(){
   const std::string controller((std::istreambuf_iterator<char>(controllerFile)),
                                std::istreambuf_iterator<char>());
   assert(controller.find("command==721")!=std::string::npos);
+  // Legacy versions predate the explicit guitar arrays: GUI must recover
+  // articulation, degree, lock and step activity from saved Step records.
+  for(const auto* field:{"storedArt[j]!=0","storedDegree[legacy]","storedLocks[legacy]","storedArt[legacy]"})
+    assert(controller.find(field)!=std::string::npos);
   // Locked STEP and DOUBLE toggles must revert locally, not only in processor.
   assert(controller.find("command>=448?command-448:command-300")!=std::string::npos);
   assert(controller.find("refreshSwitch(id);")!=std::string::npos);
