@@ -22,6 +22,14 @@ class EbmSchedulerAdapter {
 public:
     // reset() is safe only before playback or after a successful flush.
     void reset() noexcept { active_.fill(false); haveExpected_=false; recoveryPending_=false; }
+    // A callback skipped for host event-list backpressure still advances
+    // transport time. Do not mistake the next contiguous block for a seek.
+    void advanceSkippedBlock(double startPpq,double endPpq) noexcept {
+        if(haveExpected_ && !recoveryPending_ &&
+           std::isfinite(startPpq) && std::isfinite(endPpq) &&
+           endPpq>startPpq && std::abs(startPpq-expectedPpq_)<=0.002)
+            expectedPpq_=endPpq;
+    }
     // Call before replacing a prepared arrangement while transport is running.
     // If the host rejects a NoteOff, retain state and retry on next callback.
     template<class Sink>
