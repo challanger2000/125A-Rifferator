@@ -139,6 +139,15 @@ tresult PLUGIN_API Processor::process(ProcessData& data) {
         if(ebmStyle_!=style) {ebmStyle_=style;bassSwitchPending_=true;}
         continue;
       }
+      if(id>=kGuitarDoubleBase && id<kGuitarDoubleBase+16) {
+        const auto index=static_cast<std::size_t>(id-kGuitarDoubleBase);
+        if(!live_.guitarLocks[index] && index<steps_.size()) {
+          const bool doubled=value>=0.5;
+          if(steps_[index].doubled!=doubled)flushOnNextProcess_=true;
+          steps_[index].doubled=doubled;
+        }
+        continue;
+      }
       if(id>=kGuitarLockBase && id<kGuitarLockBase+16) {
         const auto index=static_cast<std::size_t>(id-kGuitarLockBase);
         live_.guitarLocks[index]=value>=0.5;
