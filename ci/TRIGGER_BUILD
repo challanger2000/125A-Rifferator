@@ -104,3 +104,4 @@
 2026-10-12 BUNDLED: pitch-specific retrigger, sustained-overlap test, guitar STOP bass isolation
 2026-10-12 BUNDLE: fix sustained-overlap expected gated length and implement lock-respecting CLEAR PATTERN UI
 2026-10-12 BUNDLE: generate clears stale double, lock guard and GUI regression
+2026-10-12 BUNDLE locked-step ON DOUBLE buttons consistent GUI feedback and regression
