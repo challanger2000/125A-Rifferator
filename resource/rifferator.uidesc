@@ -8,6 +8,55 @@
 
  <fonts><font name="Title" font-name="Arial" size="26" bold="true"/><font name="Normal" font-name="Arial" size="15"/><font name="Small" font-name="Arial" size="12"/></fonts>
  <control-tags>
+  <control-tag name="DegreeMinus0" tag="800"/>
+  <control-tag name="DegreePlus0" tag="816"/>
+  <control-tag name="DegreeValue0" tag="850"/>
+  <control-tag name="DegreeMinus1" tag="801"/>
+  <control-tag name="DegreePlus1" tag="817"/>
+  <control-tag name="DegreeValue1" tag="851"/>
+  <control-tag name="DegreeMinus2" tag="802"/>
+  <control-tag name="DegreePlus2" tag="818"/>
+  <control-tag name="DegreeValue2" tag="852"/>
+  <control-tag name="DegreeMinus3" tag="803"/>
+  <control-tag name="DegreePlus3" tag="819"/>
+  <control-tag name="DegreeValue3" tag="853"/>
+  <control-tag name="DegreeMinus4" tag="804"/>
+  <control-tag name="DegreePlus4" tag="820"/>
+  <control-tag name="DegreeValue4" tag="854"/>
+  <control-tag name="DegreeMinus5" tag="805"/>
+  <control-tag name="DegreePlus5" tag="821"/>
+  <control-tag name="DegreeValue5" tag="855"/>
+  <control-tag name="DegreeMinus6" tag="806"/>
+  <control-tag name="DegreePlus6" tag="822"/>
+  <control-tag name="DegreeValue6" tag="856"/>
+  <control-tag name="DegreeMinus7" tag="807"/>
+  <control-tag name="DegreePlus7" tag="823"/>
+  <control-tag name="DegreeValue7" tag="857"/>
+  <control-tag name="DegreeMinus8" tag="808"/>
+  <control-tag name="DegreePlus8" tag="824"/>
+  <control-tag name="DegreeValue8" tag="858"/>
+  <control-tag name="DegreeMinus9" tag="809"/>
+  <control-tag name="DegreePlus9" tag="825"/>
+  <control-tag name="DegreeValue9" tag="859"/>
+  <control-tag name="DegreeMinus10" tag="810"/>
+  <control-tag name="DegreePlus10" tag="826"/>
+  <control-tag name="DegreeValue10" tag="860"/>
+  <control-tag name="DegreeMinus11" tag="811"/>
+  <control-tag name="DegreePlus11" tag="827"/>
+  <control-tag name="DegreeValue11" tag="861"/>
+  <control-tag name="DegreeMinus12" tag="812"/>
+  <control-tag name="DegreePlus12" tag="828"/>
+  <control-tag name="DegreeValue12" tag="862"/>
+  <control-tag name="DegreeMinus13" tag="813"/>
+  <control-tag name="DegreePlus13" tag="829"/>
+  <control-tag name="DegreeValue13" tag="863"/>
+  <control-tag name="DegreeMinus14" tag="814"/>
+  <control-tag name="DegreePlus14" tag="830"/>
+  <control-tag name="DegreeValue14" tag="864"/>
+  <control-tag name="DegreeMinus15" tag="815"/>
+  <control-tag name="DegreePlus15" tag="831"/>
+  <control-tag name="DegreeValue15" tag="865"/>
+
   <control-tag name="GuitarGenerate" tag="700"/>
   <control-tag name="Action701" tag="701"/>
   <control-tag name="Action702" tag="702"/>
@@ -288,37 +337,69 @@
   <view class="CTextButton" control-tag="GuitarActive13" origin="879, 329" size="43, 14" title="ON" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
   <view class="CTextButton" control-tag="GuitarActive14" origin="935, 329" size="43, 14" title="ON" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
   <view class="CTextButton" control-tag="GuitarActive15" origin="991, 329" size="43, 14" title="ON" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
-  <view class="CSlider" control-tag="GDegree0" origin="151, 265" size="43, 19" orientation="horizontal" mode="free click" draw-back="true" draw-frame="true" draw-value="true" draw-back-color="Panel" draw-frame-color="Line" draw-value-color="Accent"/>
+  <view class="CTextButton" control-tag="DegreeMinus0" origin="151, 265" size="12, 19" title="-" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
+  <view class="CTextButton" control-tag="DegreeValue0" origin="163, 265" size="19, 19" title="1" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
+  <view class="CTextButton" control-tag="DegreePlus0" origin="182, 265" size="12, 19" title="+" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
   <view class="CTextButton" control-tag="GLock0" origin="151, 300" size="43, 23" title="L" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
-  <view class="CSlider" control-tag="GDegree1" origin="207, 265" size="43, 19" orientation="horizontal" mode="free click" draw-back="true" draw-frame="true" draw-value="true" draw-back-color="Panel" draw-frame-color="Line" draw-value-color="Accent"/>
+  <view class="CTextButton" control-tag="DegreeMinus1" origin="207, 265" size="12, 19" title="-" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
+  <view class="CTextButton" control-tag="DegreeValue1" origin="219, 265" size="19, 19" title="1" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
+  <view class="CTextButton" control-tag="DegreePlus1" origin="238, 265" size="12, 19" title="+" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
   <view class="CTextButton" control-tag="GLock1" origin="207, 300" size="43, 23" title="L" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
-  <view class="CSlider" control-tag="GDegree2" origin="263, 265" size="43, 19" orientation="horizontal" mode="free click" draw-back="true" draw-frame="true" draw-value="true" draw-back-color="Panel" draw-frame-color="Line" draw-value-color="Accent"/>
+  <view class="CTextButton" control-tag="DegreeMinus2" origin="263, 265" size="12, 19" title="-" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
+  <view class="CTextButton" control-tag="DegreeValue2" origin="275, 265" size="19, 19" title="1" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
+  <view class="CTextButton" control-tag="DegreePlus2" origin="294, 265" size="12, 19" title="+" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
   <view class="CTextButton" control-tag="GLock2" origin="263, 300" size="43, 23" title="L" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
-  <view class="CSlider" control-tag="GDegree3" origin="319, 265" size="43, 19" orientation="horizontal" mode="free click" draw-back="true" draw-frame="true" draw-value="true" draw-back-color="Panel" draw-frame-color="Line" draw-value-color="Accent"/>
+  <view class="CTextButton" control-tag="DegreeMinus3" origin="319, 265" size="12, 19" title="-" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
+  <view class="CTextButton" control-tag="DegreeValue3" origin="331, 265" size="19, 19" title="1" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
+  <view class="CTextButton" control-tag="DegreePlus3" origin="350, 265" size="12, 19" title="+" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
   <view class="CTextButton" control-tag="GLock3" origin="319, 300" size="43, 23" title="L" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
-  <view class="CSlider" control-tag="GDegree4" origin="375, 265" size="43, 19" orientation="horizontal" mode="free click" draw-back="true" draw-frame="true" draw-value="true" draw-back-color="Panel" draw-frame-color="Line" draw-value-color="Accent"/>
+  <view class="CTextButton" control-tag="DegreeMinus4" origin="375, 265" size="12, 19" title="-" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
+  <view class="CTextButton" control-tag="DegreeValue4" origin="387, 265" size="19, 19" title="1" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
+  <view class="CTextButton" control-tag="DegreePlus4" origin="406, 265" size="12, 19" title="+" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
   <view class="CTextButton" control-tag="GLock4" origin="375, 300" size="43, 23" title="L" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
-  <view class="CSlider" control-tag="GDegree5" origin="431, 265" size="43, 19" orientation="horizontal" mode="free click" draw-back="true" draw-frame="true" draw-value="true" draw-back-color="Panel" draw-frame-color="Line" draw-value-color="Accent"/>
+  <view class="CTextButton" control-tag="DegreeMinus5" origin="431, 265" size="12, 19" title="-" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
+  <view class="CTextButton" control-tag="DegreeValue5" origin="443, 265" size="19, 19" title="1" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
+  <view class="CTextButton" control-tag="DegreePlus5" origin="462, 265" size="12, 19" title="+" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
   <view class="CTextButton" control-tag="GLock5" origin="431, 300" size="43, 23" title="L" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
-  <view class="CSlider" control-tag="GDegree6" origin="487, 265" size="43, 19" orientation="horizontal" mode="free click" draw-back="true" draw-frame="true" draw-value="true" draw-back-color="Panel" draw-frame-color="Line" draw-value-color="Accent"/>
+  <view class="CTextButton" control-tag="DegreeMinus6" origin="487, 265" size="12, 19" title="-" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
+  <view class="CTextButton" control-tag="DegreeValue6" origin="499, 265" size="19, 19" title="1" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
+  <view class="CTextButton" control-tag="DegreePlus6" origin="518, 265" size="12, 19" title="+" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
   <view class="CTextButton" control-tag="GLock6" origin="487, 300" size="43, 23" title="L" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
-  <view class="CSlider" control-tag="GDegree7" origin="543, 265" size="43, 19" orientation="horizontal" mode="free click" draw-back="true" draw-frame="true" draw-value="true" draw-back-color="Panel" draw-frame-color="Line" draw-value-color="Accent"/>
+  <view class="CTextButton" control-tag="DegreeMinus7" origin="543, 265" size="12, 19" title="-" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
+  <view class="CTextButton" control-tag="DegreeValue7" origin="555, 265" size="19, 19" title="1" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
+  <view class="CTextButton" control-tag="DegreePlus7" origin="574, 265" size="12, 19" title="+" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
   <view class="CTextButton" control-tag="GLock7" origin="543, 300" size="43, 23" title="L" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
-  <view class="CSlider" control-tag="GDegree8" origin="599, 265" size="43, 19" orientation="horizontal" mode="free click" draw-back="true" draw-frame="true" draw-value="true" draw-back-color="Panel" draw-frame-color="Line" draw-value-color="Accent"/>
+  <view class="CTextButton" control-tag="DegreeMinus8" origin="599, 265" size="12, 19" title="-" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
+  <view class="CTextButton" control-tag="DegreeValue8" origin="611, 265" size="19, 19" title="1" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
+  <view class="CTextButton" control-tag="DegreePlus8" origin="630, 265" size="12, 19" title="+" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
   <view class="CTextButton" control-tag="GLock8" origin="599, 300" size="43, 23" title="L" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
-  <view class="CSlider" control-tag="GDegree9" origin="655, 265" size="43, 19" orientation="horizontal" mode="free click" draw-back="true" draw-frame="true" draw-value="true" draw-back-color="Panel" draw-frame-color="Line" draw-value-color="Accent"/>
+  <view class="CTextButton" control-tag="DegreeMinus9" origin="655, 265" size="12, 19" title="-" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
+  <view class="CTextButton" control-tag="DegreeValue9" origin="667, 265" size="19, 19" title="1" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
+  <view class="CTextButton" control-tag="DegreePlus9" origin="686, 265" size="12, 19" title="+" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
   <view class="CTextButton" control-tag="GLock9" origin="655, 300" size="43, 23" title="L" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
-  <view class="CSlider" control-tag="GDegree10" origin="711, 265" size="43, 19" orientation="horizontal" mode="free click" draw-back="true" draw-frame="true" draw-value="true" draw-back-color="Panel" draw-frame-color="Line" draw-value-color="Accent"/>
+  <view class="CTextButton" control-tag="DegreeMinus10" origin="711, 265" size="12, 19" title="-" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
+  <view class="CTextButton" control-tag="DegreeValue10" origin="723, 265" size="19, 19" title="1" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
+  <view class="CTextButton" control-tag="DegreePlus10" origin="742, 265" size="12, 19" title="+" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
   <view class="CTextButton" control-tag="GLock10" origin="711, 300" size="43, 23" title="L" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
-  <view class="CSlider" control-tag="GDegree11" origin="767, 265" size="43, 19" orientation="horizontal" mode="free click" draw-back="true" draw-frame="true" draw-value="true" draw-back-color="Panel" draw-frame-color="Line" draw-value-color="Accent"/>
+  <view class="CTextButton" control-tag="DegreeMinus11" origin="767, 265" size="12, 19" title="-" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
+  <view class="CTextButton" control-tag="DegreeValue11" origin="779, 265" size="19, 19" title="1" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
+  <view class="CTextButton" control-tag="DegreePlus11" origin="798, 265" size="12, 19" title="+" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
   <view class="CTextButton" control-tag="GLock11" origin="767, 300" size="43, 23" title="L" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
-  <view class="CSlider" control-tag="GDegree12" origin="823, 265" size="43, 19" orientation="horizontal" mode="free click" draw-back="true" draw-frame="true" draw-value="true" draw-back-color="Panel" draw-frame-color="Line" draw-value-color="Accent"/>
+  <view class="CTextButton" control-tag="DegreeMinus12" origin="823, 265" size="12, 19" title="-" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
+  <view class="CTextButton" control-tag="DegreeValue12" origin="835, 265" size="19, 19" title="1" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
+  <view class="CTextButton" control-tag="DegreePlus12" origin="854, 265" size="12, 19" title="+" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
   <view class="CTextButton" control-tag="GLock12" origin="823, 300" size="43, 23" title="L" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
-  <view class="CSlider" control-tag="GDegree13" origin="879, 265" size="43, 19" orientation="horizontal" mode="free click" draw-back="true" draw-frame="true" draw-value="true" draw-back-color="Panel" draw-frame-color="Line" draw-value-color="Accent"/>
+  <view class="CTextButton" control-tag="DegreeMinus13" origin="879, 265" size="12, 19" title="-" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
+  <view class="CTextButton" control-tag="DegreeValue13" origin="891, 265" size="19, 19" title="1" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
+  <view class="CTextButton" control-tag="DegreePlus13" origin="910, 265" size="12, 19" title="+" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
   <view class="CTextButton" control-tag="GLock13" origin="879, 300" size="43, 23" title="L" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
-  <view class="CSlider" control-tag="GDegree14" origin="935, 265" size="43, 19" orientation="horizontal" mode="free click" draw-back="true" draw-frame="true" draw-value="true" draw-back-color="Panel" draw-frame-color="Line" draw-value-color="Accent"/>
+  <view class="CTextButton" control-tag="DegreeMinus14" origin="935, 265" size="12, 19" title="-" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
+  <view class="CTextButton" control-tag="DegreeValue14" origin="947, 265" size="19, 19" title="1" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
+  <view class="CTextButton" control-tag="DegreePlus14" origin="966, 265" size="12, 19" title="+" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
   <view class="CTextButton" control-tag="GLock14" origin="935, 300" size="43, 23" title="L" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
-  <view class="CSlider" control-tag="GDegree15" origin="991, 265" size="43, 19" orientation="horizontal" mode="free click" draw-back="true" draw-frame="true" draw-value="true" draw-back-color="Panel" draw-frame-color="Line" draw-value-color="Accent"/>
+  <view class="CTextButton" control-tag="DegreeMinus15" origin="991, 265" size="12, 19" title="-" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
+  <view class="CTextButton" control-tag="DegreeValue15" origin="1003, 265" size="19, 19" title="1" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
+  <view class="CTextButton" control-tag="DegreePlus15" origin="1022, 265" size="12, 19" title="+" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
   <view class="CTextButton" control-tag="GLock15" origin="991, 300" size="43, 23" title="L" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
   <view class="CTextButton" control-tag="GCell0_0" origin="151, 75" size="43, 24" title="&#x2022;" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
   <view class="CTextButton" control-tag="GCell0_1" origin="207, 75" size="43, 24" title="&#x2022;" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
