@@ -86,3 +86,4 @@
 2026-10-12 verify musical-scale note mapping in live guitar scheduler
 2026-10-12 verify GUI controller wiring for 16 ON, 16 LOCK, and 48 drum switches
 2026-10-12 end-to-end six articulation MIDI velocity regression
+2026-10-12 implement UP DOUBLE half-step strokes, UI 16 controls, state and MIDI tests
