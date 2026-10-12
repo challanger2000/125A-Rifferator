@@ -60,6 +60,23 @@ int main(){
     assert(ons[0]==0 && ons[1]>=479 && ons[1]<=480);
     assert(ons[0]<offs[0] && offs[0]<=ons[1] && ons[1]<offs[1]);
   }
+  // A sustained OPEN note must still retrigger at half a 16th step.
+  {
+    Pair longNote;longNote.guitar.push_back({0,800,40,115,960});
+    LiveControls live;
+    live.guitarSteps.fill(false);live.guitarSteps[0]=true;
+    live.guitarArticulation[0]=4;live.guitarDouble[0]=true;
+    BlockScheduler engine;
+    std::vector<ScheduledMidiEvent> actual;
+    engine.process(longNote,0.,1.,960,61440,
+      [&](ScheduledMidiEvent e){actual.push_back(e);return true;},true,live);
+    std::vector<int> on,off;
+    for(const auto& e:actual)if(e.bus==0)
+      (e.on?on:off).push_back(e.sampleOffset);
+    assert(on.size()==2 && off.size()==2);
+    assert(on[0]==0 && on[1]==120);
+    assert(off[0]<=120 && off[1]<=240);
+  }
   // FIFTH is already sampled by the guitar library: one pitch per attack.
   {
     Pair one;one.guitar.push_back({0,200,40,110,240});
