@@ -109,3 +109,4 @@
 2026-10-12 BUNDLE PM range controller clamp and out-of-default project restore ordering
 2026-10-12 BUNDLE GUI: PM 3-digit velocity + signed degree display widths and spacing
 2026-10-12 GUI BUNDLE: numeric degree and PM readouts noninteractive plus GUI assertions
+2026-10-12 BUNDLE restore live guitar matrix consistency with step storage and regression
