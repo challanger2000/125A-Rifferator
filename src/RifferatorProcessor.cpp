@@ -115,26 +115,26 @@ tresult PLUGIN_API Processor::process(ProcessData& data) {
       }
       if(id==kChordsEnabled) {
         const bool on=value>=0.5;
-        if(live_.chordsEnabled!=on)flushOnNextProcess_=true;
+        if(live_.chordsEnabled!=on)chordFlushPending_=true;
         live_.chordsEnabled=on;
         continue;
       }
       if(id==kChordsQuality) {
         const int quality=std::clamp(static_cast<int>(std::lround(value*4.)),0,4);
-        if(live_.chordQuality!=quality)flushOnNextProcess_=true;
+        if(live_.chordQuality!=quality)chordFlushPending_=true;
         live_.chordQuality=quality;
         continue;
       }
       if(id==kChordsMode) {
         const bool root=value>=0.5;
-        if(live_.chordsRootOnly!=root)flushOnNextProcess_=true;
+        if(live_.chordsRootOnly!=root)chordFlushPending_=true;
         live_.chordsRootOnly=root;
         continue;
       }
       if(id>=kHybridRootBase && id<kHybridRootBase+16) {
         const auto bar=static_cast<std::size_t>(id-kHybridRootBase);
         const int root=std::clamp(static_cast<int>(std::lround(value*128.)),0,128);
-        if(live_.harmony.roots[bar]!=root)flushOnNextProcess_=true;
+        if(live_.harmony.roots[bar]!=root)chordFlushPending_=true;
         live_.harmony.roots[bar]=root;
         continue;
       }
@@ -271,11 +271,18 @@ tresult PLUGIN_API Processor::process(ProcessData& data) {
     if(!scheduler_.flush(sink,0) || !ebmScheduler_.flush(sink,0))return kResultOk;
     flushOnNextProcess_=false;
     drumFlushPending_=false;
-  } else if(drumFlushPending_) {
-    // Drum-pattern edits must not silence unrelated sustained guitar,
-    // bass and chord notes. Retry an unaccepted drum NoteOff next block.
-    if(!scheduler_.flushBus(2,sink,0))return kResultOk;
-    drumFlushPending_=false;
+    chordFlushPending_=false;
+  } else {
+    // Local edits must only release notes from their own output bus.
+    // Failed NoteOffs remain pending until a future callback accepts them.
+    if(drumFlushPending_) {
+      if(!scheduler_.flushBus(2,sink,0))return kResultOk;
+      drumFlushPending_=false;
+    }
+    if(chordFlushPending_) {
+      if(!scheduler_.flushBus(3,sink,0))return kResultOk;
+      chordFlushPending_=false;
+    }
   }
   const auto* ctx=data.processContext;
   const bool running=ctx && (ctx->state&ProcessContext::kPlaying)!=0;
