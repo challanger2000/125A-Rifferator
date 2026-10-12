@@ -125,11 +125,6 @@ public:
                 const int busOffset=bus==1?live.bassOffset:0;
                 const int preparedPitch=live.preparedRoot+busOffset;
                 pitch=(live.absoluteRoot>=0?live.absoluteRoot:40+live.rootSemitones)+degreeOffset(degree,live.scale)+busOffset+(note.note-preparedPitch);
-                const int articulation=live.guitarArticulation[static_cast<std::size_t>(step)];
-                if(bus==0) {
-                  constexpr std::array<int,6> velocities{0,20,50,95,115,127};
-                  velocity=velocities[static_cast<std::size_t>(articulation)];
-                }
               }
             }
             if(bus==0) {
@@ -145,6 +140,9 @@ public:
           const int64_t scaled=note.startTick+(note.boundaryTick-note.startTick)*gate/100;
           const int64_t endTick=std::max(note.startTick+1,scaled);
           if(gate<=0) continue;
+          // The second attack retains the selected instrument articulation's
+          // velocity zone; the Kontakt reference's fixed 75 would change PM
+          // to a different articulation on velocity-switched guitar VSTis.
           // Original Thrash DI UP reference: one normal stroke at the step
           // start, followed by a second stroke halfway through the step.
           // Each gets its own NoteOff and must never spill into the next step.
