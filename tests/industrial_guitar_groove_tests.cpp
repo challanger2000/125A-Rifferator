@@ -96,6 +96,26 @@ int main(){
       assert(ons==(doubled?2:1) && offs==(doubled?2:1));
     }
   }
+  // The live 16-step STOP row repeats in EVERY bar of a long arrangement.
+  {
+    Pair multi;
+    multi.guitar.push_back({0,950,40,115,960});
+    multi.guitar.push_back({3840,4790,40,115,4800});
+    LiveControls controls;
+    controls.guitarSteps.fill(false);
+    controls.guitarSteps[0]=true;controls.guitarArticulation[0]=4;
+    controls.guitarSteps[1]=true;controls.guitarArticulation[1]=0;
+    BlockScheduler engine;
+    std::vector<ScheduledMidiEvent> actual;
+    engine.process(multi,0.,4.5,4320,3*3840,
+      [&](ScheduledMidiEvent e){actual.push_back(e);return true;},true,controls);
+    int stops=0;
+    for(const auto& e:actual)if(e.bus==0 && !e.on && e.pitch==40) {
+      assert(e.sampleOffset==240 || e.sampleOffset==4080);
+      ++stops;
+    }
+    assert(stops==2);
+  }
   // An out-of-period STOP must not wrap into an eight-step pattern.
   {
     Pair held;held.guitar.push_back({0,1800,40,115,1920});
