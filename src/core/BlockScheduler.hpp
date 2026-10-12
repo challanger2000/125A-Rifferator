@@ -130,12 +130,13 @@ public:
             }
             if(bus==0) {
               velocity=guitarStepVelocity(static_cast<int>((note.startTick/240)%16),live.guitarArticulation[static_cast<std::size_t>((note.startTick/240)%16)]);
-              if(live.guitarArticulation[static_cast<std::size_t>((note.startTick/240)%16)]==2)
-                {
-                  velocity=std::clamp(velocity,live.pmMin,live.pmMax);
-                  if(on && secondStroke)
-                    velocity=std::max(live.pmMin,velocity-std::min(4,(live.pmMax-live.pmMin)/3));
-                }
+              if(live.guitarArticulation[static_cast<std::size_t>((note.startTick/240)%16)]==2) {
+                const int lower=std::clamp(live.pmMin,1,127);
+                const int upper=std::clamp(live.pmMax,lower,127);
+                velocity=std::clamp(velocity,lower,upper);
+                if(on && secondStroke)
+                  velocity=std::max(lower,velocity-std::min(4,(upper-lower)/3));
+              }
               pitch+=fifth;
             }
             if(bus==1)velocity=live.bassVelocity;
