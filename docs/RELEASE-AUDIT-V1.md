@@ -45,6 +45,31 @@
   Studio One multi-output routing, editing and musical review are
   **NOT VERIFIED**; do not infer FINAL from successful CTest/validator.
 
+## 2026-10-12 — MIDI automation collision and DOUBLE-release regression
+
+- Green baseline prior to this bundle: CI #38251033396, commit
+  `a8b6c6598b65959ce0a6ab1b4e71be9848daccec`.
+- **Found regression after adding FOLLOW DOUBLE:** changing DOUBLE on a sounding
+  step released Guitar only, even though it also changes FOLLOW Bass rhythmic
+  output. Corrected: flush Guitar + FOLLOW Bass, but not independent EBM/HYBRID
+  Bass. A VST3 Processor event regression checks the held-bass NoteOff and a
+  separate EBM test checks for no unrelated NoteOff.
+- **Cross-queue automation ordering:** a LOCK queue and the same step's
+  articulation, degree, ON or DOUBLE queue could be processed in either order,
+  changing the musical result. The Processor now resolves each step's final
+  LOCK value before step edits. A final LOCK=ON blocks all edits in that
+  callback, regardless of queue order; final LOCK=OFF permits edits. Multiple
+  test permutations compare serialized output byte fields. The legacy
+  short-pattern test explicitly performs legitimate edits before LOCK in a
+  separate callback.
+- This defines **block-level final-LOCK semantics**; it is not evidence of
+  sample-accurate cross-parameter automation. The real host's Controller /
+  Processor synchronization on simultaneously automated controls remains a
+  Studio One acceptance check and is not labelled PASS.
+- **Status:** IMPLEMENTED / CI verification pending for this bundle.
+  GUI attachment, real MIDI bus routing and full release acceptance remain
+  **NOT VERIFIED**.
+
 ## Required completion gates
 - Fix host GUI visibility with reproducible diagnosis rather than speculative resource changes; 20 consecutive open/close/reopen cycles and restore.
 - Compare the editor creation/resource contracts against authoritative 125A Midiator Final and validate expected studio rendering.
