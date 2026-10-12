@@ -5,7 +5,7 @@
 ## Baseline
 - Repository: `challanger2000/125A-Rifferator`, branch `develop/v1.0.0`.
 - Earlier pre-audit baseline: workflow #38165400049, 29/29 CTest PASS, Steinberg validator 537/537 PASS.
-- Latest independently confirmed green development baseline: workflow [#38289271370](https://github.com/challanger2000/125A-Rifferator/actions/runs/38289271370), commit `9b24a0ba6970a3004a7aa70ab257f4ddc2c9c1b8`. CI log: **29/29 CTest PASS**, **Steinberg validator 537/537 PASS**, VST3 packaging/resource audit PASS and Windows development artifact uploaded. This verifies automated CI, **not** the attached Studio One editor.
+- Latest independently confirmed green development baseline: workflow [#38293244458](https://github.com/challanger2000/125A-Rifferator/actions/runs/38293244458), commit `41a2a26df77006e7e1d5e5527ce97759b381e64f`. CI log: **29/29 CTest PASS**, **Steinberg validator 537/537 PASS**, VST3 packaging/resource audit PASS and Windows development artifact uploaded. This verifies automated CI, **not** the attached Studio One editor.
 - Windows delivery bundle renamed `125A Rifferator.vst3`; matching internal binary and packaged `rifferator.uidesc` verified by CI.
 - User reports the intended editor **does not appear in Studio One**, including after #38164929473. The host GUI defect remains OPEN, irrespective of SDK validator pass.
 - The current editor now uses `AspectRatioVST3Editor`, as does the working 125A Midiator. No VST3 host-attached GUI rendering PASS has been established for Rifferator.
@@ -246,6 +246,14 @@ actual visible STANDARD BEAT/GENERATE/VARIATE commands, despite the
   relabelled PASS solely by wiring the buttons.
 - **Status:** IMPLEMENTED / next Windows CI pending; real Studio One clicks,
   host routing, editor lifecycle and musical approval remain NOT VERIFIED.
+
+## 2026-10-12 — Latest green Drum command CI and host-QA protocol reconciliation
+
+- Independently verified CI #38293244458 after the stale GUI source-assertion correction: **29/29 CTest PASS**, **537/537 Steinberg VST3 Validator PASS**, bundle/resource checks PASS.
+- Compared `createView` and Editor API with the current official `125A-Midiator-Final` source: both use **`VSTGUI::AspectRatioVST3Editor`** with named UIDESC templates. Rifferator's `RifferatorView` direct-child template and bundled resource are CI validated. This comparison **does not** prove rendering, mouse handling or editor lifecycle inside Studio One; the HOST-GUI blocker remains active.
+- Corrected `docs/HOST-GUI-QA.md` to name the actual artifact **`125A Rifferator.vst3`**, not the internal `Rifferator.vst3` stage name; list four 0-based event-bus indices **0 Guitar / 1 Bass / 2 Drums / 3 Chords**, not misleading bus ordinals; distinguish active STOP (Guitar NoteOff) from empty OFF; cover every newer Generator, Gate, Style, Drum toggle and zoom-state control; specify actual 150% editor geometry **1680×1044** and 20 host editor reopen cycles.
+- Exact regression/host status remains independent: **automated MIDI, Controller/GUI-layout and Validator PASS; native Studio One GUI, MIDI bus routing, host project recall, Plugin Tester and signed-off V1 scope NOT VERIFIED**.
+- Documentation-only follow-up after #38293244458 intentionally requires **no new Windows Action**. Product binary and source code remain at that verified green baseline.
 
 ## Required completion gates
 - Fix host GUI visibility with reproducible diagnosis rather than speculative resource changes; 20 consecutive open/close/reopen cycles and restore.
