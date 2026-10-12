@@ -39,6 +39,23 @@ int main(){
     }
     assert(ons==(art==0?0:art==4?2:1));
   }
+  // UP/DOUBLE: two successive strikes at half-step spacing, not a chord.
+  {
+    Pair one;one.guitar.push_back({0,200,40,110,240});
+    LiveControls selected;
+    selected.guitarSteps.fill(false);selected.guitarSteps[0]=true;
+    selected.guitarArticulation[0]=2;selected.guitarDouble[0]=true;
+    BlockScheduler engine;
+    std::vector<ScheduledMidiEvent> actual;
+    engine.process(one,0.,0.25,960,61440,
+      [&](ScheduledMidiEvent e){actual.push_back(e);return true;},true,selected);
+    std::vector<int> ons,offs;
+    for(const auto& e:actual)if(e.bus==0 && e.pitch==40)
+      (e.on?ons:offs).push_back(e.sampleOffset);
+    assert(ons.size()==2 && offs.size()==2);
+    assert(ons[0]==0 && ons[1]==120);
+    assert(ons[0]<offs[0] && offs[0]<=ons[1] && ons[1]<offs[1]);
+  }
   assert(!makeIndustrialGuitarGroove(49).enabled[15]);
   assert(makeIndustrialGuitarGroove(50).enabled[15]);
   Pair pair;
