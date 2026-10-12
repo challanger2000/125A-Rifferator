@@ -270,6 +270,7 @@ tresult PLUGIN_API Processor::process(ProcessData& data) {
   for(auto& root:resolvedHarmony.roots)if(root==128)root=autoRoot;
   LiveControls routing=live_;
   routing.absoluteRoot=config_.rootMidi;
+  routing.scale=config_.scale;
   routing.bassOffset=config_.bassOffset;
   routing.preparedRoot=preparedRootMidi_;
   routing.harmony=resolvedHarmony;
