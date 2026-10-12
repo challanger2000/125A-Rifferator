@@ -87,6 +87,24 @@
   a feature's MIDI ownership changes.
 - **Status:** new CI pending; no completed DAW or release QA verdict.
 
+## 2026-10-12 — CI #38253543438 FILL/LOCK test setup correction
+
+- CI #38253543438 failed only `rifferator_processor_state` at
+  `ng==1 && nb==1` in the FILL/LOCK end-to-end test; 28/29 CTests
+  otherwise passed.
+- The fixture had begun enabling/editing an inactive step **in the same
+  parameter block that set LOCK=ON**. The Processor's deliberately strict
+  final-block LOCK precedence correctly rejected the edits, leaving the
+  fixture's step OFF. This contradicted the fixture's expectation that
+  Guitar and FOLLOW Bass NoteOns would be emitted.
+- Correct fixture sequence: apply FILL, activate step, set DEGREE in an
+  initial parameter callback; optionally apply LOCK in a second callback;
+  then process the selected FILL onset and inspect both actual MIDI buses.
+  An independent queue-permutation regression separately validates the
+  LOCK precedence rule.
+- **Status:** correction committed; fresh Windows CI result pending.
+  No claim of real DAW host lifecycle validation.
+
 ## Required completion gates
 - Fix host GUI visibility with reproducible diagnosis rather than speculative resource changes; 20 consecutive open/close/reopen cycles and restore.
 - Compare the editor creation/resource contracts against authoritative 125A Midiator Final and validate expected studio rendering.
