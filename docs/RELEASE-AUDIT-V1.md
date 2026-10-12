@@ -105,6 +105,14 @@
 - **Status:** correction committed; fresh Windows CI result pending.
   No claim of real DAW host lifecycle validation.
 
+## 2026-10-12 — HYBRID harmony root and held-note ownership
+
+- Most recent successful regression baseline: [CI #38254546977](https://github.com/challanger2000/125A-Rifferator/actions/runs/38254546977), commit `56a70ae1136c58138a8345f6ad1310b4b9864ac5`.
+- **Found:** Automating `kHybridRootBase` changed the chord root and also the HYBRID bass's computed MIDI pitch. Only the Chords output (bus 3) received an immediate held-note flush; the HYBRID Bass output (bus 1) could retain its previous pitch until natural note end.
+- **Corrected:** Explicit harmony-root changes release Chords, and additionally release Bass if the *currently active* bass mode is HYBRID. FOLLOW and independent EBM Bass must not be cut by an unrelated chord/harmony-root parameter edit; guitar and drums are unaffected.
+- **Regression:** A real VST3 Processor/host EventList test starts held Chord and Bass voices, automates the same explicit root under FOLLOW/EBM/HYBRID, then compares NoteOffs on all four event buses.
+- **Status:** implementation and regression added; this batch is **CI pending**. Real Studio One multi-bus/GUI QA is not verified.
+
 ## Required completion gates
 - Fix host GUI visibility with reproducible diagnosis rather than speculative resource changes; 20 consecutive open/close/reopen cycles and restore.
 - Compare the editor creation/resource contracts against authoritative 125A Midiator Final and validate expected studio rendering.
