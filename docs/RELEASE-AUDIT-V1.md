@@ -5,7 +5,7 @@
 ## Baseline
 - Repository: `challanger2000/125A-Rifferator`, branch `develop/v1.0.0`.
 - Earlier pre-audit baseline: workflow #38165400049, 29/29 CTest PASS, Steinberg validator 537/537 PASS.
-- Latest independently confirmed green development baseline: workflow [#38255712530](https://github.com/challanger2000/125A-Rifferator/actions/runs/38255712530), commit `1b1ff8ab5296a1293509f23b7b3e830f4f5c627f`. This verifies automated CI, **not** the attached Studio One editor.
+- Latest independently confirmed green development baseline: workflow [#38257386913](https://github.com/challanger2000/125A-Rifferator/actions/runs/38257386913), commit `72c60b9e58b86dc9612d293297be99215508ec53`. CI log: **29/29 CTest PASS**, **Steinberg validator 537/537 PASS**, VST3 packaging/resource audit PASS and Windows development artifact uploaded. This verifies automated CI, **not** the attached Studio One editor.
 - Windows delivery bundle renamed `125A Rifferator.vst3`; matching internal binary and packaged `rifferator.uidesc` verified by CI.
 - User reports the intended editor **does not appear in Studio One**, including after #38164929473. The host GUI defect remains OPEN, irrespective of SDK validator pass.
 - The current editor now uses `AspectRatioVST3Editor`, as does the working 125A Midiator. No VST3 host-attached GUI rendering PASS has been established for Rifferator.
@@ -134,6 +134,14 @@
   height is 1044 px **plus host chrome**, potentially exceeding a
   1920×1080 screen. Do not claim full visual fit or lifecycle PASS until
   measured in the DAW.
+
+## 2026-10-12 — Verified post-zoom CI and release decision
+
+- [Workflow #38257386913](https://github.com/challanger2000/125A-Rifferator/actions/runs/38257386913) independently inspected: Windows build, MIDI/Core/Controller/GUI-layout regressions **29/29 PASS**, validator **537/537 PASS**, packaged binary/resource audit PASS, development artifact saved.
+- Controller zoom 100%/150% roundtrip and invalid-state regressions are **CI PASS**. They do **not** prove Studio One's editor can attach, display at 150%, or survive project reopen.
+- The scope gap is still material: the current GUI/MIDI grid is **fixed at 16 steps**; `docs/PRODUCT-SPEC.md` describes up to 32 steps, selectable step resolution, independent Generate/Variate controls and MIDI export/profile workflows not shown to be implemented in the current editor. Only product owner approval can narrow V1 scope, otherwise those features remain release blockers.
+- Manual gates remain: actual Studio One GUI visibility and repeated editor lifecycle, multibus routing with target guitar/bass instruments, transport/loop/automation torture, project save/reopen at both zoom factors, 125A Plugin Tester, musical assessment and release-artifact SHA freeze.
+- **Decision unchanged: BLOCKED / NOT FINAL.** Do not publish or call the plugin ready solely on CI PASS.
 
 ## Required completion gates
 - Fix host GUI visibility with reproducible diagnosis rather than speculative resource changes; 20 consecutive open/close/reopen cycles and restore.
