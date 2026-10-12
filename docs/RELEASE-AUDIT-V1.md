@@ -21,6 +21,30 @@
 9. **PRODUCT-QUALITY — NOT VERIFIED.** Generated riff variety, PM/Power articulations with target sampled guitar, bass/harmony arrangement and practical playability require MIDI capture and listening through real target libraries.
 10. **PLATFORM — NOT VERIFIED beyond Windows CI.** No Mac compatibility claim. No independently verified Studio One version/Windows DPI host snapshot.
 
+## 2026-10-12 — PM dynamics and FOLLOW DOUBLE verification
+
+- Latest **confirmed** green development baseline before this change:
+  [CI #38249744123](https://github.com/challanger2000/125A-Rifferator/actions/runs/38249744123).
+- The guitar DOUBLE timing already emitted two separate attacks. The FOLLOW
+  bass previously emitted **only one** attack in the same occupied step,
+  contrary to the product's bass-follows-DOUBLE rhythm contract. The live
+  scheduler now emits two bass attacks and paired NoteOffs inside the step.
+  EBM/HYBRID independent bass generators remain single-owner bus 1.
+- PM MIN/MAX previously clamped a constant MIDI velocity 50, making typical
+  edits that still included 50 ineffective. PM velocity now varies
+  deterministically across the 16-step bar inside the configured interval:
+  step positions modulo 4 receive (100%, 25%, 75%, 50%) of the
+  MIN-to-MAX span. DOUBLE's second guitar stroke remains slightly softer
+  but cannot leave the chosen PM zone. No RNG/allocations enter the
+  realtime callback.
+- Automated evidence added to `industrial_guitar_groove_tests.cpp` and
+  `processor_state_roundtrip_tests.cpp`: paired Guitar/FOLLOW Bass
+  NoteOn/NoteOff, gate and onsets, PM MIN/MAX velocity endpoints, disabled
+  and independent bass exclusion, and actual Processor event-list output.
+- **Status:** IMPLEMENTED / new CI and real Studio One tests pending.
+  Studio One multi-output routing, editing and musical review are
+  **NOT VERIFIED**; do not infer FINAL from successful CTest/validator.
+
 ## Required completion gates
 - Fix host GUI visibility with reproducible diagnosis rather than speculative resource changes; 20 consecutive open/close/reopen cycles and restore.
 - Compare the editor creation/resource contracts against authoritative 125A Midiator Final and validate expected studio rendering.
