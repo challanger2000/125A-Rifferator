@@ -597,6 +597,23 @@ int main(){
         setupBlock.inputParameterChanges=&lockChange;
         assert(playing.process(setupBlock)==Steinberg::kResultOk);
       }
+      // Assert that the fixture has a playable step BEFORE inspecting the
+      // emitted notes. Otherwise a lock-precedence failure is misdiagnosed
+      // as a FILL scheduler failure with merely ng==0 / nb==0.
+      MemoryStream preparedState;
+      assert(playing.getState(&preparedState)==Steinberg::kResultOk);
+      const auto* stateBytes=static_cast<const char*>(preparedState.getData());
+      const auto word=[&](std::size_t index) {
+        assert((index+1)*sizeof(std::int32_t)<=
+               static_cast<std::size_t>(preparedState.getSize()));
+        std::int32_t v=0;
+        std::memcpy(&v,stateBytes+index*sizeof(std::int32_t),sizeof(v));
+        return v;
+      };
+      const std::size_t liveBase=11u+16u*4u+49u;
+      assert(word(liveBase+static_cast<std::size_t>(step))==1);
+      assert(word(liveBase+32u+static_cast<std::size_t>(step))==3);
+      assert(word(liveBase+48u+static_cast<std::size_t>(step))==(locked?1:0));
       Steinberg::Vst::ProcessSetup setup{};
       setup.processMode=Steinberg::Vst::kRealtime;
       setup.symbolicSampleSize=Steinberg::Vst::kSample32;
