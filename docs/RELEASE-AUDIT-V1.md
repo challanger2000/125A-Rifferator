@@ -5,7 +5,7 @@
 ## Baseline
 - Repository: `challanger2000/125A-Rifferator`, branch `develop/v1.0.0`.
 - Earlier pre-audit baseline: workflow #38165400049, 29/29 CTest PASS, Steinberg validator 537/537 PASS.
-- Latest independently confirmed green development baseline: workflow [#38257386913](https://github.com/challanger2000/125A-Rifferator/actions/runs/38257386913), commit `72c60b9e58b86dc9612d293297be99215508ec53`. CI log: **29/29 CTest PASS**, **Steinberg validator 537/537 PASS**, VST3 packaging/resource audit PASS and Windows development artifact uploaded. This verifies automated CI, **not** the attached Studio One editor.
+- Latest independently confirmed green development baseline: workflow [#38289271370](https://github.com/challanger2000/125A-Rifferator/actions/runs/38289271370), commit `9b24a0ba6970a3004a7aa70ab257f4ddc2c9c1b8`. CI log: **29/29 CTest PASS**, **Steinberg validator 537/537 PASS**, VST3 packaging/resource audit PASS and Windows development artifact uploaded. This verifies automated CI, **not** the attached Studio One editor.
 - Windows delivery bundle renamed `125A Rifferator.vst3`; matching internal binary and packaged `rifferator.uidesc` verified by CI.
 - User reports the intended editor **does not appear in Studio One**, including after #38164929473. The host GUI defect remains OPEN, irrespective of SDK validator pass.
 - The current editor now uses `AspectRatioVST3Editor`, as does the working 125A Midiator. No VST3 host-attached GUI rendering PASS has been established for Rifferator.
@@ -214,6 +214,38 @@ editor attach, mouse click, parameter automation, host MIDI routing and
 save/reopen remain **NOT VERIFIED**. No new parameter IDs or musical
 Processor state fields. Other product-contract gaps (32-step paging,
 resolution selector, optional random toggles, exports) remain open.
+
+## 2026-10-12 — Drum standard/generation commands wired to front panel
+
+The earlier V1 GUI exposed 48 editable GM drum cells and a Drums ON/OFF
+switch, while the codebase already included a GM `DrumPattern::standard()`
+and seeded `generateDrums()` core with conservative `Variate`. It had no
+actual visible STANDARD BEAT/GENERATE/VARIATE commands, despite the
+`GUI-V1-IMPLEMENTATION-CONTRACT.md` describing them.
+
+- **STANDARD BEAT** / GUI command 725 calls `restoreStandardDrums()`,
+  publishing 4 kicks at steps 0,4,8,12; 2 snares at 4,12; and 16 hats
+  on the 16-step GM grid through the original kDrumStepBase..247 parameters.
+- **GENERATE DRUMS** / command 726 calls existing seeded
+  `generateDrums(...,Generate)`, then publishes only changed step values.
+- **VARIATE DRUMS** / command 727 calls
+  `generateDrums(...,Variate)` with a conservative 25% step mutation
+  proposal, preserving other step values.
+- All commands deliberately **preserve the global Drums Enabled** parameter;
+  neither generation nor standard reset silently unmutes a user-muted bus.
+  No realtime allocations, new parameter IDs or Processor state words were
+  introduced; commands live on the Controller/UI thread.
+- Controller regression now checks exact standard GM pattern, deterministic
+  seeded results across independent fresh controllers, conservative retention
+  under VARIATE, standard reset from a generated pattern and unchanged
+  Drums Enabled. Static GUI audit checks the three control tags, listener,
+  controller-to-generator dispatch and geometries in the 1120×696 editor.
+- **Limit:** the V1 editor has **no independent drum-lock control or saved
+  drum-lock metadata**; drum generation cannot promise to preserve locked
+  drum cells. This remains a distinct product-scope gap and must not be
+  relabelled PASS solely by wiring the buttons.
+- **Status:** IMPLEMENTED / next Windows CI pending; real Studio One clicks,
+  host routing, editor lifecycle and musical approval remain NOT VERIFIED.
 
 ## Required completion gates
 - Fix host GUI visibility with reproducible diagnosis rather than speculative resource changes; 20 consecutive open/close/reopen cycles and restore.
