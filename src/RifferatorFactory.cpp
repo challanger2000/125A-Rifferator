@@ -67,7 +67,16 @@ public:
       const auto j=static_cast<std::size_t>(i);
       if(current[j].locked)continue;
       const auto& step=result[j];
-      publish(kGuitarStepBase+i,step.articulation==Articulation::Off?0.:1.);
+      // The core Step::Off does not distinguish an intentionally active
+      // STOP command from an empty cell. VARIATE must not silently erase
+      // an unchanged STOP (the note-off command) just because the core
+      // proposal left that step's articulation unchanged.
+      const bool preserveStop=command==GenerationCommand::Variate &&
+        current[j].articulation==Articulation::Off &&
+        getParamNormalized(kGuitarStepBase+i)>=0.5 &&
+        step.articulation==Articulation::Off;
+      publish(kGuitarStepBase+i,
+              (step.articulation!=Articulation::Off || preserveStop)?1.:0.);
       publish(kGuitarArticulationBase+i,
               static_cast<int>(step.articulation)/5.);
       publish(kGuitarDegreeBase+i,(step.degree+13)/28.);
