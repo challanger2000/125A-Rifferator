@@ -254,6 +254,19 @@ tresult PLUGIN_API Processor::process(ProcessData& data) {
     }
   }
   if(data.numSamples<=0 || !data.outputEvents)return kResultOk;
+  const auto* ctx=data.processContext;
+  const bool running=ctx && (ctx->state&ProcessContext::kPlaying)!=0;
+  const bool havePosition=ctx && (ctx->state&ProcessContext::kProjectTimeMusicValid)!=0;
+  const bool haveTempo=ctx && (ctx->state&ProcessContext::kTempoValid)!=0 &&
+    ctx->tempo>0 && processSetup.sampleRate>0;
+  const double start=havePosition?ctx->projectTimeMusic:0.;
+  const double end=start+(haveTempo?double(data.numSamples)*ctx->tempo/
+    (60.*processSetup.sampleRate):0.);
+  const auto skipUnscheduledBlock=[&]() noexcept {
+    if(!running || !havePosition || !haveTempo)return;
+    scheduler_.advanceSkippedBlock(start,end);
+    ebmScheduler_.advanceSkippedBlock(start,end);
+  };
   auto sink=[&](const ScheduledMidiEvent& midi) {
     Event e{};
     e.busIndex=midi.bus;
@@ -273,14 +286,18 @@ tresult PLUGIN_API Processor::process(ProcessData& data) {
   };
   if(bassSwitchPending_) {
     // Never activate a second bus-1 producer before the first one is silent.
-    if(!scheduler_.flushBus(1,sink,0) || !ebmScheduler_.patternChanged(sink))
-      return kResultOk;
+    if(!scheduler_.flushBus(1,sink,0) || !ebmScheduler_.patternChanged(sink)) {
+      skipUnscheduledBlock();return kResultOk;
+    }
     activeBassMode_=bassMode_;
     bassSwitchPending_=false;
+    skipUnscheduledBlock();
     return kResultOk; // new-mode NoteOns start only on a later callback
   }
   if(flushOnNextProcess_) {
-    if(!scheduler_.flush(sink,0) || !ebmScheduler_.flush(sink,0))return kResultOk;
+    if(!scheduler_.flush(sink,0) || !ebmScheduler_.flush(sink,0)) {
+      skipUnscheduledBlock();return kResultOk;
+    }
     flushOnNextProcess_=false;
     drumFlushPending_=false;
     chordFlushPending_=false;
@@ -290,33 +307,32 @@ tresult PLUGIN_API Processor::process(ProcessData& data) {
     // Local edits must only release notes from their own output bus.
     // Failed NoteOffs remain pending until a future callback accepts them.
     if(drumFlushPending_) {
-      if(!scheduler_.flushBus(2,sink,0))return kResultOk;
+      if(!scheduler_.flushBus(2,sink,0)) {
+        skipUnscheduledBlock();return kResultOk;
+      }
       drumFlushPending_=false;
     }
     if(chordFlushPending_) {
-      if(!scheduler_.flushBus(3,sink,0))return kResultOk;
+      if(!scheduler_.flushBus(3,sink,0)) {
+        skipUnscheduledBlock();return kResultOk;
+      }
       chordFlushPending_=false;
     }
     if(guitarFlushPending_) {
-      if(!scheduler_.flushBus(0,sink,0))return kResultOk;
+      if(!scheduler_.flushBus(0,sink,0)) {
+        skipUnscheduledBlock();return kResultOk;
+      }
       guitarFlushPending_=false;
     }
     if(bassFlushPending_) {
       // Bus 1 has two mutually exclusive MIDI producers. Flush both on a
       // change to the shared guitar guide or any bass control.
-      if(!scheduler_.flushBus(1,sink,0) || !ebmScheduler_.flush(sink,0))
-        return kResultOk;
+      if(!scheduler_.flushBus(1,sink,0) || !ebmScheduler_.flush(sink,0)) {
+        skipUnscheduledBlock();return kResultOk;
+      }
       bassFlushPending_=false;
     }
   }
-  const auto* ctx=data.processContext;
-  const bool running=ctx && (ctx->state&ProcessContext::kPlaying)!=0;
-  const bool havePosition=ctx && (ctx->state&ProcessContext::kProjectTimeMusicValid)!=0;
-  const bool haveTempo=ctx && (ctx->state&ProcessContext::kTempoValid)!=0 &&
-    ctx->tempo>0 && processSetup.sampleRate>0;
-  const double start=havePosition?ctx->projectTimeMusic:0.;
-  const double end=start+(haveTempo?double(data.numSamples)*ctx->tempo/
-    (60.*processSetup.sampleRate):0.);
   const auto& active=fillVariants_[static_cast<std::size_t>(fillIndex_)];
   // Derive a stable harmonic anchor from the actual live guitar step controls.
   // Explicit per-bar harmony edits override this automatic result.
