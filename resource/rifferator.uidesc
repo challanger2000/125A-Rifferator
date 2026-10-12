@@ -8,6 +8,12 @@
 
  <fonts><font name="Title" font-name="Arial" size="26" bold="true"/><font name="Normal" font-name="Arial" size="15"/><font name="Small" font-name="Arial" size="12"/></fonts>
  <control-tags>
+  <control-tag name="PmMinMinus" tag="880"/>
+  <control-tag name="PmMinPlus" tag="881"/>
+  <control-tag name="PmMaxMinus" tag="882"/>
+  <control-tag name="PmMaxPlus" tag="883"/>
+  <control-tag name="PmMinValue" tag="884"/>
+  <control-tag name="PmMaxValue" tag="885"/>
   <control-tag name="DegreeMinus0" tag="800"/>
   <control-tag name="DegreePlus0" tag="816"/>
   <control-tag name="DegreeValue0" tag="850"/>
@@ -530,6 +536,15 @@
   <view class="CTextButton" control-tag="GCell5_14" origin="935, 230" size="43, 24" title="&#x2022;" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
   <view class="CTextButton" control-tag="GCell5_15" origin="991, 230" size="43, 24" title="&#x2022;" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
  </view>
+ <view class="CTextLabel" origin="18, 384" size="98, 20" title="PM VELOCITY" font="Small" font-color="Accent" transparent="true"/>
+ <view class="CTextButton" control-tag="PmMinMinus" origin="128, 382" size="24, 24" title="-" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
+ <view class="CTextButton" control-tag="PmMinValue" origin="157, 382" size="24, 24" title="30" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
+ <view class="CTextButton" control-tag="PmMinPlus" origin="211, 382" size="24, 24" title="+" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
+ <view class="CTextButton" control-tag="PmMaxMinus" origin="267, 382" size="24, 24" title="-" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
+ <view class="CTextButton" control-tag="PmMaxValue" origin="296, 382" size="24, 24" title="50" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
+ <view class="CTextButton" control-tag="PmMaxPlus" origin="350, 382" size="24, 24" title="+" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
+ <view class="CTextLabel" origin="159, 366" size="48, 15" title="MIN" font="Small" font-color="Text" transparent="true"/>
+ <view class="CTextLabel" origin="298, 366" size="48, 15" title="MAX" font="Small" font-color="Text" transparent="true"/>
  <view class="CTextButton" control-tag="GuitarGenerate" origin="34, 424" size="185, 32" title="GENERATE GUITAR" font="Normal" text-color="Text" text-color-highlighted="Accent" frame-color="Accent" frame-color-highlighted="Accent" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
  <view class="CTextLabel" origin="233, 426" size="825, 26" title="INDUSTRIAL RIFF  |  PM / POWER / STOP  |  LOCKED STEPS PROTECTED" font="Small" font-color="Text" transparent="true"/>
   <view class="CTextLabel" origin="25, 462" size="1020, 22" title="BASS  |  ROOT-FOCUSED EBM COMPANION" font="Normal" font-color="Accent" transparent="true"/>
