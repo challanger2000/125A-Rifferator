@@ -5,6 +5,8 @@
 #include <set>
 #include <map>
 #include <iterator>
+#include <array>
+#include <utility>
 int main(){
   std::ifstream file("resource/rifferator.uidesc");
   assert(file.good());
@@ -61,6 +63,20 @@ int main(){
   }
   assert(xml.find("<control-tag name=\"DrumsEnabledAction\" tag=\"724\"/>")!=std::string::npos);
   assert(xml.find("control-tag=\"DrumsEnabledAction\" origin=\"912, 582\"")!=std::string::npos);
+  // Three active drum commands must occupy separate non-overlapping
+  // positions in the fixed header band and have unique controller tags.
+  for(const auto& spec:std::array<std::pair<const char*,int>,3>{{
+      {"StandardDrums",725},{"GenerateDrums",726},{"VariateDrums",727}}}) {
+    const auto tag=std::string("<control-tag name=\"")+spec.first+
+      "\" tag=\""+std::to_string(spec.second)+"\"/>";
+    assert(xml.find(tag)!=std::string::npos);
+    assert(xml.find(std::string("control-tag=\"")+spec.first+
+      "\" origin=\"")!=std::string::npos);
+  }
+  assert(xml.find("control-tag=\"StandardDrums\" origin=\"348, 582\" size=\"173, 27\"")!=std::string::npos);
+  assert(xml.find("control-tag=\"GenerateDrums\" origin=\"533, 582\" size=\"173, 27\"")!=std::string::npos);
+  assert(xml.find("control-tag=\"VariateDrums\" origin=\"718, 582\" size=\"173, 27\"")!=std::string::npos);
+
   assert(xml.find("control-tag=\"ClearPattern\"")!=std::string::npos);
   // Numerical PM readouts are labels, not misleading interactive switches.
   for(const auto* name:{"PmMinValue","PmMaxValue"}) {
@@ -82,6 +98,12 @@ int main(){
                                std::istreambuf_iterator<char>());
   assert(controller.find("applyMusicalStepCommand(command);")!=std::string::npos);
   assert(controller.find("toggleDrumsEnabled();")!=std::string::npos);
+  assert(controller.find("if(command==725)")!=std::string::npos);
+  assert(controller.find("if(command==726 || command==727)")!=std::string::npos);
+  assert(controller.find("runDrumGeneration(command==726?")!=std::string::npos);
+  assert(controller.find("publishDrumSteps(generateDrums(")!=std::string::npos);
+  assert(controller.find("publishDrumSteps(a125::rifferator::DrumPattern::standard())")!=std::string::npos);
+  assert(controller.find("(control->getTag()>=700 && control->getTag()<=727)")!=std::string::npos);
   assert(controller.find("if(id==musicalParam(i))")!=std::string::npos);
   assert(controller.find("refreshMusicalDisplays();")!=std::string::npos);
   assert(controller.find("control->getTag()==724")!=std::string::npos);
