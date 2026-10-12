@@ -64,6 +64,7 @@
   <control-tag name="DegreeValue15" tag="865"/>
 
   <control-tag name="GuitarGenerate" tag="700"/>
+  <control-tag name="ClearPattern" tag="721"/>
   <control-tag name="Action701" tag="701"/>
   <control-tag name="Action702" tag="702"/>
   <control-tag name="Action703" tag="703"/>
@@ -546,7 +547,8 @@
  <view class="CTextLabel" origin="159, 366" size="48, 15" title="MIN" font="Small" font-color="Text" transparent="true"/>
  <view class="CTextLabel" origin="298, 366" size="48, 15" title="MAX" font="Small" font-color="Text" transparent="true"/>
  <view class="CTextButton" control-tag="GuitarGenerate" origin="34, 424" size="185, 32" title="GENERATE GUITAR" font="Normal" text-color="Text" text-color-highlighted="Accent" frame-color="Accent" frame-color-highlighted="Accent" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
- <view class="CTextLabel" origin="233, 426" size="825, 26" title="INDUSTRIAL RIFF  |  PM / POWER / STOP  |  LOCKED STEPS PROTECTED" font="Small" font-color="Text" transparent="true"/>
+ <view class="CTextButton" control-tag="ClearPattern" origin="230, 424" size="180, 32" title="CLEAR PATTERN" font="Normal" text-color="Text" text-color-highlighted="Accent" frame-color="Accent" frame-color-highlighted="Accent" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
+ <view class="CTextLabel" origin="422, 426" size="636, 26" title="INDUSTRIAL RIFF  |  PM / POWER / STOP  |  LOCKED STEPS PROTECTED" font="Small" font-color="Text" transparent="true"/>
   <view class="CTextLabel" origin="25, 462" size="1020, 22" title="BASS  |  ROOT-FOCUSED EBM COMPANION" font="Normal" font-color="Accent" transparent="true"/>
  <view class="CTextButton" control-tag="Action710" origin="33, 488" size="104, 28" title="FOLLOW" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
  <view class="CTextButton" control-tag="Action711" origin="144, 488" size="104, 28" title="EBM" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
