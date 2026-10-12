@@ -111,3 +111,4 @@
 2026-10-12 GUI BUNDLE: numeric degree and PM readouts noninteractive plus GUI assertions
 2026-10-12 BUNDLE restore live guitar matrix consistency with step storage and regression
 2026-10-12 restore lossless project state roundtrip and matching GUI contract
+2026-10-12 BUNDLE: STOP every bar, sustained OPEN over empty steps, legacy tests, duplicate-run concurrency
