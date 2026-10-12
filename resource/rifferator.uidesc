@@ -67,6 +67,9 @@
   <control-tag name="ClearPattern" tag="721"/>
   <control-tag name="GuitarVariate" tag="722"/>
   <control-tag name="DrumsEnabledAction" tag="724"/>
+  <control-tag name="StandardDrums" tag="725"/>
+  <control-tag name="GenerateDrums" tag="726"/>
+  <control-tag name="VariateDrums" tag="727"/>
   <control-tag name="RootMinus" tag="900"/>
   <control-tag name="RootPlus" tag="901"/>
   <control-tag name="RootValue" tag="912"/>
@@ -607,7 +610,10 @@
  <view class="CTextButton" control-tag="Action716" origin="457, 547" size="95, 28" title="SUS2" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
  <view class="CTextButton" control-tag="Action717" origin="558, 547" size="95, 28" title="SUS4" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
  <view class="CTextButton" control-tag="Action720" origin="665, 547" size="125, 28" title="CHORD / ROOT" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
- <view class="CTextLabel" origin="33, 583" size="850, 25" title="DRUMS  |  GM KICK 36 / SNARE 38 / HAT 42" font="Normal" font-color="Accent" transparent="true"/>
+ <view class="CTextLabel" origin="33, 583" size="300, 25" title="DRUMS  |  GM 36 / 38 / 42" font="Normal" font-color="Accent" transparent="true"/>
+ <view class="CTextButton" control-tag="StandardDrums" origin="348, 582" size="173, 27" title="STANDARD BEAT" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
+ <view class="CTextButton" control-tag="GenerateDrums" origin="533, 582" size="173, 27" title="GENERATE DRUMS" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
+ <view class="CTextButton" control-tag="VariateDrums" origin="718, 582" size="173, 27" title="VARIATE DRUMS" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
  <view class="CTextButton" control-tag="DrumsEnabledAction" origin="912, 582" size="133, 27" title="DRUMS ON/OFF" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
  
  <view class="CTextLabel" origin="34, 614" size="76, 20" title="KICK" font="Small" font-color="Text" transparent="true"/>
