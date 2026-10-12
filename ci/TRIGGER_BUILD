@@ -91,3 +91,4 @@
 2026-10-12 STOP guitar note-off distinct from empty step, full MIDI regression
 2026-10-12 step matrix second click clears articulation; STOP stays separate
 2026-10-12 suppress redundant zoom resize and check controller guard
+2026-10-12 retain articulation velocity on second DOUBLE attack
