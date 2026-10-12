@@ -136,7 +136,14 @@ public:
                 // Live degree control is absolute, not an additional transpose.
                 const int busOffset=bus==1?live.bassOffset:0;
                 const int preparedPitch=live.preparedRoot+busOffset;
-                pitch=(live.absoluteRoot>=0?live.absoluteRoot:40+live.rootSemitones)+degreeOffset(degree,live.scale)+busOffset+(note.note-preparedPitch);
+                // The prepared 16-bar phrase adds its FILL variation as a
+                // pitch delta from the neutral source note. LOCK can change
+                // during playback, long after those variations were rendered.
+                // Suppress only the cached FILL delta for locked steps; retain
+                // the user's own live degree on both guitar and follow bass.
+                const int fillDelta=live.guitarLocks[static_cast<std::size_t>(step)]
+                  ?0:(note.note-preparedPitch);
+                pitch=(live.absoluteRoot>=0?live.absoluteRoot:40+live.rootSemitones)+degreeOffset(degree,live.scale)+busOffset+fillDelta;
               }
             }
             if(bus==0) {
