@@ -60,13 +60,6 @@ int main(){
   }
   assert(xml.find("<control-tag name=\"DrumsEnabledAction\" tag=\"724\"/>")!=std::string::npos);
   assert(xml.find("control-tag=\"DrumsEnabledAction\" origin=\"912, 582\"")!=std::string::npos);
-  assert(controller.find("applyMusicalStepCommand(command);")!=std::string::npos);
-  assert(controller.find("toggleDrumsEnabled();")!=std::string::npos);
-  assert(controller.find("if(id==musicalParam(i))")!=std::string::npos);
-  assert(controller.find("refreshMusicalDisplays();")!=std::string::npos);
-  assert(controller.find("control->getTag()==724")!=std::string::npos);
-  assert(controller.find("kRootPitch,kGuitarGate,kBassGate,kFillIntensity,kBassVelocity,kEbmStyle")!=std::string::npos);
-
   assert(xml.find("control-tag=\"ClearPattern\"")!=std::string::npos);
   // Numerical PM readouts are labels, not misleading interactive switches.
   for(const auto* name:{"PmMinValue","PmMaxValue"}) {
@@ -86,6 +79,14 @@ int main(){
   assert(controllerFile.good());
   const std::string controller((std::istreambuf_iterator<char>(controllerFile)),
                                std::istreambuf_iterator<char>());
+  assert(controller.find("applyMusicalStepCommand(command);")!=std::string::npos);
+  assert(controller.find("toggleDrumsEnabled();")!=std::string::npos);
+  assert(controller.find("if(id==musicalParam(i))")!=std::string::npos);
+  assert(controller.find("refreshMusicalDisplays();")!=std::string::npos);
+  assert(controller.find("control->getTag()==724")!=std::string::npos);
+  assert(controller.find("kRootPitch,kGuitarGate,kBassGate,kFillIntensity,kBassVelocity,kEbmStyle")!=std::string::npos);
+
+
   assert(controller.find("command==721")!=std::string::npos);
   // PM bounds must agree between host display and processor after automation
   // and the restore order must support ranges above and below defaults.
