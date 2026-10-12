@@ -123,6 +123,24 @@ public:
   }
   VSTGUI::VST3Editor* activeEditor_{};
   VSTGUI::VST3Editor* viewOwner_{};
+  // Separate Guitar and Rhythm surfaces avoid overcrowding and preserve
+  // full-size step controls at 100/150% without changing MIDI parameter IDs.
+  bool rhythmPageSelected_{};
+  VSTGUI::CView* guitarPageView_{};
+  VSTGUI::CView* rhythmPageView_{};
+  std::array<VSTGUI::CControl*,2> pageButtons_{};
+  void refreshPages() {
+    if(guitarPageView_)guitarPageView_->setVisible(!rhythmPageSelected_);
+    if(rhythmPageView_)rhythmPageView_->setVisible(rhythmPageSelected_);
+    for(int i=0;i<2;++i)if(auto* button=pageButtons_[static_cast<std::size_t>(i)]) {
+      button->setValueNormalized((rhythmPageSelected_==(i==1))?1.f:0.f);
+      button->invalid();
+    }
+  }
+  void selectPage(bool rhythm) {
+    rhythmPageSelected_=rhythm;
+    refreshPages();
+  }
   std::array<VSTGUI::CControl*,25> commandButtons_{};
   void refreshCommands() {
     const auto selected=[&](int tag) -> bool {
@@ -290,6 +308,9 @@ public:
       // Never retain pointers after this editor destroys its views.
       for(auto& row:guitarCells_)row.fill(nullptr);
       commandButtons_.fill(nullptr);
+      guitarPageView_=nullptr;
+      rhythmPageView_=nullptr;
+      pageButtons_.fill(nullptr);
       degreeDisplays_.fill(nullptr);
       stepOnButtons_.fill(nullptr);
       lockButtons_.fill(nullptr);
@@ -300,12 +321,15 @@ public:
     }
   }
   VSTGUI::CView* verifyView(VSTGUI::CView* view,
-                            const VSTGUI::UIAttributes&,
+                            const VSTGUI::UIAttributes& attributes,
                             const VSTGUI::IUIDescription*,
                             VSTGUI::VST3Editor* editor) override {
     if(viewOwner_!=editor) {
       for(auto& row:guitarCells_)row.fill(nullptr);
       commandButtons_.fill(nullptr);
+      guitarPageView_=nullptr;
+      rhythmPageView_=nullptr;
+      pageButtons_.fill(nullptr);
       degreeDisplays_.fill(nullptr);
       stepOnButtons_.fill(nullptr);
       lockButtons_.fill(nullptr);
@@ -315,10 +339,22 @@ public:
       drumButtons_.fill(nullptr);
       viewOwner_=editor;
     }
+    // Match the same identifier-based page ownership used by Midiator.
+    // A controller may retain its selected page across editor reopen, but
+    // never a CView pointer belonging to an already destroyed editor.
+    if(const auto* id=attributes.getAttributeValue("rifferator-page")) {
+      if(*id=="guitar")guitarPageView_=view;
+      else if(*id=="rhythm")rhythmPageView_=view;
+      refreshPages();
+    }
     if(auto* control=dynamic_cast<VSTGUI::CControl*>(view)) {
-      if((control->getTag()>=500 && control->getTag()<596) || (control->getTag()>=700 && control->getTag()<=727) || (control->getTag()>=800 && control->getTag()<832) || (control->getTag()>=200 && control->getTag()<248) || (control->getTag()>=300 && control->getTag()<316) || (control->getTag()>=432 && control->getTag()<464) || (control->getTag()>=880 && control->getTag()<884) || (control->getTag()>=900 && control->getTag()<912) || control->getTag()==724)
+      if((control->getTag()>=500 && control->getTag()<596) || (control->getTag()>=700 && control->getTag()<=729) || (control->getTag()>=800 && control->getTag()<832) || (control->getTag()>=200 && control->getTag()<248) || (control->getTag()>=300 && control->getTag()<316) || (control->getTag()>=432 && control->getTag()<464) || (control->getTag()>=880 && control->getTag()<884) || (control->getTag()>=900 && control->getTag()<912) || control->getTag()==724)
         control->setListener(this);
       const auto tag=control->getTag();
+      if(tag==728 || tag==729) {
+        pageButtons_[static_cast<std::size_t>(tag-728)]=control;
+        refreshPages();
+      }
       if(tag>=912 && tag<918) {
         musicalDisplays_[static_cast<std::size_t>(tag-912)]=
           dynamic_cast<VSTGUI::CTextButton*>(control);
@@ -473,6 +509,10 @@ public:
     }
     if(command==724) {
       toggleDrumsEnabled();
+      return;
+    }
+    if(command==728 || command==729) {
+      selectPage(command==729);
       return;
     }
     if(command==725) {
