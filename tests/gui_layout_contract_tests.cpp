@@ -242,6 +242,7 @@ int main(){
   struct Rect {int x,y,w,h; std::string page; std::string name;};
   std::vector<Rect> stack{{0,0,1120,640,"header","root"}};
   std::vector<Rect> interactive;
+  std::vector<Rect> labels;
   const std::regex viewTokens(R"RE(<view\b[^>]*\/>|<view\b[^>]*>|<\/view>)RE");
   const std::regex originRe(R"RE(origin="([0-9]+), ([0-9]+)")RE");
   const std::regex sizeRe(R"RE(size="([0-9]+), ([0-9]+)")RE");
@@ -272,6 +273,8 @@ int main(){
       rect.name=tag[1].str();
       interactive.push_back(rect);
     }
+    if(node.find("class=\"CTextLabel\"")!=std::string::npos)
+      labels.push_back(rect);
     if(node.size()<2 || node.substr(node.size()-2)!="/>")
       stack.push_back(rect);
   }
@@ -289,6 +292,18 @@ int main(){
       const int dy=std::min(a.y+a.h,b.y+b.h)-std::max(a.y,b.y);
       assert(dx<=0 || dy<=0);
     }
+  // Separately verify readable text bounds. Overlapping label rectangles
+  // were another visible cause of the cramped 100% screenshot.
+  const auto overlap=[](const Rect& a,const Rect& b) {
+    const int dx=std::min(a.x+a.w,b.x+b.w)-std::max(a.x,b.x);
+    const int dy=std::min(a.y+a.h,b.y+b.h)-std::max(a.y,b.y);
+    return dx>0 && dy>0;
+  };
+  for(const auto& a:interactive)for(const auto& b:labels)
+    if(a.page==b.page)assert(!overlap(a,b));
+  for(std::size_t i=0;i<labels.size();++i)
+    for(std::size_t j=i+1;j<labels.size();++j)
+      if(labels[i].page==labels[j].page)assert(!overlap(labels[i],labels[j]));
   for(const auto& button:interactive) {
     if(button.name=="GuitarPage" || button.name=="RhythmPage")
       assert(button.y+button.h<=106); // no transparent page over header
