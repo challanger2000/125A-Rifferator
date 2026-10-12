@@ -110,6 +110,26 @@ int main(){
     for(const auto& e:actual)
       assert(!(e.bus==0 && !e.on && e.sampleOffset==960));
   }
+  // Retrigger of one pitch must not kill another sustained guitar pitch.
+  {
+    Pair overlap;
+    overlap.guitar.push_back({0,950,40,115,960});
+    overlap.guitar.push_back({0,950,45,115,960});
+    overlap.guitar.push_back({240,450,40,115,480});
+    LiveControls c;c.guitarSteps.fill(false);
+    c.guitarSteps[0]=true;c.guitarArticulation[0]=4;
+    c.guitarSteps[1]=true;c.guitarArticulation[1]=4;
+    BlockScheduler engine;
+    std::vector<ScheduledMidiEvent> actual;
+    engine.process(overlap,0.,1.,960,61440,
+      [&](ScheduledMidiEvent e){actual.push_back(e);return true;},true,c);
+    int otherOn=0,otherOff=0;
+    for(const auto& e:actual)if(e.bus==0 && e.pitch==45) {
+      if(e.on)++otherOn;
+      else {++otherOff;assert(e.sampleOffset>=940);}
+    }
+    assert(otherOn==1 && otherOff==1);
+  }
   // STOP releases a long OPEN at step 2; an empty step does not.
   {
     Pair held;held.guitar.push_back({0,950,40,115,960});
