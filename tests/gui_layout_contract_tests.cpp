@@ -51,7 +51,12 @@ int main(){
       assert(counts.at(name)==200+row*16+n);
     }
     assert(viewTags.count("GLock"+std::to_string(n))==1);
-    assert(viewTags.count("GDegree"+std::to_string(n))==1);
+    for(const auto* prefix: {"DegreeMinus","DegreeValue","DegreePlus"})
+      assert(viewTags.count(std::string(prefix)+std::to_string(n))==1);
+    assert(counts.at("DegreeMinus"+std::to_string(n))==800+n);
+    assert(counts.at("DegreePlus"+std::to_string(n))==816+n);
+    assert(counts.at("DegreeValue"+std::to_string(n))==850+n);
+    assert(viewTags.count("GDegree"+std::to_string(n))==0);
   }
   for(int tag=701;tag<=702;++tag)assert(viewTags.count("Action"+std::to_string(tag))==1);
   for(int tag=710;tag<=720;++tag)assert(viewTags.count("Action"+std::to_string(tag))==1);
