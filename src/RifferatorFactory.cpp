@@ -141,6 +141,26 @@ public:
     if(index==5)return std::clamp(value,0,4)/4.;
     return std::clamp(value,0,100)/100.;
   }
+  void applyMusicalStepCommand(int command) {
+    if(command<900 || command>=912)return;
+    const int index=(command-900)/2;
+    const auto id=musicalParam(index);
+    const int original=musicalValue(index,getParamNormalized(id));
+    const int minimum=index==4?1:0;
+    const int maximum=index==0||index==4?127:index==5?4:100;
+    const int updated=std::clamp(
+      original+(command%2==0?-1:1),minimum,maximum);
+    if(updated==original)return;
+    const double normalized=musicalNormalized(index,updated);
+    beginEdit(id);setParamNormalized(id,normalized);
+    performEdit(id,normalized);endEdit(id);
+  }
+  void toggleDrumsEnabled() {
+    const auto id=a125::rifferator::kDrumEnabled;
+    const double value=getParamNormalized(id)>=0.5?0.:1.;
+    beginEdit(id);setParamNormalized(id,value);
+    performEdit(id,value);endEdit(id);
+  }
   void refreshMusicalDisplays() {
     static constexpr const char* styles[5]{
       "CLASSIC","CHROMATIC","OCTAVE","INDUSTRIAL","ROLLING"};
@@ -411,24 +431,11 @@ public:
       return;
     }
     if(command>=900 && command<912) {
-      const int index=(command-900)/2;
-      const auto id=musicalParam(index);
-      const int original=musicalValue(index,getParamNormalized(id));
-      const int minimum=index==4?1:0;
-      const int maximum=index==0||index==4?127:index==5?4:100;
-      const int updated=std::clamp(
-        original+(command%2==0?-1:1),minimum,maximum);
-      if(updated==original)return;
-      const double normalized=musicalNormalized(index,updated);
-      beginEdit(id);setParamNormalized(id,normalized);
-      performEdit(id,normalized);endEdit(id);
+      applyMusicalStepCommand(command);
       return;
     }
     if(command==724) {
-      const auto id=a125::rifferator::kDrumEnabled;
-      const double value=getParamNormalized(id)>=0.5?0.:1.;
-      beginEdit(id);setParamNormalized(id,value);
-      performEdit(id,value);endEdit(id);
+      toggleDrumsEnabled();
       return;
     }
     if(command==700 || command==722) {
