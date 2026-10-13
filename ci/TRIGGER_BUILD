@@ -134,3 +134,4 @@
 2026-10-13 TARGETED CI: fix invalid multiple structured binding in gui_layout_contract_tests.cpp after #38325340609
 2026-10-13 ONE BUNDLED: classic gallop 8th+16th+16th preset, GUI command and locked-step MIDI regression
 2026-10-13 TARGETED RETEST: fix erroneous extra escape in GALLOP GUI-string regression (10/11 tests already PASS)
+2026-10-13 FIX GUI CLIP: remove needless out-of-parent label under GALLOP (nested geometry preflight 0 errors)

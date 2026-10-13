@@ -479,7 +479,6 @@
  <view class="CTextButton" control-tag="ClearPattern" origin="285, 478" size="235, 39" title="CLEAR PATTERN" font="Normal" text-color="Text" text-color-highlighted="Accent" frame-color="Accent" frame-color-highlighted="Accent" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
  <view class="CTextButton" control-tag="GuitarVariate" origin="535, 478" size="235, 39" title="VARIATE GUITAR" font="Normal" text-color="Text" text-color-highlighted="Accent" frame-color="Accent" frame-color-highlighted="Accent" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
  <view class="CTextButton" control-tag="GuitarGallop" origin="791, 478" size="270, 39" title="GALLOP  1/8 + 1/16 + 1/16" font="Normal" text-color="Text" text-color-highlighted="Accent" frame-color="Accent" frame-color-highlighted="Accent" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
- <view class="CTextLabel" origin="791, 525" size="270, 18" title="LOCKED STEPS PROTECTED" font="Small" font-color="Text" transparent="true"/>
  </view>
  
 </template>
