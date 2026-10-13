@@ -92,3 +92,6 @@ CI #38406858006 compiled the current VST3 and passed all six Windows CTest tests
 
 ## Host harness compile gate #38408632263
 The full Windows VST3 compiled and all 6/6 Release regressions, GUI packaging checks and validator binary build passed. The newly added SDK-based host harness did not compile because its class-category constants lacked the SDK pluginfactory header (C2065). This was detected before any attach/detach testing; no editor lifecycle PASS was claimed. The missing include has been added; Windows workflow path filters now cover host harness source changes so regression updates do not silently evade CI.
+
+## Host test-harness correction, CI #38409370363
+Windows VST3 binary and six CTest tests passed, and Steinberg Validator compiled. The original host-side test did not compile because SDK factory category names were inadvertently used as undeclared C++ constants in the standalone harness. Product identity is now selected using the exact registered class names `125A Rifferator` / `125A Rifferator Controller`, instead of relying on a preprocessor factory-registration macro. The native host probe still requires a successful compile and actual 20-cycle run before PASS.

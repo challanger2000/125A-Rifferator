@@ -53,8 +53,8 @@ int main(int argc,char** argv){
  Hosting::ClassInfo editClass;
  bool haveAudio=false,haveController=false;
  for(const auto& info:factory.classInfos()){
-  if(info.category()==kVstAudioEffectClass){audioClass=info;haveAudio=true;}
-  if(info.category()==kVstComponentControllerClass){editClass=info;haveController=true;}
+  if(info.name()=="125A Rifferator"){audioClass=info;haveAudio=true;}
+  if(info.name()=="125A Rifferator Controller"){editClass=info;haveController=true;}
  }
  if(!haveAudio||!haveController){std::cerr<<"[FAIL] Missing VST3 component/controller\n";return 2;}
  auto component=factory.createInstance<IComponent>(audioClass.ID());

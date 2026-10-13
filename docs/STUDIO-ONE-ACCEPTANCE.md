@@ -1,6 +1,19 @@
-# 125A Rifferator V1 — Studio One acceptance (NOT EXECUTED)
+# 125A Rifferator V1 — Studio One acceptance (PARTIALLY VERIFIED)
 
 The current Windows bundle is experimental and not a final release. This is a human host QA checklist, not a pass claim.
+
+## Studio One observations (user-confirmed, 2026-10-13)
+
+The previous "NOT EXECUTED" heading referred to the original untested checklist. The user has independently confirmed these **specific** observations in Studio One:
+
+- VST3 discovered; branded GUI rendered; 150% zoom worked without visible clipping.
+- GENERATE PATTERN populated the correct visible 16-step bar. OPEN POWERCHORD row editing and SHIFT+left-click note selection changed Step 4 to G2.
+- LOCK protected Step 4 from manual edits, subsequent GENERATE, and CLEAR. Unlocked steps were cleared.
+- EXPORT MIDI wrote a valid SMF, and the exported one-note riff imported into Studio One at Step 4 with its expected duration.
+- Direct VST3 MIDI routing to Heavier7Strings produced audible, individually rhythmic attacks (not merely an exported file). Playback stopped on transport STOP without a hanging note.
+- Two distinct bars were audible in a 2-bar configuration. Exact wrap after bar 2 was **not** explicitly confirmed.
+
+Not yet user-confirmed: 4/8 bar host playback, 20× host editor lifecycle, actual Studio One project recall, host-sample-accurate automation, all four H7 articulation velocity mappings, repeated MIDI trigger and transport seeking, 125A Plugin Tester full QA. None is silently promoted to PASS by source-level testing.
 
 ## Initial smoke and lifecycle
 - [ ] Studio One discovers "125A Rifferator" from the **complete** .vst3 directory, not an isolated DLL.
