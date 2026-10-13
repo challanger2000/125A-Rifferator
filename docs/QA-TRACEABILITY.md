@@ -69,3 +69,14 @@ At commit ba3207c, [Windows CI #38392621834](https://github.com/challanger2000/1
 One custom-drawn VSTGUI panel (1160×570), original logo vector resource, 16×5 step cells, SHIFT+left click diatonic note-picker overlay, BAR prev/next, global selectors, STEP ON/LOCK, GENERATE/VARIATE/CLEAR, EXPORT MIDI dialog and exact 100/150% VST3Editor zoom. All parameters flow through Controller beginEdit/setParamNormalized/performEdit/endEdit. SDK-free hitbox geometry tests added. THIS SOURCE IS NOT YET COMPILED OR STUDIO ONE VERIFIED; the first Windows VSTGUI build must settle integration and resource validation. The controller uses UI-only zoom state and host-independent pattern editing, not the old Rifferator implementation.
 
 Windows GUI MSVC stage #38395611145: new VST3 GUI code compiled/linked, but UI geometry test /WX failed on C4459 variable shadowing. Corrected local parameter names without changing hitbox logic. Also added processor NoteOff cleanup when editing active step parameters, and an embedded UIDESC/SVG bundle audit. Full Windows CI result PENDING for these changes; do not count the failed workflow as PASS.
+
+## First experimental GUI VST3 — Windows evidence (2026-10-13)
+
+- Source and complete GUI: `rebuild/v1.0.0-clean`, SHA `39cd796682b83c2f25d221df15a86ea1541722a6`.
+- [GitHub Actions Windows x64 #38396052442](https://github.com/challanger2000/125A-Rifferator/actions/runs/38396052442): **SUCCESS**. Actual VST3 compiled/linked in Release with VSTGUI 4.
+- CTest Windows Release: **5/5 PASS**, including `rifferator_gui_geometry`; assertions kept active even under optimized build.
+- SDK Steinberg Validator: **537 PASS, 0 FAIL**.
+- Embedded package audit: verified original `125A_Logo_Master_FINAL.svg` byte-for-byte by SHA256 comparison with source, valid `rifferator.uidesc`, root template `RifferatorView` size 1160×570 and both custom views.
+- GUI prototype includes: bar navigation, editable 16×5 matrix, STEP ON/LOCK, SHIFT+left-click diatonic picker, notes/scale labels, globals (KEY, SCALE, ROOT NOTE, BARS, PM VELOCITY, FILL, TRIGGER), GENERATE/VARIATE/CLEAR, controller-side Standard MIDI File save dialog and 100/150% zoom.
+- [Experimental VST3 artifact #11811362702](https://github.com/challanger2000/125A-Rifferator/actions/runs/38396052442/artifacts/11811362702): ZIP 1,649,137 bytes; SHA256 `e662c5190a8f0029a3b6d7ae380f046cafa0fd6f416bd0f54243014a06eb02a7`.
+- **Not yet verified**: native host attach/detach 20×, Studio One window rendering and hitbox alignment at 100/150%, realtime automation vs Editor parameters, actual H7 articulation sound/MIDI routing, project state recall, MIDI file import/save dialog, 125A Plugin Tester. This bundle is NOT FINAL.
