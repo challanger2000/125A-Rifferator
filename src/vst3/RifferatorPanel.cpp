@@ -4,6 +4,7 @@
 #include "vstgui/lib/cdrawcontext.h"
 #include "vstgui/lib/cfont.h"
 #include "vstgui/lib/cbuttonstate.h"
+#include "vstgui/lib/events.h"
 #include <algorithm>
 #include <array>
 #include <cstdio>
@@ -38,15 +39,61 @@ const char* chordName(int note){
 }
 }
 RifferatorPanel::RifferatorPanel(const VSTGUI::CRect& size,Controller* owner):
- VSTGUI::CView(size),owner_(owner) {setTransparency(false);}
-VSTGUI::CMouseEventResult RifferatorPanel::onMouseDown(VSTGUI::CPoint& pos,
-                                      const VSTGUI::CButtonState& buttons) {
+ VSTGUI::CView(size),owner_(owner) {
+ setTransparency(false);
+ setWantsFocus(true);
+}
+VSTGUI::CMouseEventResult RifferatorPanel::onMouseDown(
+    VSTGUI::CPoint& pos,const VSTGUI::CButtonState& buttons){
  if(!owner_||!(buttons&VSTGUI::kLButton))return VSTGUI::kMouseEventNotHandled;
- owner_->click(static_cast<int>(pos.x-getViewSize().left),
-               static_cast<int>(pos.y-getViewSize().top),
-               (buttons&VSTGUI::kShift)!=0,
-               (buttons&VSTGUI::kControl)!=0);
+ const int x=static_cast<int>(pos.x-getViewSize().left);
+ const int y=static_cast<int>(pos.y-getViewSize().top);
+ const auto target=ui::hit(x,y,owner_->picker()>=0).target;
+ if(!(buttons&VSTGUI::kControl)&&owner_->picker()<0 &&
+    (target==ui::Target::Pm||target==ui::Target::Fill)){
+  owner_->beginNumericDrag(x,y);
+  draggingNumeric_=true;
+  return VSTGUI::kMouseEventHandled;
+ }
+ owner_->click(x,y,(buttons&VSTGUI::kShift)!=0,
+                 (buttons&VSTGUI::kControl)!=0);
  return VSTGUI::kMouseDownEventHandledButDontNeedMovedOrUpEvents;
+}
+VSTGUI::CMouseEventResult RifferatorPanel::onMouseMoved(
+    VSTGUI::CPoint& pos,const VSTGUI::CButtonState& buttons){
+ if(!owner_||!draggingNumeric_)return VSTGUI::kMouseEventNotHandled;
+ if(!(buttons&VSTGUI::kLButton)){
+  owner_->endNumericDrag();
+  draggingNumeric_=false;
+  return VSTGUI::kMouseEventHandled;
+ }
+ owner_->updateNumericDrag(static_cast<int>(pos.x-getViewSize().left));
+ return VSTGUI::kMouseEventHandled;
+}
+VSTGUI::CMouseEventResult RifferatorPanel::onMouseUp(
+    VSTGUI::CPoint&,const VSTGUI::CButtonState&){
+ if(!owner_||!draggingNumeric_)return VSTGUI::kMouseEventNotHandled;
+ owner_->endNumericDrag();
+ draggingNumeric_=false;
+ return VSTGUI::kMouseEventHandled;
+}
+VSTGUI::CMouseEventResult RifferatorPanel::onMouseCancel(){
+ if(draggingNumeric_&&owner_)owner_->endNumericDrag();
+ draggingNumeric_=false;
+ return VSTGUI::kMouseEventHandled;
+}
+void RifferatorPanel::onMouseWheelEvent(VSTGUI::MouseWheelEvent& event){
+ if(!owner_||event.deltaY==0.)return;
+ const int x=static_cast<int>(event.mousePosition.x-getViewSize().left);
+ const int y=static_cast<int>(event.mousePosition.y-getViewSize().top);
+ const auto target=ui::hit(x,y,owner_->picker()>=0).target;
+ if(target!=ui::Target::Pm&&target!=ui::Target::Fill)return;
+ owner_->nudgeNumeric(x,y,event.deltaY>0.?1:-1);
+ event.consumed=true;
+}
+int32_t RifferatorPanel::onKeyDown(VSTGUI::VstKeyCode& key){
+ if(key.virt==VSTGUI::VKEY_ESCAPE&&owner_&&owner_->cancelPicker())return 1;
+ return 0;
 }
 void RifferatorPanel::draw(VSTGUI::CDrawContext* dc) {
  using namespace VSTGUI;
@@ -77,14 +124,19 @@ void RifferatorPanel::draw(VSTGUI::CDrawContext* dc) {
  for(const auto& t:selectors){
   fill(dc,rect(t.x,100,t.w,55),back,border);
   label(dc,t.heading,rect(t.x+12,104,t.w-20,15),muted);
-  label(dc,t.value,rect(t.x+12,120,t.w-20,29),text);
+  label(dc,t.value,rect(t.x+12,120,t.w-20,18),text);
  }
- // PM/FILL are absolute horizontal selection strips, not increment buttons.
- fill(dc,rect(671,150,191,5),dark,border);
- fill(dc,rect(671,150,
-              1+(s.pmVelocity-30)*190/53,5),red,redBorder);
- fill(dc,rect(895,150,221,5),dark,border);
- fill(dc,rect(895,150,1+music.fillIntensity*220/100,5),red,redBorder);
+ // Drag is a single VST3 automation gesture; wheel steps one integer.
+ const int pmX=671+(s.pmVelocity-30)*190/53;
+ const int fillX=895+music.fillIntensity*220/100;
+ label(dc,"DRAG / WHEEL +/-1",rect(739,120,122,18),muted,true);
+ label(dc,"DRAG / WHEEL +/-1",rect(996,120,118,18),muted,true);
+ fill(dc,rect(671,142,191,12),dark,border);
+ fill(dc,rect(671,142,1+(s.pmVelocity-30)*190/53,12),red,redBorder);
+ fill(dc,rect(std::clamp(pmX-5,671,851),139,11,17),redBorder,redBorder);
+ fill(dc,rect(895,142,221,12),dark,border);
+ fill(dc,rect(895,142,1+music.fillIntensity*220/100,12),red,redBorder);
+ fill(dc,rect(std::clamp(fillX-5,895,1105),139,11,17),redBorder,redBorder);
  fill(dc,rect(23,174,1113,43),panel,border);
  label(dc,"BAR",rect(37,186,42,22),text);
  fill(dc,rect(82,177,40,40),dark,border);label(dc,"<",rect(82,187,40,23),text,true);
@@ -92,6 +144,10 @@ void RifferatorPanel::draw(VSTGUI::CDrawContext* dc) {
  fill(dc,rect(155,177,40,40),dark,border);label(dc,">",rect(155,187,40,23),text,true);
  for(int c=0;c<16;++c)
   label(dc,std::to_string(c+1),rect(180+c*50,186,48,26),muted,true);
+ // Playback trigger belongs to the BAR/transport toolbar.
+ fill(dc,rect(992,177,144,40),dark,border);
+ label(dc,s.syncMode==SyncMode::Transport?"TRANSPORT":"MIDI NOTE",
+       rect(994,185,140,22),text,true);
  fill(dc,rect(23,219,1113,250),back,border);
  const char* captions[]={"PINCH / HARMONICS","OPEN POWERCHORD","PALM MUTE","NOISE","STOP"};
  const int tech[]={3,2,0,1,-1};
@@ -128,11 +184,8 @@ void RifferatorPanel::draw(VSTGUI::CDrawContext* dc) {
   if(i)notes+=" ";
   notes+=chordName(v);
  }
- label(dc,notes.substr(0,16),rect(1002,397,133,18),text);
- if(notes.size()>16)label(dc,notes.substr(16),rect(1002,413,133,18),text);
- fill(dc,rect(1008,426,112,40),dark,border);
- label(dc,s.syncMode==SyncMode::Transport?"TRANSPORT":"MIDI NOTE",
-       rect(1008,436,112,20),text,true);
+ label(dc,notes.substr(0,16),rect(1002,399,133,20),text);
+ if(notes.size()>16)label(dc,notes.substr(16),rect(1002,420,133,20),text);
  fill(dc,rect(23,483,1113,61),dark,border);
  struct Footer {int x,w;const char* title;};
  const Footer footer[]={{34,235,"GENERATE PATTERN"},{283,168,"VARIATE"},
@@ -142,12 +195,14 @@ void RifferatorPanel::draw(VSTGUI::CDrawContext* dc) {
        item.x==34?redBorder:border);
   label(dc,item.title,rect(item.x,504,item.w,21),text,true);
  }
- label(dc,std::string("STATUS: ")+owner_->notification(),rect(920,500,207,26),muted,true);
- label(dc,"SHIFT+LEFT CLICK = SCALE NOTE",rect(916,540,215,19),muted,true);
+ label(dc,std::string("STATUS: ")+owner_->notification(),rect(916,494,218,22),muted,true);
+ label(dc,"SHIFT+CLICK: CHOOSE NOTE",rect(916,518,218,19),muted,true);
  if(owner_->picker()>=0){
   // Modal right-panel picker leaves every grid row and STOP field exposed.
   fill(dc,rect(992,224,144,240),panel,redBorder);
-  label(dc,"SELECT SCALE NOTE",rect(997,227,133,19),text,true);
+  label(dc,"CHOOSE NOTE",rect(997,227,102,19),text,true);
+  fill(dc,rect(1102,225,31,23),red,redBorder);
+  label(dc,"X",rect(1102,225,31,23),text,true);
   for(int i=0;i<15;++i){
    const int degree=i-7;
    const auto name=pitchName(pitchForDegree(degree,music));

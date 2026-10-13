@@ -282,7 +282,10 @@ VSTGUI::CView* Controller::createCustomView(VSTGUI::UTF8StringPtr name,
  return nullptr;
 }
 void Controller::willClose(VSTGUI::VST3Editor* editor){
- if(editor_==editor){panel_=nullptr;editor_=nullptr;pickerStep_=-1;}
+ if(editor_==editor){
+  endNumericDrag(); // Finish any pending host automation gesture.
+  panel_=nullptr;editor_=nullptr;pickerStep_=-1;
+ }
 }
 void Controller::redraw(){
  if(panel_)panel_->invalid();
@@ -429,9 +432,60 @@ void Controller::openChoiceMenu(ParamID id,int x,int y){
   menu->forget();
  }
 }
+bool Controller::cancelPicker(){
+ if(pickerStep_<0)return false;
+ pickerStep_=-1;
+ status_="NOTE SELECTION CANCELLED";
+ redraw();
+ return true;
+}
+void Controller::beginNumericDrag(int x,int y){
+ const auto target=ui::hit(x,y,false).target;
+ using ui::Target;
+ if(target!=Target::Pm&&target!=Target::Fill)return;
+ endNumericDrag();
+ activeNumericParam_=target==Target::Pm?static_cast<int>(Pm):
+                                           static_cast<int>(Fill);
+ beginEdit(static_cast<ParamID>(activeNumericParam_));
+ updateNumericDrag(x);
+}
+void Controller::updateNumericDrag(int x){
+ if(activeNumericParam_<0)return;
+ using ui::Target;
+ const bool pm=activeNumericParam_==static_cast<int>(Pm);
+ const auto target=pm?Target::Pm:Target::Fill;
+ const int value=ui::numericValue(target,x);
+ const auto id=static_cast<ParamID>(activeNumericParam_);
+ const double normalized=pm?n(value,30,83):n(value,0,100);
+ if(std::abs(read(visual_,id)-normalized)<1.e-9)return;
+ EditController::setParamNormalized(id,normalized);
+ performEdit(id,normalized);
+ apply(visual_,id,normalized);
+ redraw();
+}
+void Controller::endNumericDrag(){
+ if(activeNumericParam_<0)return;
+ endEdit(static_cast<ParamID>(activeNumericParam_));
+ activeNumericParam_=-1;
+}
+void Controller::nudgeNumeric(int x,int y,int delta){
+ const auto target=ui::hit(x,y,false).target;
+ using ui::Target;
+ if(target==Target::Pm)
+  publish(Pm,n(ui::numericNudge(target,visual_.pmVelocity,delta),30,83));
+ else if(target==Target::Fill)
+  publish(Fill,n(ui::numericNudge(target,visual_.musical.fillIntensity,delta),0,100));
+}
 void Controller::click(int x,int y,bool shift,bool control){
  const auto hit=ui::hit(x,y,pickerStep_>=0);
  using ui::Target;
+ // Picker is modal: X, Escape, or an outside click cancels without
+ // committing a pitch or activating controls beneath it.
+ if(ui::shouldCancelPicker(pickerStep_>=0,hit.target)){
+  cancelPicker();
+  return;
+ }
+ if(hit.target==Target::PickerCancel){cancelPicker();return;}
  if(hit.target==Target::None)return;
  // 125A default-reset gesture. Other controls must NOT become inert
  // just because Ctrl is held (previously swallowed Export/Generate/etc.).

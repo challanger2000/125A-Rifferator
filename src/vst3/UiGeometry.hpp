@@ -2,10 +2,15 @@
 #include <algorithm>
 namespace a125::riff::vst::ui {
 constexpr int width=1160,height=570,gridLeft=180,gridTop=224;
-enum class Target { None,Zoom,Bars,Key,Scale,Root,Pm,Fill,Prev,Next,StepOn,Lock,Mode,Generate,Variate,Clear,Export,Cell,Picker };
+enum class Target { None,Zoom,Bars,Key,Scale,Root,Pm,Fill,Prev,Next,StepOn,Lock,Mode,Generate,Variate,Clear,Export,Cell,Picker,PickerCancel };
 struct Hit {Target target{Target::None};int column{-1};int row{-1};};
 // Direct horizontal selection for PM VELOCITY and FILL. All values are
 // reachable, endpoints included, independent of GUI zoom.
+inline int numericNudge(Target type,int current,int delta) noexcept {
+ if(type==Target::Pm)return std::clamp(current+delta,30,83);
+ if(type==Target::Fill)return std::clamp(current+delta,0,100);
+ return current;
+}
 inline int numericValue(Target type,int x) noexcept {
  if(type==Target::Pm){
   constexpr int start=671,end=861;
@@ -22,9 +27,13 @@ inline int numericValue(Target type,int x) noexcept {
 inline bool inside(int x,int y,int left,int top,int w,int h) noexcept {
  return x>=left&&x<left+w&&y>=top&&y<top+h;
 }
+inline bool shouldCancelPicker(bool open,Target target) noexcept {
+ return open&&target!=Target::Picker;
+}
 inline Hit hit(int x,int y,bool picker) noexcept {
  if(x<0||y<0||x>=width||y>=height)return {};
  // Picker replaces the right detail panel, never covers STOP cells.
+ if(picker&&inside(x,y,1102,225,31,23))return {Target::PickerCancel};
  if(picker&&inside(x,y,997,248,133,213)){
   const int c=(x-997)/45,r=(y-248)/43;
   if(c<3&&r<5&&x<997+c*45+43&&y<248+r*43+41)
@@ -48,7 +57,7 @@ inline Hit hit(int x,int y,bool picker) noexcept {
  if(inside(x,y,155,177,40,40))return {Target::Next};
  if(inside(x,y,1008,276,112,42))return {Target::StepOn};
  if(inside(x,y,1008,322,112,42))return {Target::Lock};
- if(inside(x,y,1008,426,112,40))return {Target::Mode};
+ if(inside(x,y,992,177,144,40))return {Target::Mode};
  if(inside(x,y,34,493,235,44))return {Target::Generate};
  if(inside(x,y,283,493,168,44))return {Target::Variate};
  if(inside(x,y,465,493,215,44))return {Target::Clear};

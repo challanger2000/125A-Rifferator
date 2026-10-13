@@ -27,9 +27,22 @@ int main(){
   assert(choice.target==Target::Picker&&choice.column==i);
  }
  assert(hit(979,426,true).target==Target::None);
- assert(hit(1009,430,false).target==Target::Mode);
+ assert(hit(1009,430,false).target==Target::None);
  assert(hit(1009,430,true).target==Target::Picker);
  assert(hit(1009,430,true).column==12);
+ assert(hit(1115,236,true).target==Target::PickerCancel);
+ assert(!supportsReset(Target::PickerCancel));
+ assert(hit(1115,236,false).target==Target::None);
+ assert(hit(1007,195,false).target==Target::Mode);
+ assert(hit(1007,195,true).target==Target::Mode);
+ assert(hit(1100,435,false).target==Target::None);
+ assert(hit(1100,435,true).target==Target::Picker);
+ assert(!shouldCancelPicker(true,Target::Picker));
+ assert(shouldCancelPicker(true,Target::PickerCancel));
+ assert(shouldCancelPicker(true,Target::Mode));
+ assert(shouldCancelPicker(true,Target::Cell));
+ assert(shouldCancelPicker(true,Target::None));
+ assert(!shouldCancelPicker(false,Target::PickerCancel));
  // All header fields open direct menus / select an absolute numeric value.
  assert(hit(75,131,false).target==Target::Bars);
  assert(hit(240,131,false).target==Target::Key);
@@ -132,6 +145,31 @@ int main(){
         p,s,a125::riff::heavier::Velocity{}).empty());
   }
  }
+ // Both full header fields accept pointer dragging, not only the narrow
+ // visual slider strip; 100% and 150% pointer hit geometry is unscaled.
+ for(int x=658;x<872;++x)for(int y=100;y<155;++y)
+  assert(hit(x,y,false).target==Target::Pm);
+ for(int x=884;x<1126;++x)for(int y=100;y<155;++y)
+  assert(hit(x,y,false).target==Target::Fill);
+ // All 54 PM and 101 FILL integer values are reachable on the track,
+ // including 0 / 100 and the full H7 PM velocity range of 30..83.
+ for(int v=30;v<=83;++v){
+  bool found=false;
+  for(int x=671;x<=861;++x)found|=numericValue(Target::Pm,x)==v;
+  assert(found);
+ }
+ for(int v=0;v<=100;++v){
+  bool found=false;
+  for(int x=895;x<=1115;++x)found|=numericValue(Target::Fill,x)==v;
+  assert(found);
+ }
+ // Precise wheel nudging never wraps or jumps by arbitrary 5/10 steps.
+ assert(numericNudge(Target::Pm,30,-1)==30);
+ assert(numericNudge(Target::Pm,83,1)==83);
+ assert(numericNudge(Target::Pm,40,1)==41);
+ assert(numericNudge(Target::Fill,0,-1)==0);
+ assert(numericNudge(Target::Fill,100,1)==100);
+ assert(numericNudge(Target::Fill,54,-1)==53);
  assert(hit(1100,40,false).target==Target::Zoom);
  assert(hit(34,510,false).target==Target::Generate);
  assert(hit(720,510,false).target==Target::Export);

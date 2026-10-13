@@ -54,6 +54,11 @@ public:
  double zoom() const noexcept {return zoom_;}
  const char* notification() const noexcept {return status_;}
  void click(int x,int y,bool shift,bool control=false);
+ bool cancelPicker();
+ void beginNumericDrag(int x,int y);
+ void updateNumericDrag(int x);
+ void endNumericDrag();
+ void nudgeNumeric(int x,int y,int delta);
 private:
  void publish(ParamID,double);
  void publishPattern(const product::Snapshot& target);
@@ -65,6 +70,7 @@ private:
  VSTGUI::VST3Editor* editor_{nullptr};
  RifferatorPanel* panel_{nullptr};
  int bar_{0},focused_{0},pickerStep_{-1};
+ int activeNumericParam_{-1};
  bool componentRestored_{false};
  double zoom_{1.0};
  std::uint32_t seed_{0x125A2026u}; // persisted Controller-only state v2
