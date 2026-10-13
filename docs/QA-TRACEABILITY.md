@@ -48,3 +48,6 @@ Product-state SDK-free V1 codec: fixed 408-byte endian-stable snapshot includes 
 Source-only prototype at src/vst3: 647 parameter IDs (7 globals + 5×128 step controls), event in/out, VST3 component state translation and host PPQ/MIDI trigger runtime. First Windows x64 build is **NOT VERIFIED**. There is **no editor yet**; GUI and DAW QA remain blocking. Linux standalone 4/4 CTest cannot establish Windows VST3 binary PASS. Review docs/VST3-INTEGRATION.md and the experimental CI run before any further compliance claim.
 
 Windows VST3 build #38391923331: COMPILE FAIL, C++ namespace collision (a125::riff::Event vs Steinberg::Vst::Event). SDK configure PASS. Fully-qualified event types staged for next Windows check. Not a release defect escape; this was detected before any host claim.
+
+## 2026-10-13 Windows build QA
+Windows MSVC successfully linked the native x64 VST3 in #38392237851, but the workflow failed when Release unit tests compiled with NDEBUG, suppressing assert-based tests and provoking /WX unused-variable diagnostics. The original 4/4 Linux Debug PASS did not validate Windows Release test assertions. Correction: all four CTest targets explicitly undefine NDEBUG at compile time; test files fail compilation if it remains defined. Retest Windows Release before claiming full workflow success.

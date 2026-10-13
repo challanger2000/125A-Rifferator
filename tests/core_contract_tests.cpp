@@ -1,6 +1,9 @@
 #include "core/Pattern.hpp"
 #include "instruments/Heavier7Strings.hpp"
 #include "core/StandardMidiFile.hpp"
+#ifdef NDEBUG
+#error CORE_TEST_ASSERT_DISABLED: assert-based QA cannot run with NDEBUG enabled.
+#endif
 #include <cassert>
 #include <vector>
 using namespace a125::riff;
