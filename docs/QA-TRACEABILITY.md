@@ -46,3 +46,5 @@ Product-state SDK-free V1 codec: fixed 408-byte endian-stable snapshot includes 
 
 ## Experimental Steinberg VST3 adapter
 Source-only prototype at src/vst3: 647 parameter IDs (7 globals + 5×128 step controls), event in/out, VST3 component state translation and host PPQ/MIDI trigger runtime. First Windows x64 build is **NOT VERIFIED**. There is **no editor yet**; GUI and DAW QA remain blocking. Linux standalone 4/4 CTest cannot establish Windows VST3 binary PASS. Review docs/VST3-INTEGRATION.md and the experimental CI run before any further compliance claim.
+
+Windows VST3 build #38391923331: COMPILE FAIL, C++ namespace collision (a125::riff::Event vs Steinberg::Vst::Event). SDK configure PASS. Fully-qualified event types staged for next Windows check. Not a release defect escape; this was detected before any host claim.

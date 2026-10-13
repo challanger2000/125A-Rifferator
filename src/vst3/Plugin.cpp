@@ -106,22 +106,22 @@ tresult PLUGIN_API Processor::process(ProcessData& data){
   const int32 total=data.inputEvents->getEventCount();
   if(total>MidiRuntime::kMaxTriggerEvents)return kResultFalse;
   for(int32 i=0;i<total;++i){
-   Event e{};
+   Steinberg::Vst::Event e{};
    if(data.inputEvents->getEvent(i,e)!=kResultOk)continue;
-   if(e.type!=Event::kNoteOnEvent&&e.type!=Event::kNoteOffEvent)continue;
-   const bool on=e.type==Event::kNoteOnEvent&&e.noteOn.velocity>0.f;
-   const int pitch=e.type==Event::kNoteOnEvent?e.noteOn.pitch:e.noteOff.pitch;
+   if(e.type!=Steinberg::Vst::Event::kNoteOnEvent&&e.type!=Steinberg::Vst::Event::kNoteOffEvent)continue;
+   const bool on=e.type==Steinberg::Vst::Event::kNoteOnEvent&&e.noteOn.velocity>0.f;
+   const int pitch=e.type==Steinberg::Vst::Event::kNoteOnEvent?e.noteOn.pitch:e.noteOff.pitch;
    if(pitch<0||pitch>127||e.sampleOffset<0||e.sampleOffset>=data.numSamples)continue;
    triggers[triggerCount++]={e.sampleOffset,pitch,on};
   }
  }
  auto sink=[&](MidiOut midi)->bool {
   if(!data.outputEvents)return false;
-  Event event{};
+  Steinberg::Vst::Event event{};
   event.busIndex=0;
   event.sampleOffset=midi.sampleOffset;
   if(midi.noteOn){
-   event.type=Event::kNoteOnEvent;
+   event.type=Steinberg::Vst::Event::kNoteOnEvent;
    event.noteOn.channel=0;
    event.noteOn.pitch=static_cast<int16>(midi.pitch);
    event.noteOn.velocity=static_cast<float>(midi.velocity)/127.f;
@@ -129,7 +129,7 @@ tresult PLUGIN_API Processor::process(ProcessData& data){
    event.noteOn.length=0;
    event.noteOn.noteId=-1;
   }else{
-   event.type=Event::kNoteOffEvent;
+   event.type=Steinberg::Vst::Event::kNoteOffEvent;
    event.noteOff.channel=0;
    event.noteOff.pitch=static_cast<int16>(midi.pitch);
    event.noteOff.velocity=0.f;

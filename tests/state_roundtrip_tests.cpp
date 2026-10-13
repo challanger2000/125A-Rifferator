@@ -1,4 +1,5 @@
 #include "product/RifferatorState.hpp"
+#include "vst3/Parameters.hpp"
 #include <cassert>
 using namespace a125::riff;
 using namespace a125::riff::product;
@@ -78,4 +79,25 @@ int main(){
   assert(!encode(invalid,sentinel));
   invalid=initial;invalid.musical.rootMidi=41;
   assert(!encode(invalid,sentinel));
+  // Host VST3 normalized parameter map: all 128 cells / five controls.
+  // Test both directions, LOCK protection, and upper-bound indices.
+  a125::riff::product::Snapshot mapped;
+  assert(mapped.pattern.setBars(8));
+  for(std::uint32_t cell=0;cell<128;++cell){
+    using namespace a125::riff::vst;
+    assert(apply(mapped,On+cell,1.)&&read(mapped,On+cell)==1.);
+    assert(apply(mapped,Type+cell,1.)&&read(mapped,Type+cell)==1.);
+    assert(apply(mapped,Degree+cell,0.5)&&read(mapped,Degree+cell)==0.5);
+    assert(apply(mapped,Stop+cell,1.)&&read(mapped,Stop+cell)==1.);
+    assert(apply(mapped,Lock+cell,1.)&&read(mapped,Lock+cell)==1.);
+    assert(!apply(mapped,On+cell,0.));
+    assert(mapped.pattern.steps[cell].on);
+    assert(apply(mapped,Lock+cell,0.)&&read(mapped,Lock+cell)==0.);
+    assert(apply(mapped,Stop+cell,0.)&&read(mapped,Stop+cell)==0.);
+  }
+  assert(!a125::riff::vst::apply(mapped,a125::riff::vst::On+128,1.));
+  assert(a125::riff::vst::apply(mapped,a125::riff::vst::Pm,1.));
+  assert(mapped.pmVelocity==83);
+  assert(mapped.valid());
+
 }
