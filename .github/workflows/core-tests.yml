@@ -1,6 +1,9 @@
 name: Clean Rifferator Core Tests
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - rebuild/v1.0.0-clean
 permissions:
   contents: read
 jobs:

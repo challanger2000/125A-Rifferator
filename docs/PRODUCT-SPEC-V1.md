@@ -13,3 +13,6 @@ This is a **new product codebase**, not a patch to the old develop/v1.0.0 implem
 - Generic rhythm/PPQ core independent of Heavier7Strings velocity profile; designed to be reusable for a **separate future** EBM bass instrument, without mixing it into Rifferator.
 
 **Development stage:** isolated C++ core only. Only Major and Natural Minor are in this first core. Precise final scale-choice UI and host behavior must be validated; do not present these as already host-integrated.
+
+## Host-neutral real-time prototype
+A new allocation-free MidiRuntime schedules the user's approved rhythm contract using absolute host PPQ with input-trigger alternative; NoteOff first, gap-as-hold and stop/seek/backpressure recovery are covered by source-level regression fixtures. This does not imply VST3 wiring, sample-offset host conformance or Studio One acceptance.

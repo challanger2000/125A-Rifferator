@@ -153,14 +153,16 @@ struct Random {
   }
 };
 // FILL NEVER adds attacks. It only changes in-scale degree on existing ON cells.
-inline void applyFill(Pattern& pattern,int intensity,std::uint32_t seed) noexcept {
+inline void applyFill(Pattern& pattern,const Settings& settings,int intensity,std::uint32_t seed) noexcept {
   Random rng{seed};intensity=std::clamp(intensity,0,100);
   for(int i=0;i<pattern.activeSteps();++i){
     auto& s=pattern.steps[static_cast<std::size_t>(i)];
     const bool change=rng.range(100)<intensity;
     const int movement=rng.range(2)?1:-1;
-    if(!s.locked&&s.on&&s.articulation!=Articulation::Stop&&change)
-      s.degree=std::clamp(s.degree+movement,-14,14);
+    if(!s.locked&&s.on&&s.articulation!=Articulation::Stop&&change){
+      const int candidate=std::clamp(s.degree+movement,-14,14);
+      if(pitchForDegree(candidate,settings)>=0)s.degree=candidate;
+    }
   }
 }
 } // namespace a125::riff

@@ -14,8 +14,8 @@
 | PM VELOCITY | Settings/velocity | CORE IMPLEMENTED; UI/automation NOT IMPLEMENTED |
 | FILL 0..100 changes only pitch | applyFill | CORE TESTED; UI NOT IMPLEMENTED |
 | GENERATE and VARIATE | generate/variate | CORE IMPLEMENTED; broader musical QA pending |
-| PPQ absolute transport clock | visitAbsoluteEvents + compileLoopCycle | CORE TESTED including wrap sustain; sample-offset VST3 adapter pending |
-| MIDI NOTE trigger NoteOn/NoteOff | none | NOT IMPLEMENTED |
+| PPQ absolute transport clock | visitAbsoluteEvents / MidiRuntime absolute grid | CORE IMPLEMENTED, new realtime regressions CI PENDING; VST3 adapter NOT VERIFIED |
+| MIDI NOTE trigger NoteOn/NoteOff | MidiRuntime::process, TriggerEvent | CORE RUNTIME IMPLEMENTED; VST3 binding NOT VERIFIED |
 | EXPORT MIDI Standard MIDI File | exportMidi | HEADER/END-TRACK CORE TESTED; independent SMF reader pending |
 | EXPORT MIDI Save dialog | none | NOT IMPLEMENTED |
 | 100/150% zoom | proven High Gain Guitar Finisher source inspected | NOT IMPLEMENTED |

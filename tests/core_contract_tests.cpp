@@ -43,12 +43,12 @@ int main(){
   assert(p.setLock(4,true));p.clear();
   assert(p.steps[4].locked&&p.steps[4].on&&!p.steps[0].on&&!p.steps[16].on);
   assert(!p.setStep(4,Step{}));
-  p=sample();p.setLock(4,true);applyFill(p,100,123);
+  p=sample();p.setLock(4,true);applyFill(p,s,100,123);
   const auto filled=compile(p,s);
   int hits=0;for(const auto& e:filled)if(e.noteOn)++hits;
   assert(hits==3&&p.steps[4].degree==0);
   assert(p.steps[0].degree!=0&&p.steps[16].degree!=0);
-  p=sample();applyFill(p,0,123);
+  p=sample();applyFill(p,s,0,123);
   assert(p.steps[0].degree==0&&p.steps[16].degree==0);
   Pattern a,b;a.setBars(8);b.setBars(8);
   generate(a,s,555);generate(b,s,555);

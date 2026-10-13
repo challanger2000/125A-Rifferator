@@ -30,7 +30,7 @@ inline void generate(Pattern& pattern,const Settings& settings,std::uint32_t see
     step.articulation=beat==0&&roll<25?Articulation::OpenPowerchord:Articulation::PalmMute;
     step.degree=0;
   }
-  applyFill(pattern,settings.fillIntensity,seed^0x6d2b79f5U);
+  applyFill(pattern,settings,settings.fillIntensity,seed^0x6d2b79f5U);
 }
 inline void variate(Pattern& pattern,const Settings& settings,std::uint32_t seed) noexcept {
   Random rng{seed};

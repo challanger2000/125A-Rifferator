@@ -13,3 +13,12 @@ else()
 endif()
 add_test(NAME rifferator_core_contract COMMAND rifferator_core_tests)
 # VST3 target deliberately deferred until static design and host adapter exist.
+
+add_executable(rifferator_runtime_tests tests/midi_runtime_tests.cpp)
+target_include_directories(rifferator_runtime_tests PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src")
+if(MSVC)
+ target_compile_options(rifferator_runtime_tests PRIVATE /W4 /WX)
+else()
+ target_compile_options(rifferator_runtime_tests PRIVATE -Wall -Wextra -Wpedantic -Werror)
+endif()
+add_test(NAME rifferator_midi_runtime COMMAND rifferator_runtime_tests)
