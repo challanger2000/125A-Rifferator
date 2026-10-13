@@ -51,3 +51,6 @@ Windows VST3 build #38391923331: COMPILE FAIL, C++ namespace collision (a125::ri
 
 ## 2026-10-13 Windows build QA
 Windows MSVC successfully linked the native x64 VST3 in #38392237851, but the workflow failed when Release unit tests compiled with NDEBUG, suppressing assert-based tests and provoking /WX unused-variable diagnostics. The original 4/4 Linux Debug PASS did not validate Windows Release test assertions. Correction: all four CTest targets explicitly undefine NDEBUG at compile time; test files fail compilation if it remains defined. Retest Windows Release before claiming full workflow success.
+
+## Native VST3 compilation evidence
+At commit ba3207c, [Windows CI #38392621834](https://github.com/challanger2000/125A-Rifferator/actions/runs/38392621834) compiled and linked the actual x64 VST3 binary, ran 4/4 Release CTest with NDEBUG explicitly off, and published ZIP artifact #11809317427. **BUILDS PASS, WINDOWS CORE TEST PASS.** Host interaction, actual VST3 editor and Steinberg validator are NOT VERIFIED. The next source change adds Validator plus branded bundle packaging. No FINAL claim.

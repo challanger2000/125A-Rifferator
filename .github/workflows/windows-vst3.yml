@@ -25,6 +25,9 @@ jobs:
       - name: Run SDK-free regression suite on Windows
         shell: pwsh
         run: ctest --test-dir build-vst3 -C Release --output-on-failure
+      - name: Build independent Steinberg VST3 Validator
+        shell: pwsh
+        run: cmake --build build-vst3 --config Release --parallel 4 --target validator
       - name: Stage experimental VST3 bundle
         shell: pwsh
         run: |
@@ -32,9 +35,26 @@ jobs:
           if ($bundles.Count -lt 1) { throw "No VST3 bundle found" }
           New-Item -ItemType Directory -Force -Path stage | Out-Null
           Copy-Item -Path $bundles[0].FullName -Destination stage -Recurse
+          $bundle = Join-Path stage 'Rifferator.vst3'
+          if (-not (Test-Path $bundle -PathType Container)) { throw "Missing complete bundle" }
+          $branded = Join-Path stage '125A Rifferator.vst3'
+          Move-Item -LiteralPath $bundle -Destination $branded
+          $inner = Join-Path $branded 'Contents/x86_64-win/Rifferator.vst3'
+          if (-not (Test-Path $inner -PathType Leaf)) { throw "Missing Windows x64 module" }
+          Move-Item -LiteralPath $inner -Destination (Join-Path $branded 'Contents/x86_64-win/125A Rifferator.vst3')
       - name: Archive experimental VST3 (NOT FINAL)
         uses: actions/upload-artifact@v4
         with:
           name: Rifferator-V1-EXPERIMENTAL-Windows-x64
           path: stage/
           if-no-files-found: error
+      - name: Steinberg VST3 Validator (host compliance only)
+        shell: pwsh
+        run: |
+          $validator = Get-ChildItem build-vst3 -Recurse -File -Filter 'validator.exe' |
+            Where-Object { $_.FullName -match 'Release' } |
+            Select-Object -First 1
+          if ($null -eq $validator) { throw "Steinberg validator executable missing" }
+          $plugin = Join-Path (Resolve-Path stage).Path '125A Rifferator.vst3'
+          & $validator.FullName -e $plugin
+          if ($LASTEXITCODE -ne 0) { throw "Steinberg Validator failed: $LASTEXITCODE" }

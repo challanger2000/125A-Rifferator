@@ -24,3 +24,5 @@ A fixed-size V1 processor state codec now stores all pattern cells and musical s
 ## Current source-level QA
 
 **GitHub Actions [#38389103512](https://github.com/challanger2000/125A-Rifferator/actions/runs/38389103512): 4/4 CTest PASS** at commit `630c2034`. This measures the standalone MIDI core, runtime, standard-MIDI-file format and fixed-size state codec only; no VST3, Windows or GUI status is implied. Release remains blocked until genuine Studio One/125A/Steinberg QA.
+
+**Windows host-adapter source:** Windows x64 VST3 binary successfully compiled/link-checked and 4/4 CTest passed in [GitHub run #38392621834](https://github.com/challanger2000/125A-Rifferator/actions/runs/38392621834). Its experimental downloadable bundle is NOT FINAL and has no VSTGUI editor. Any later build/Validator claims must cite their own exact commit and run.
