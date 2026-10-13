@@ -14,3 +14,15 @@ Record exact commit, workflow run, Windows display scale, Studio One version, pl
 7. Close/reopen editor 20 times at both zoom factors. Then complete 125A Plugin Tester editor lifecycle, I/O events, host torture, state/automation and Steinberg Validator.
 
 Record each gate independently as PASS/FAIL/NOT VERIFIED. A green build is not GUI acceptance.
+
+## Zoom regression, 2026-10-13
+
+Earlier builds used `AspectRatioVST3Editor`, which may recalculate zoom in
+`onSize()` and overwrite an explicit factor. That editor has been replaced by
+`VST3Editor`, with explicit 100/150% control and `onZoomChanged()` persistence.
+Automated tests verify correct editor class and saved factor, **not** actual
+host acceptance of `resizeView`. In Studio One verify both buttons physically
+resize to 1120×640 and 1680×960 at Windows display scale 100%; also test
+right-click native UI Zoom if present, reopen and project restore. Distinguish
+`button changes state but host window does not resize` from `no callback`.
+No GUI host PASS before the user confirms it.

@@ -70,6 +70,14 @@ int main(){
  assert(seenViews.size()==byName.size());
  assert(interactive.size()==228);
  assert(xml.find("title=\"NOTE LENGTH\"")!=std::string::npos);
+ // Prevent regression to AspectRatioVST3Editor: its onSize() recomputes
+ // calcZoomFactor and can silently undo the explicit 100/150% selection.
+ std::ifstream controllerFile("src/RifferatorFactory.cpp");
+ const std::string controller((std::istreambuf_iterator<char>(controllerFile)),std::istreambuf_iterator<char>());
+ assert(controller.find("new VSTGUI::VST3Editor(")!=std::string::npos);
+ assert(controller.find("new VSTGUI::AspectRatioVST3Editor(")==std::string::npos);
+ assert(controller.find("setAllowedZoomFactors({1.0,1.5})")!=std::string::npos);
+ assert(controller.find("void onZoomChanged(")!=std::string::npos);
  std::ifstream processorFile("src/RifferatorProcessor.cpp");
  const std::string p((std::istreambuf_iterator<char>(processorFile)),std::istreambuf_iterator<char>());
  assert(p.find("addEventOutput(STR16(\"Guitar Out\")")!=std::string::npos);
