@@ -14,7 +14,7 @@
 | PM VELOCITY | Settings/velocity | CORE IMPLEMENTED; UI/automation NOT IMPLEMENTED |
 | FILL 0..100 changes only pitch | applyFill | CORE TESTED; UI NOT IMPLEMENTED |
 | GENERATE and VARIATE | generate/variate | CORE IMPLEMENTED; broader musical QA pending |
-| PPQ absolute transport clock | visitAbsoluteEvents | CORE TESTED; sample-offset VST3 adapter pending |
+| PPQ absolute transport clock | visitAbsoluteEvents + compileLoopCycle | CORE TESTED including wrap sustain; sample-offset VST3 adapter pending |
 | MIDI NOTE trigger NoteOn/NoteOff | none | NOT IMPLEMENTED |
 | EXPORT MIDI Standard MIDI File | exportMidi | HEADER/END-TRACK CORE TESTED; independent SMF reader pending |
 | EXPORT MIDI Save dialog | none | NOT IMPLEMENTED |

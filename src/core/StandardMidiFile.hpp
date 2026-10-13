@@ -20,8 +20,9 @@ inline void vlq(std::vector<std::uint8_t>& out,std::uint32_t value){
 }
 // Standard MIDI File Format 0, one MIDI channel and 960 PPQ.
 // Only returns bytes, not disk IO. The non-realtime Controller owns the save dialog.
-inline std::vector<std::uint8_t> exportMidi(const Pattern& pattern,const Settings& settings){
-  const auto events=compileOneCycle(pattern,settings);
+template<class VelocityPolicy>
+inline std::vector<std::uint8_t> exportMidi(const Pattern& pattern,const Settings& settings,VelocityPolicy&& policy){
+  const auto events=compileOneCycle(pattern,settings,policy);
   if(!settings.valid()||!pitchInScale(settings.rootMidi,settings))return {};
   std::vector<std::uint8_t> track;
   std::int64_t previous=0;

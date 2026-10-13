@@ -81,23 +81,14 @@ struct Event {
   int pitch{0},velocity{0};
   bool noteOn{false};
 };
-inline int velocity(Articulation a,const Settings& s) noexcept {
-  switch(a){
-    case Articulation::Noise:return 20;
-    case Articulation::PalmMute:return s.pmVelocity;
-    case Articulation::OpenPowerchord:return 115;
-    case Articulation::PinchHarmonic:return 127;
-    case Articulation::Stop:return 0;
-  }
-  return 0;
-}
 inline bool eventLess(const Event& a,const Event& b) noexcept {
   return a.tick==b.tick?a.noteOn<b.noteOn:a.tick<b.tick;
 }
 // Offline/controller-thread compilation, not called on the real-time callback.
 // OFF steps extend the note. STOP releases; any next note releases first.
 // One-cycle export ends at boundary so imported MIDI cannot leave hanging notes.
-inline std::vector<Event> compileOneCycle(const Pattern& pattern,const Settings& s){
+template<class VelocityPolicy>
+inline std::vector<Event> compileOneCycle(const Pattern& pattern,const Settings& s,VelocityPolicy&& velocityPolicy){
   std::vector<Event> output;
   if(!s.valid()||!pitchInScale(s.rootMidi,s))return output;
   output.reserve(static_cast<std::size_t>(pattern.activeSteps())*2);
@@ -112,12 +103,28 @@ inline std::vector<Event> compileOneCycle(const Pattern& pattern,const Settings&
     if(boundary||step.articulation==Articulation::Stop)continue;
     const int p=pitchForDegree(step.degree,s);
     if(p<0){output.clear();return output;}
-    output.push_back({tick,p,velocity(step.articulation,s),true});
+    output.push_back({tick,p,velocityPolicy(step.articulation,s),true});
     heldPitch=p;
   }
   std::stable_sort(output.begin(),output.end(),eventLess);
   return output;
 }
+// Live loop is cyclic: last sounding note remains held over empty leading
+// steps of the next cycle, until its first active Note or STOP releases it.
+template<class VelocityPolicy>
+inline std::vector<Event> compileLoopCycle(const Pattern& pattern,const Settings& s,
+                                           VelocityPolicy&& velocityPolicy){
+  auto result=compileOneCycle(pattern,s,velocityPolicy);
+  if(result.empty()||result.back().noteOn||result.back().tick!=pattern.lengthTicks())return result;
+  for(int i=0;i<pattern.activeSteps();++i){
+    if(pattern.steps[static_cast<std::size_t>(i)].on){
+      result.back().tick+=static_cast<std::int64_t>(i)*kTicksPerStep;
+      break;
+    }
+  }
+  return result;
+}
+
 // Absolute host PPQ visitor; host adapter will restrict invocation to bounded blocks.
 // Does not reset musical phase when processing seeks, loops or varying blocks.
 template<class Emit>
@@ -155,26 +162,5 @@ inline void applyFill(Pattern& pattern,int intensity,std::uint32_t seed) noexcep
     if(!s.locked&&s.on&&s.articulation!=Articulation::Stop&&change)
       s.degree=std::clamp(s.degree+movement,-14,14);
   }
-}
-inline void generate(Pattern& pattern,const Settings& settings,std::uint32_t seed) noexcept {
-  Random rng{seed};
-  for(int i=0;i<pattern.activeSteps();++i){
-    auto& step=pattern.steps[static_cast<std::size_t>(i)];
-    if(step.locked)continue;
-    const int beat=i%4,roll=rng.range(100);
-    step.on=(beat==0||roll<38);
-    step.articulation=beat==0&&roll<25?Articulation::OpenPowerchord:Articulation::PalmMute;
-    step.degree=0;
-  }
-  applyFill(pattern,settings.fillIntensity,seed^0x6d2b79f5U);
-}
-inline void variate(Pattern& pattern,const Settings& settings,std::uint32_t seed) noexcept {
-  Random rng{seed};
-  for(int i=0;i<pattern.activeSteps();++i){
-    auto& s=pattern.steps[static_cast<std::size_t>(i)];
-    if(s.locked||!s.on||s.articulation==Articulation::Stop)continue;
-    if(rng.range(100)<15)s.articulation=Articulation::PalmMute;
-  }
-  applyFill(pattern,settings.fillIntensity,seed^0x9e3779b9U);
 }
 } // namespace a125::riff
