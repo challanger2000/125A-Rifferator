@@ -41,6 +41,6 @@ Legende: `QUELL` = Code und Bindung nachvollzogen, `TEST` = deterministische iso
 1. **Native GUI-Menüs und Mausaktionen in Studio One:** alle Auswahlmenüs inkl. Root-Submenüs, Cancel, 100/150% und reale Bedienung der zurücksetzbaren Controls; nicht Teil des bisherigen 20×-Editor-Lifecycle-Probes.
 2. **Bidirektionale VST3-Kette:** pro Aktion native Maus → Controller Begin/Perform/End Edit → Processor Parameter → tatsächliche MIDI-Ausgabe → GUI-Anzeige, dazu Projekt speichern/neu laden.
 3. **Heavier7Strings-Hörabnahme:** alle vier Articulations/Velocity-Mappings inkl. 20 Noise und 127 Harmonics.
-4. **Offizieller vollständiger 125A Plugin Tester:** separater, noch nicht ausgeführter Test; die vorhandene eigene SDK-Probe ist kein Ersatz.
+4. **Offizieller 125A Plugin Tester (JETZT BESTANDEN):** Version 0.2.9, Windows [run #38436972585](https://github.com/challanger2000/125A-Plugin-Tester/actions/runs/38436972585) auf exakt `8b70827f`: **30 PASS / 0 WARNING / 0 FAIL**. Das ist die echte private Testsuite; Audioausgabe-Torture ist für ein reines MIDI-Plugin nicht anwendbar. [Originalberichte](https://github.com/challanger2000/125A-Plugin-Tester/actions/runs/38436972585/artifacts/11833722284). Das ersetzt **nicht** die ausstehenden Studio-One-Mausklick- und musikalischen Tests.
 
 **Keine Final-Freigabe, solange ein Pflichtpfad OFFEN ist.** Die neue Policy-Regression prüft Steuerlogik/Output, aber keine echten Windows-Mausereignisse oder nativen VSTGUI-Popup-Callbacks.

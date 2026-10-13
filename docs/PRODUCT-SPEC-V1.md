@@ -12,7 +12,7 @@ This is a **new product codebase**, not a patch to the old develop/v1.0.0 implem
 - GUI must be spacious, mathematically laid out, stable at 100/150%; static design **before** VSTGUI. Proven working zoom approach inspected in current High Gain Guitar Finisher: VSTGUI::VST3Editor, setAllowedZoomFactors 1.0/1.5, setZoomFactor, controller state persistence, willClose invalidation.
 - Generic rhythm/PPQ core independent of Heavier7Strings velocity profile; designed to be reusable for a **separate future** EBM bass instrument, without mixing it into Rifferator.
 
-**Development stage:** isolated C++ core only. Only Major and Natural Minor are in this first core. Precise final scale-choice UI and host behavior must be validated; do not present these as already host-integrated.
+**Development stage (updated 2026-10-13):** implemented experimental Windows VST3 with GUI; only Major and Natural Minor are in V1. Source, core and original 125A Plugin Tester technical checks are now PASS for `8b70827f`, but direct Studio One popup/step/reset mouse interaction, host project reopen and subjective H7 musical verification remain open. **NOT FINAL.**
 
 ## Host-neutral real-time prototype
 A new allocation-free MidiRuntime schedules the user's approved rhythm contract using absolute host PPQ with input-trigger alternative; NoteOff first, gap-as-hold and stop/seek/backpressure recovery are covered by source-level regression fixtures. This does not imply VST3 wiring, sample-offset host conformance or Studio One acceptance.

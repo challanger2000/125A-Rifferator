@@ -59,3 +59,6 @@ Single-click native selection menus now replace repeated-click cycling for KEY /
 
 ## User control regression after reported GUI workflow problems — PENDING
 STOP grid cells now toggle ON/OFF with repeated clicks; Ctrl+click of an unlocked cell clears it, Ctrl+STEP ON resets OFF and Ctrl+LOCK unlocks while respecting locked-step invariants. Ctrl+commands no longer become inert. Pure controller-policy and MIDI-event regressions (CI pending) check 5×16 hitbox geometry, 1/2/4/8 bars, all four Heavier7Strings velocity modes and STOP. Actual Studio One cursor/click tests, 100/150% zoom, menu selection/cancellation and project reopen must be performed against the new build before release.
+
+## Official 125A tester technical gate — now PASS, 2026-10-13
+[Private run #38436972585](https://github.com/challanger2000/125A-Plugin-Tester/actions/runs/38436972585) tested exact V1 code `8b70827f` with the real portable Tester v0.2.9: **30 PASS / 0 WARN / 0 FAIL**. [Full diagnostic artifact](https://github.com/challanger2000/125A-Plugin-Tester/actions/runs/38436972585/artifacts/11833722284). This resolves only the previously open **technical full 125A Tester gate**. The above user-operated Studio One checklist is still separately open: actual new popup menus, STOP off/on, Ctrl default resets, 100/150% hit alignment, saved/loaded DAW project and musical H7 acceptance.
