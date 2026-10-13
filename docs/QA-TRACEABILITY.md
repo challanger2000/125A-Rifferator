@@ -95,3 +95,6 @@ The full Windows VST3 compiled and all 6/6 Release regressions, GUI packaging ch
 
 ## Host test-harness correction, CI #38409370363
 Windows VST3 binary and six CTest tests passed, and Steinberg Validator compiled. The original host-side test did not compile because SDK factory category names were inadvertently used as undeclared C++ constants in the standalone harness. Product identity is now selected using the exact registered class names `125A Rifferator` / `125A Rifferator Controller`, instead of relying on a preprocessor factory-registration macro. The native host probe still requires a successful compile and actual 20-cycle run before PASS.
+
+## 2026-10-13 follow-up changes (PENDING CI)
+Real-host picker had obstructed STOP. It now replaces the right detail panel, preserving every STOP hitbox; CTest checks all 15 picker cells and all 16 STOP cells with modal picker active. Controller publish now validates/quantizes before emitting edit gestures and sends a paired ROOT parameter edit when GUI KEY/SCALE changes the root. The Controller readback also mirrors snapped ROOT for incoming host changes without generating host feedback edits. Exact Studio One automation and project recall still NOT VERIFIED.

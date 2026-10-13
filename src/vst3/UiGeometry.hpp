@@ -8,9 +8,12 @@ inline bool inside(int x,int y,int left,int top,int w,int h) noexcept {
 }
 inline Hit hit(int x,int y,bool picker) noexcept {
  if(x<0||y<0||x>=width||y>=height)return {};
- if(picker&&inside(x,y,180,423,800,43)){
-  const int column=(x-180)/50;
-  return column<15&&x<180+column*50+48?Hit{Target::Picker,column,0}:Hit{};
+ // Picker replaces the right detail panel, never covers STOP cells.
+ if(picker&&inside(x,y,997,248,133,213)){
+  const int c=(x-997)/45,r=(y-248)/43;
+  if(c<3&&r<5&&x<997+c*45+43&&y<248+r*43+41)
+   return {Target::Picker,r*3+c,0};
+  return {};
  }
  if(inside(x,y,180,224,800,240)){
   const int c=(x-180)/50,r=(y-224)/48;

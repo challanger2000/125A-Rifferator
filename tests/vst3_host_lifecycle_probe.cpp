@@ -12,6 +12,9 @@
 #include "pluginterfaces/vst/ivstcomponent.h"
 #include "pluginterfaces/vst/ivsteditcontroller.h"
 #include "pluginterfaces/vst/vsttypes.h"
+#include "../src/product/RifferatorState.hpp"
+#include "../src/vst3/Parameters.hpp"
+#include <cmath>
 #include <atomic>
 #include <cstring>
 #include <iostream>
@@ -64,6 +67,25 @@ int main(int argc,char** argv){
     controller->initialize(host)!=kResultOk){
    std::cerr<<"[FAIL] VST3 initialization\n";return 2;
  }
+ // A default-only roundtrip can miss genuine lost BARs, notes and LOCKs.
+ // Install a non-default eight-bar fixture through the actual VST3 interface.
+ a125::riff::product::Snapshot fixture;
+ if(!fixture.pattern.setBars(8)){std::cerr<<"[FAIL] Fixture bars\n";return 2;}
+ fixture.musical.fillIntensity=70;
+ fixture.pmVelocity=65;
+ fixture.syncMode=a125::riff::SyncMode::MidiNote;
+ auto& guitar=fixture.pattern.steps[4];
+ guitar.on=true;guitar.degree=2;guitar.articulation=2;guitar.locked=true;
+ auto& lastBar=fixture.pattern.steps[100];
+ lastBar.on=true;lastBar.stop=true;lastBar.locked=true;
+ a125::riff::product::StateBytes fixtureBytes{};
+ if(!a125::riff::product::encode(fixture,fixtureBytes)){
+  std::cerr<<"[FAIL] Non-default state fixture encoding\n";return 2;
+ }
+ MemoryStream fixtureStream(fixtureBytes.data(),static_cast<TSize>(fixtureBytes.size()));
+ if(component->setState(&fixtureStream)!=kResultOk){
+  std::cerr<<"[FAIL] Processor could not restore non-default fixture\n";return 2;
+ }
  MemoryStream serialized;
  if(component->getState(&serialized)!=kResultOk||serialized.getSize()<=0){
   std::cerr<<"[FAIL] Processor getState\n";return 2;
@@ -80,15 +102,52 @@ int main(int argc,char** argv){
  if(controller->setComponentState(&serialized)!=kResultOk){
   std::cerr<<"[FAIL] Controller setComponentState\n";return 2;
  }
+ MemoryStream recovered;
+ if(fresh->getState(&recovered)!=kResultOk||
+    recovered.getSize()!=static_cast<TSize>(fixtureBytes.size())){
+  std::cerr<<"[FAIL] Fresh Processor non-default state re-serialization\n";return 2;
+ }
+ a125::riff::product::Snapshot decoded;
+ if(!a125::riff::product::decode(
+       reinterpret_cast<const std::uint8_t*>(recovered.getData()),
+       static_cast<std::size_t>(recovered.getSize()),decoded)||
+    decoded.pattern.bars!=8||decoded.pmVelocity!=65||
+    decoded.syncMode!=a125::riff::SyncMode::MidiNote||
+    decoded.musical.fillIntensity!=70||
+    !decoded.pattern.steps[4].locked||
+    decoded.pattern.steps[4].degree!=2||
+    !decoded.pattern.steps[100].stop||
+    !decoded.pattern.steps[100].locked){
+  std::cerr<<"[FAIL] Non-default Processor state mismatch\n";return 2;
+ }
+ const auto close=[](double a,double b){return std::abs(a-b)<1.e-7;};
+ if(!close(controller->getParamNormalized(a125::riff::vst::Bars),1.)||
+    !close(controller->getParamNormalized(a125::riff::vst::Pm),
+           a125::riff::vst::n(65,30,83))||
+    !close(controller->getParamNormalized(a125::riff::vst::On+4),1.)||
+    !close(controller->getParamNormalized(a125::riff::vst::Lock+100),1.)||
+    !close(controller->getParamNormalized(a125::riff::vst::Degree+4),
+           a125::riff::vst::n(2,-14,14))){
+  std::cerr<<"[FAIL] Controller did not reflect restored non-default state\n";return 2;
+ }
+ // Also exercise the UI-only 150% zoom and BAR 8 across getState/setState.
+ std::uint32_t customUi[3]{0x52475531u,150u,7u};
+ MemoryStream customUiIn(customUi,sizeof(customUi));
+ if(controller->setState(&customUiIn)!=kResultOk){
+  std::cerr<<"[FAIL] Controller custom zoom/BAR restore\n";return 2;
+ }
  MemoryStream privateState;
- if(controller->getState(&privateState)!=kResultOk||privateState.getSize()<=0){
-  std::cerr<<"[FAIL] Controller private state save\n";return 2;
+ if(controller->getState(&privateState)!=kResultOk||
+    privateState.getSize()!=sizeof(customUi)||
+    std::memcmp(privateState.getData(),customUi,sizeof(customUi))!=0){
+  std::cerr<<"[FAIL] Controller zoom/BAR state save mismatch\n";return 2;
  }
  privateState.seek(0,IBStream::kIBSeekSet,nullptr);
  if(controller->setState(&privateState)!=kResultOk){
   std::cerr<<"[FAIL] Controller private state restore\n";return 2;
  }
- std::cout<<"[PASS] Fresh-instance Processor/Controller state restore\n";
+ // Non-default snapshot and zoom/BAR fixtures must survive native host reload.
+ std::cout<<"[PASS] Non-default 8-bar Processor/Controller state, LOCK and 150% UI recall\n";
  HINSTANCE instance=GetModuleHandleW(nullptr);
  const wchar_t cls[]=L"RifferatorQaHostWindow";
  WNDCLASSW wc{};wc.hInstance=instance;wc.lpfnWndProc=DefWindowProcW;

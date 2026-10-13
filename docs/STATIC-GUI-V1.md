@@ -22,3 +22,6 @@ This file is the **geometry contract**, not a claimed finished static mockup. Co
 
 ## Actual VSTGUI implementation stage
 Interactive RifferatorPanel maps the previously specified 16×5 cells to one on-screen bar and dispatches internally by fixed geometry. Standalone geometry contract covers all cells, 40-pixel-plus hitboxes on global actions, BAR and STEP ON/LOCK, and note-picker overlay. Original branding master is copied unmodified to resource/ and rendered by the separately verified High Gain Guitar Finisher vector-logo view. VSTGUI output, Studio One hit coordinates and lifecycle remain NOT VERIFIED until Windows build and host test.
+
+## Picker layout repair (2026-10-13)
+The earlier 15-column overlay at x=180..983, y=422..467 concealed STOP cells. Now the 15 diatonic choices temporarily replace only the right-hand detail panel at x=992..1136, y=224..464 in a 3-column × 5-row arrangement. Every one of the 16 STOP hitboxes remains visible/clickable while note selection is open. Fixed layout, no new controls or audio behavior.

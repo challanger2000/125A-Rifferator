@@ -13,10 +13,20 @@ int main(){
  assert(hit(180,224,false).target==Target::Cell);
  assert(hit(979,462,false).target==Target::None); // cell gutter
  assert(hit(180,464,false).target==Target::None);
- assert(hit(180,426,true).target==Target::Picker);
+ // Picker must never obstruct any STOP cell.
+ for(int c=0;c<16;++c){
+  const auto stop=hit(180+50*c+24,224+48*4+23,true);
+  assert(stop.target==Target::Cell&&stop.column==c&&stop.row==4);
+ }
+ // All 15 diatonic choices remain mouse-accessible.
+ for(int i=0;i<15;++i){
+  const auto choice=hit(997+(i%3)*45+21,248+(i/3)*43+20,true);
+  assert(choice.target==Target::Picker&&choice.column==i);
+ }
  assert(hit(979,426,true).target==Target::None);
  assert(hit(1009,430,false).target==Target::Mode);
- assert(hit(1009,430,true).target==Target::Mode);
+ assert(hit(1009,430,true).target==Target::Picker);
+ assert(hit(1009,430,true).column==12);
  assert(hit(1100,40,false).target==Target::Zoom);
  assert(hit(34,510,false).target==Target::Generate);
  assert(hit(720,510,false).target==Target::Export);

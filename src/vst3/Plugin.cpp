@@ -274,7 +274,9 @@ void Controller::redraw(){
 tresult PLUGIN_API Controller::setParamNormalized(ParamID tag,ParamValue value){
  const auto r=EditController::setParamNormalized(tag,value);
  if(r==kResultOk){
-  apply(visual_,tag,value);
+  // KEY/SCALE may derive a new ROOT. Update the parameter readback.
+  if(apply(visual_,tag,value)&&(tag==Key||tag==ScaleId||tag==Root))
+   EditController::setParamNormalized(Root,read(visual_,Root));
   bar_=std::clamp(bar_,0,visual_.pattern.bars-1);
   if(focused_>=visual_.pattern.activeSteps())focused_=bar_*16;
   redraw();
@@ -282,11 +284,21 @@ tresult PLUGIN_API Controller::setParamNormalized(ParamID tag,ParamValue value){
  return r;
 }
 void Controller::publish(ParamID tag,double value){
+ // Publish the quantized, validated value that the GUI actually displays.
+ const int previousRoot=visual_.musical.rootMidi;
+ if(!apply(visual_,tag,value))return;
+ const double normalized=read(visual_,tag);
  beginEdit(tag);
- EditController::setParamNormalized(tag,value);
- performEdit(tag,value);
+ EditController::setParamNormalized(tag,normalized);
+ performEdit(tag,normalized);
  endEdit(tag);
- apply(visual_,tag,value);
+ if((tag==Key||tag==ScaleId)&&visual_.musical.rootMidi!=previousRoot){
+  const double rootValue=read(visual_,Root);
+  beginEdit(Root);
+  EditController::setParamNormalized(Root,rootValue);
+  performEdit(Root,rootValue);
+  endEdit(Root);
+ }
  redraw();
 }
 void Controller::publishPattern(const product::Snapshot& target){
@@ -349,9 +361,8 @@ void Controller::click(int x,int y,bool shift){
   focused_=bar_*16;pickerStep_=-1;
  }else if(hit.target==Target::Key){
   const int newKey=(visual_.musical.key+1)%12;
-  // Root must remain in the selected scale; follow the tonic when KEY changes.
-  const int root=36+newKey;
-  publish(Key,n(newKey,0,11));publish(Root,n(root,0,127));
+  // The Key parameter mapper transposes tonic Root automatically.
+  publish(Key,n(newKey,0,11));
  }else if(hit.target==Target::Scale){
   publish(ScaleId,visual_.musical.scale==Scale::Major?1.:0.);
  }else if(hit.target==Target::Root){

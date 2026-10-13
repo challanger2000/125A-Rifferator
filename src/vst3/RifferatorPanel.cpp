@@ -138,12 +138,15 @@ void RifferatorPanel::draw(VSTGUI::CDrawContext* dc) {
  label(dc,std::string("STATUS: ")+owner_->notification(),rect(920,500,207,26),muted,true);
  label(dc,"SHIFT+LEFT CLICK = SCALE NOTE",rect(916,540,215,19),muted,true);
  if(owner_->picker()>=0){
-  fill(dc,rect(178,422,805,45),panel,redBorder);
+  // Modal right-panel picker leaves every grid row and STOP field exposed.
+  fill(dc,rect(992,224,144,240),panel,redBorder);
+  label(dc,"SELECT SCALE NOTE",rect(997,227,133,19),text,true);
   for(int i=0;i<15;++i){
    const int degree=i-7;
    const auto name=pitchName(pitchForDegree(degree,music));
-   fill(dc,rect(180+i*50,423,48,41),dark,border);
-   label(dc,name,rect(180+i*50,433,48,21),text,true);
+   const int x=997+(i%3)*45,y=248+(i/3)*43;
+   fill(dc,rect(x,y,43,41),dark,border);
+   label(dc,name,rect(x,y+8,43,22),text,true);
   }
  }
  setDirty(false);
