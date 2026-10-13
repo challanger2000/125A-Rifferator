@@ -39,7 +39,7 @@ inline void variate(Pattern& pattern,const Settings& settings,std::uint32_t seed
     if(s.locked||!s.on||s.articulation==Articulation::Stop)continue;
     if(rng.range(100)<15)s.articulation=Articulation::PalmMute;
   }
-  applyFill(pattern,settings.fillIntensity,seed^0x9e3779b9U);
+  applyFill(pattern,settings,settings.fillIntensity,seed^0x9e3779b9U);
 }
 
 } // namespace a125::riff::heavier

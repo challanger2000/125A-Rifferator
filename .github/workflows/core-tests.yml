@@ -4,6 +4,11 @@ on:
   push:
     branches:
       - rebuild/v1.0.0-clean
+    paths:
+      - 'src/**'
+      - 'tests/**'
+      - 'CMakeLists.txt'
+      - '.github/workflows/core-tests.yml'
 permissions:
   contents: read
 jobs:
