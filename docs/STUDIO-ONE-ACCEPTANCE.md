@@ -40,3 +40,6 @@ Not yet user-confirmed: 4/8 bar host playback, 20× host editor lifecycle, actua
 
 ### Automated host probes (pending)
 The separate 125A Plugin Tester repository is private and inaccessible to the Rifferator workflow token. The clean V1 now builds an original Steinberg-SDK host lifecycle harness: fresh-instance component/controller state transfer and 20 native Windows editor attach/detach cycles. I/O and event torture from the full 125A Plugin Tester are still NOT VERIFIED. Do not count its inaccessible private workflow as a PASS.
+
+## Follow-up automated QA (2026-10-13)
+[Windows run #38414680086](https://github.com/challanger2000/125A-Rifferator/actions/runs/38414680086) confirmed 6/6 native CTest, full 537/537 Steinberg Validator, 20 HWND editor cycles, and non-default 8-bar Processor and Controller state roundtrip including 150% zoom, BAR 8, selected locked notes, trigger mode and PM velocity. The modal pitch picker no longer geometrically overlays STOP, proven by deterministic hitbox tests; its appearance and clicking in actual Studio One remain unverified. This evidence supplements, but does **not** replace, the outstanding Studio One and 125A Plugin Tester release requirements.

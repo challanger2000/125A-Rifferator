@@ -98,3 +98,13 @@ Windows VST3 binary and six CTest tests passed, and Steinberg Validator compiled
 
 ## 2026-10-13 follow-up changes (PENDING CI)
 Real-host picker had obstructed STOP. It now replaces the right detail panel, preserving every STOP hitbox; CTest checks all 15 picker cells and all 16 STOP cells with modal picker active. Controller publish now validates/quantizes before emitting edit gestures and sends a paired ROOT parameter edit when GUI KEY/SCALE changes the root. The Controller readback also mirrors snapped ROOT for incoming host changes without generating host feedback edits. Exact Studio One automation and project recall still NOT VERIFIED.
+
+## 2026-10-13 verified follow-up Windows QA — #38414680086
+
+- Source: commit `e84349ba5738d5e66a39aebe042fbbcc72941752` on `rebuild/v1.0.0-clean`.
+- [GitHub Actions](https://github.com/challanger2000/125A-Rifferator/actions/runs/38414680086): **SUCCESS** (Windows 2022 x64 native VST3, resources and branding confirmed).
+- All six Windows Release CTest regressions: **6/6 PASS**, including 4/8-bar timeline and the picker layout regression for all 15 choices and all 16 unoccluded STOP cells.
+- Original VST3 SDK host test: **PASS** non-default 8-bar Processor snapshot (including LOCK in a late bar, PM velocity and MIDI-note trigger mode), Controller normalized readback, saved 150% zoom/BAR 8 controller state, fresh-instance restore; **20/20 native Windows editor attach/detach PASS**.
+- Steinberg VST3 Validator: **537 passed, 0 failed**.
+- Experimental Windows x64 bundle: [artifact #11824790128](https://github.com/challanger2000/125A-Rifferator/actions/runs/38414680086/artifacts/11824790128), not a release-ready package.
+- **Not verified:** changed picker appearance, Studio One automation and save/reload, standalone 125A Plugin Tester I/O/event torture, complete H7 articulation audition and precise 4/8-bar DAW playback. No FINAL gate promotion.
