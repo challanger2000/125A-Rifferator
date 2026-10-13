@@ -11,12 +11,12 @@
 | Empty step sustains; next note or STOP releases | compileOneCycle | CORE TESTED |
 | KEY / SCALE / ROOT NOTE, scale notes always visible | Settings, pitchForDegree | CORE TESTED; GUI NOT IMPLEMENTED |
 | SHIFT+left-click note chooser | static UI design | NOT IMPLEMENTED |
-| PM VELOCITY | Settings/velocity | CORE IMPLEMENTED; UI/automation NOT IMPLEMENTED |
+| PM VELOCITY | Settings/velocity | H7 PM velocity policy TEST PASS; UI/automation NOT IMPLEMENTED |
 | FILL 0..100 changes only pitch | applyFill | CORE TESTED; UI NOT IMPLEMENTED |
 | GENERATE and VARIATE | generate/variate | CORE IMPLEMENTED; broader musical QA pending |
-| PPQ absolute transport clock | visitAbsoluteEvents / MidiRuntime absolute grid | CORE IMPLEMENTED, new realtime regressions CI PENDING; VST3 adapter NOT VERIFIED |
+| PPQ absolute transport clock | visitAbsoluteEvents / MidiRuntime absolute grid | CORE REGRESSION PASS (CI #38389103512); VST3 adapter NOT VERIFIED |
 | MIDI NOTE trigger NoteOn/NoteOff | MidiRuntime::process, TriggerEvent | CORE RUNTIME IMPLEMENTED; VST3 binding NOT VERIFIED |
-| EXPORT MIDI Standard MIDI File | exportMidi | HEADER/END-TRACK CORE TESTED; independent SMF reader pending |
+| EXPORT MIDI Standard MIDI File | exportMidi | INDEPENDENT SMF FORMAT-0 PARSER TEST PASS (CI #38389103512); DAW import NOT VERIFIED |
 | EXPORT MIDI Save dialog | none | NOT IMPLEMENTED |
 | 100/150% zoom | proven High Gain Guitar Finisher source inspected | NOT IMPLEMENTED |
 | VST3 buses, state, automation, controller lifecycle | none | NOT IMPLEMENTED |
@@ -30,8 +30,16 @@
 - Native VST3 validation, Steinberg Validator, 125A Plugin Tester, 20 GUI attach/reopen cycles, zoom actual Studio One geometry and manual musical verification.
 - FINAL remains **BLOCKED** until all applicable gates and Studio One acceptance succeed.
 
-Source separation checked: Pattern and MidiRuntime do not name H7 performance techniques; the H7 adapter declares the named mapping and PM velocity policy. Regression with arbitrary non-H7 technique code will run in the next core CI. This does not certify the eventual EBM bass product.
+Source separation checked: Pattern and MidiRuntime do not name H7 performance techniques; the H7 adapter declares the named mapping and PM velocity policy. Independent non-H7 technique-policy regression PASS in CI #38388570151. This does not certify the eventual EBM bass product.
 
-Additional independent Standard MIDI File decoder regression (header, VLQ timing, NoteOff-first order, 8-bar boundary and malformed pattern rejection) staged for the next core CI.
+Additional independent Standard MIDI File decoder regression (header, VLQ timing, NoteOff-first order, 8-bar boundary and malformed pattern rejection) PASS in CI #38388570151.
 
-Product-state SDK-free V1 codec: fixed 408-byte endian-stable snapshot includes all 128 cells, bars, key/scale/root, FILL, H7 PM velocity, MIDI trigger mode and seed. Reject unsupported version, CRC/FNV mismatch, malformed values and truncated data *atomically*. Tests pending next core CI. Controller-only BAR selection and zoom state remain separate and not yet implemented.
+Product-state SDK-free V1 codec: fixed 408-byte endian-stable snapshot includes all 128 cells, bars, key/scale/root, FILL, H7 PM velocity, MIDI trigger mode and seed. Reject unsupported version, CRC/FNV mismatch, malformed values and truncated data *atomically*. Malformed-state regression PASS in CI #38389103512. Controller-only BAR selection and zoom state remain separate and not yet implemented.
+
+## Verified automated evidence (2026-10-13)
+
+- **Exact source:** `challanger2000/125A-Rifferator`, `rebuild/v1.0.0-clean`, commit `630c2034a349b4ccdcaa19d5d96a0a511cbe0da6`.
+- **Core CTest:** 4/4 PASS, Linux Ubuntu 24.04, GCC 13.3, C++17 Debug, -Wall/-Wextra/-Wpedantic/-Werror. [CI #38389103512](https://github.com/challanger2000/125A-Rifferator/actions/runs/38389103512).
+- **Subtests:** `rifferator_core_contract`, `rifferator_midi_runtime`, `rifferator_midi_file_format0`, `rifferator_state_roundtrip`.
+- **Evidence limitation:** This is source-level C++ compliance only. No VST3 processor/controller, no Windows native plugin, no Steinberg Validator result, no Editor Lifecycle, no 125A Plugin Tester, no Studio One acceptance. Static SVG is not a functional GUI.
+- **State format:** New V1 wire contract intentionally does not attempt to migrate unreleased/abandoned previous Rifferator V1..V11 implementations. Old source preserved in the historic branch.

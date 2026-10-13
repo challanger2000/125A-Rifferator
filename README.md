@@ -15,8 +15,12 @@ Local core verification (does not incur GitHub Actions):
 
 Mandatory general standards in 125A-Engineering START-HERE / ENGINEERING-GUARDRAILS; Branding master + Knob Designer for future GUI. Primary H7 velocity evidence: https://www.search-manual.com/upload/three-body-technology-heavier-7-strings-metal-guitar-virtual-instrument-plug-in-309614-user-manual.pdf §§6.1/6.4/6.5.
 
-2026-10-13: A separate allocation-free, host-neutral MidiRuntime.hpp and MIDI trigger transport regression suite have been introduced. Until the new core CI is green, treat these changes as unverified. No VST3 binary exists yet.
+2026-10-13: A separate allocation-free, host-neutral MidiRuntime.hpp and MIDI trigger transport regression suite have been introduced. Initial host-neutral core CI is now green (see the exact run below); this does not establish DAW functionality. No VST3 binary exists yet.
 
 **Core/instrument split:** Pattern technique codes are opaque in the generic timing layer. Heavier7Strings.hpp owns the technique labels and velocity profile; tests exercise an independent synthetic bass velocity mapping.
 
-A fixed-size V1 processor state codec now stores all pattern cells and musical settings with atomic validation; this is still SDK-free and its first CI validation is pending.
+A fixed-size V1 processor state codec now stores all pattern cells and musical settings with atomic validation; this is still SDK-free and its malformed-state regression has passed isolated CTest.
+
+## Current source-level QA
+
+**GitHub Actions [#38389103512](https://github.com/challanger2000/125A-Rifferator/actions/runs/38389103512): 4/4 CTest PASS** at commit `630c2034`. This measures the standalone MIDI core, runtime, standard-MIDI-file format and fixed-size state codec only; no VST3, Windows or GUI status is implied. Release remains blocked until genuine Studio One/125A/Steinberg QA.
