@@ -47,3 +47,6 @@ The separate 125A Plugin Tester repository is private and inaccessible to the Ri
 ## Windows event/automation host verification
 
 The [native Windows VST3 QA #38417386319](https://github.com/challanger2000/125A-Rifferator/actions/runs/38417386319) additionally passed actual ProcessData MIDI output and parameter-queue automation: PM65/OPEN115, STOP and transport NoteOff, KEY/ROOT transposition, no unnecessary reattack for unchanged ON, and NoteOn/NoteOff trigger sample offsets. This does not claim a Studio One-specific automation pass or full 125A Plugin Tester approval.
+
+## Controller state v2 regression gate (pending)
+New RGU2 Controller state saves zoom, selected BAR and GENERATE/VARIATE RNG seed; old RGU1 zoom+BAR state is still accepted. Native SDK host harness checks invalid/truncated state cannot modify an existing correct state, and rejects LOCK-protected host parameter changes without corrupting VST3 parameter readback. Studio One resave/reopen still requires user acceptance.

@@ -66,7 +66,7 @@ private:
  int bar_{0},focused_{0},pickerStep_{-1};
  bool componentRestored_{false};
  double zoom_{1.0};
- std::uint32_t seed_{0x125A2026u};
+ std::uint32_t seed_{0x125A2026u}; // persisted Controller-only state v2
  const char* status_{"READY"};
 };
 }

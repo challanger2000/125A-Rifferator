@@ -217,15 +217,28 @@ tresult PLUGIN_API Controller::setComponentState(IBStream* stream){
  return kResultOk;
 }
 // UI-only state has a separate versioned header: no processor state mutation.
+// UI-only Controller state v2 also persists the deterministic GENERATE seed.
+// The 12-byte legacy format (v1) is accepted without changing Processor state.
 tresult PLUGIN_API Controller::setState(IBStream* stream){
  if(!stream)return kInvalidArgument;
  std::uint32_t values[3]{};
  int32 bytes=0;
  if(stream->read(values,sizeof(values),&bytes)!=kResultOk||
-    bytes!=sizeof(values)||values[0]!=0x52475531u||
-    (values[1]!=100&&values[1]!=150)||values[2]>=kMaxBars)return kResultFalse;
+    bytes!=sizeof(values)||
+    (values[0]!=0x52475531u&&values[0]!=0x52475532u)||
+    (values[1]!=100&&values[1]!=150)||values[2]>=kMaxBars)
+  return kResultFalse;
+ std::uint32_t nextSeed=seed_;
+ if(values[0]==0x52475532u){
+  int32 readSeed=0;
+  if(stream->read(&nextSeed,sizeof(nextSeed),&readSeed)!=kResultOk||
+     readSeed!=sizeof(nextSeed))
+   return kResultFalse;
+ }
+ // No GUI/controller field changes until validation and all reads complete.
  zoom_=values[1]/100.;
  bar_=static_cast<int>(values[2]);
+ seed_=nextSeed;
  if(componentRestored_)bar_=std::min(bar_,visual_.pattern.bars-1);
  focused_=bar_*16;
  pickerStep_=-1;
@@ -235,8 +248,8 @@ tresult PLUGIN_API Controller::setState(IBStream* stream){
 }
 tresult PLUGIN_API Controller::getState(IBStream* stream){
  if(!stream)return kInvalidArgument;
- const std::uint32_t values[3]={0x52475531u,zoom_>1.25?150u:100u,
-                                 static_cast<std::uint32_t>(bar_)};
+ const std::uint32_t values[4]={0x52475532u,zoom_>1.25?150u:100u,
+                                 static_cast<std::uint32_t>(bar_),seed_};
  int32 written=0;
  return stream->write((void*)values,sizeof(values),&written)==kResultOk&&
         written==sizeof(values)?kResultOk:kResultFalse;
@@ -272,16 +285,23 @@ void Controller::redraw(){
  if(panel_)panel_->invalid();
 }
 tresult PLUGIN_API Controller::setParamNormalized(ParamID tag,ParamValue value){
- const auto r=EditController::setParamNormalized(tag,value);
- if(r==kResultOk){
-  // KEY/SCALE may derive a new ROOT. Update the parameter readback.
-  if(apply(visual_,tag,value)&&(tag==Key||tag==ScaleId||tag==Root))
-   EditController::setParamNormalized(Root,read(visual_,Root));
-  bar_=std::clamp(bar_,0,visual_.pattern.bars-1);
-  if(focused_>=visual_.pattern.activeSteps())focused_=bar_*16;
+ const auto result=EditController::setParamNormalized(tag,value);
+ if(result!=kResultOk)return result;
+ if(!apply(visual_,tag,value)){
+  // Rejected LOCK-protected edits must not leave stale host parameter values.
+  EditController::setParamNormalized(tag,read(visual_,tag));
   redraw();
+  return kResultFalse;
  }
- return r;
+ const double effective=read(visual_,tag);
+ if(std::abs(effective-value)>1.e-8)
+  EditController::setParamNormalized(tag,effective);
+ if(tag==Key||tag==ScaleId)
+  EditController::setParamNormalized(Root,read(visual_,Root));
+ bar_=std::clamp(bar_,0,visual_.pattern.bars-1);
+ if(focused_>=visual_.pattern.activeSteps())focused_=bar_*16;
+ redraw();
+ return result;
 }
 void Controller::publish(ParamID tag,double value){
  // Publish the quantized, validated value that the GUI actually displays.

@@ -125,3 +125,9 @@ Source commit `74a28db8bd7b6348d6a63a6008f9da2cc7db3bdf`; [Windows run #38417386
 - Windows CTest **6/6 PASS**, editor **20/20 PASS**, Steinberg Validator **537/537 PASS**.
 - [Experimental Windows build artifact #11824563636](https://github.com/challanger2000/125A-Rifferator/actions/runs/38417386319/artifacts/11824563636).
 - Real Studio One project-save/reload, full 125A Plugin Tester I/O and event torture, all H7 articulation audition and precise 4/8-bar Studio One playback are **NOT YET VERIFIED**. This is not FINAL.
+
+## Release-audit patch pending — locked automation & deterministic regeneration
+Inspected and reproduced by source trace: `Controller::setParamNormalized` accepted host values into the VST3 parameter cache before the pattern LOCK invariant could reject them; the displayed parameter value could therefore disagree with actual MIDI/GUI. Rejected edits now revert the host parameter cache to the pattern's authoritative normalized value; accepted but snapped ROOT values are likewise synchronized. A native Win32 VST3 host regression verifies locked ON/DEGREE host readback and invalid ROOT snap. The 12-byte UI state (RGU1) previously saved zoom+bar but omitted Controller's `seed_` counter used by Generate/Variate; the 16-byte RGU2 now adds seed with backward-compatible RGU1 read. Native host tests cover RGU1 migration, RGU2 full roundtrip and atomic truncated-state rejection. No new public parameter IDs and no Processor state format change. New CI result pending.
+
+### Extended host timeline stress (pending verification)
+Added native Windows SDK-hosted stress loops for 44.1/96 kHz, realtime and offline process modes, irregular 1/31/127/257/512 sample blocks, explicit pause/stop event flush, per-block event-offset bounds and exact NoteOn/NoteOff balance. Results must be checked in actual Windows Actions logs; this is not a replacement for 125A Plugin Tester, DAW save/reopen or MIDI audio perception.

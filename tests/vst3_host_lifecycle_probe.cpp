@@ -19,6 +19,8 @@
 #include "../src/product/RifferatorState.hpp"
 #include "../src/vst3/Parameters.hpp"
 #include <cmath>
+#include <algorithm>
+#include <cstdint>
 #include <atomic>
 #include <cstring>
 #include <iostream>
@@ -141,21 +143,54 @@ int main(int argc,char** argv){
            a125::riff::vst::n(2,-14,14))){
   std::cerr<<"[FAIL] Controller did not reflect restored non-default state\n";return 2;
  }
- // Also exercise the UI-only 150% zoom and BAR 8 across getState/setState.
- std::uint32_t customUi[3]{0x52475531u,150u,7u};
+ // Test new UI state v2 including seed, plus backward-compatibility with
+ // the previously shipped experimental 12-byte v1 Controller state.
+ std::uint32_t legacyUi[3]{0x52475531u,150u,7u};
+ MemoryStream legacyIn(legacyUi,sizeof(legacyUi));
+ if(controller->setState(&legacyIn)!=kResultOk){
+  std::cerr<<"[FAIL] Controller legacy v1 state migration\n";return 2;
+ }
+ std::uint32_t customUi[4]{0x52475532u,150u,7u,0xfedcba98u};
  MemoryStream customUiIn(customUi,sizeof(customUi));
  if(controller->setState(&customUiIn)!=kResultOk){
-  std::cerr<<"[FAIL] Controller custom zoom/BAR restore\n";return 2;
+  std::cerr<<"[FAIL] Controller v2 zoom/BAR/generator seed restore\n";return 2;
  }
  MemoryStream privateState;
  if(controller->getState(&privateState)!=kResultOk||
     privateState.getSize()!=sizeof(customUi)||
     std::memcmp(privateState.getData(),customUi,sizeof(customUi))!=0){
-  std::cerr<<"[FAIL] Controller zoom/BAR state save mismatch\n";return 2;
+  std::cerr<<"[FAIL] Controller v2 GUI state and seed serialization\n";return 2;
+ }
+ // Truncated v2 state cannot partially update any Controller field.
+ std::uint32_t shortUi[3]{0x52475532u,100u,0u};
+ MemoryStream shortIn(shortUi,sizeof(shortUi));
+ if(controller->setState(&shortIn)==kResultOk){
+  std::cerr<<"[FAIL] Truncated UI state accepted\n";return 2;
+ }
+ MemoryStream afterBad;
+ if(controller->getState(&afterBad)!=kResultOk||
+    afterBad.getSize()!=sizeof(customUi)||
+    std::memcmp(afterBad.getData(),customUi,sizeof(customUi))!=0){
+  std::cerr<<"[FAIL] Invalid UI state corrupted prior Controller fields\n";return 2;
  }
  privateState.seek(0,IBStream::kIBSeekSet,nullptr);
  if(controller->setState(&privateState)!=kResultOk){
-  std::cerr<<"[FAIL] Controller private state restore\n";return 2;
+  std::cerr<<"[FAIL] Controller private v2 state roundtrip\n";return 2;
+ }
+ // Reject a host edit to locked ON and DEGREES while restoring host readback.
+ if(controller->setParamNormalized(a125::riff::vst::On+4,0.)==kResultOk ||
+    !close(controller->getParamNormalized(a125::riff::vst::On+4),1.)||
+    controller->setParamNormalized(a125::riff::vst::Degree+4,0.)==kResultOk ||
+    !close(controller->getParamNormalized(a125::riff::vst::Degree+4),
+           a125::riff::vst::n(2,-14,14))){
+  std::cerr<<"[FAIL] Host automation changed a locked step readback\n";return 2;
+ }
+ // Snapped out-of-scale roots must also report the actual corrected pitch.
+ if(controller->setParamNormalized(a125::riff::vst::Root,
+                                  a125::riff::vst::n(41,0,127))!=kResultOk ||
+    !close(controller->getParamNormalized(a125::riff::vst::Root),
+           a125::riff::vst::n(42,0,127))){
+  std::cerr<<"[FAIL] ROOT out-of-scale snap not reflected in host\n";return 2;
  }
  // Non-default snapshot and zoom/BAR fixtures must survive native host reload.
  std::cout<<"[PASS] Non-default 8-bar Processor/Controller state, LOCK and 150% UI recall\n";
@@ -336,6 +371,90 @@ int main(int argc,char** argv){
  if(!check(processor->setProcessing(false)==kResultOk &&
            fresh->setActive(false)==kResultOk,
            "host suspend"))return 2;
+ // 125A-style bounded host stress: multiple rates, offline/realtime and
+ // deliberately irregular 1..512 sample blocks, with actual event-list
+ // validation and a final STOP. No synthetic "plugin passed" shortcut.
+ for(const double rate : {44100.,96000.}){
+  for(const int processMode : {kRealtime,kOffline}){
+   ProcessSetup modeSetup{};
+   modeSetup.processMode=processMode;
+   modeSetup.symbolicSampleSize=kSample32;
+   modeSetup.maxSamplesPerBlock=512;
+   modeSetup.sampleRate=rate;
+   if(!check(processor->setupProcessing(modeSetup)==kResultOk &&
+             fresh->setActive(true)==kResultOk &&
+             processor->setProcessing(true)==kResultOk,
+             "stress setup/activate"))return 2;
+   incoming.clear();
+   changes.clearQueue();
+   if(!check(automate(a125::riff::vst::Mode,0.),
+             "stress select TRANSPORT mode"))return 2;
+   const int lengths[5]{1,31,127,257,512};
+   const std::int64_t end=static_cast<std::int64_t>(rate*1.25);
+   std::int64_t pos=0;
+   int blocks=0,noteOns=0,noteOffs=0;
+   bool noteActive=false;
+   while(pos<end){
+    data.numSamples=static_cast<int>(
+       std::min<std::int64_t>(lengths[blocks%5],end-pos));
+    data.processMode=processMode;
+    context.sampleRate=rate;
+    context.tempo=120.;
+    context.projectTimeMusic=static_cast<double>(pos)*2./rate;
+    context.state=ProcessContext::kPlaying |
+                  ProcessContext::kProjectTimeMusicValid |
+                  ProcessContext::kTempoValid;
+    outgoing.clear();
+    if(!check(processor->process(data)==kResultOk,
+              "variable-block callback"))return 2;
+    for(int n=0;n<outgoing.getEventCount();++n){
+     Event e{};
+     if(!check(outgoing.getEvent(n,e)==kResultOk &&
+               e.busIndex==0 &&
+               e.sampleOffset>=0 &&
+               e.sampleOffset<data.numSamples,
+               "event must lie inside processing block"))return 2;
+     if(e.type==Event::kNoteOnEvent){
+      if(!check(!noteActive&&e.noteOn.pitch>=0&&e.noteOn.pitch<=127,
+                "duplicate or invalid NoteOn in stress"))return 2;
+      noteActive=true;++noteOns;
+     }else if(e.type==Event::kNoteOffEvent){
+      if(!check(noteActive,"unmatched NoteOff in stress"))return 2;
+      noteActive=false;++noteOffs;
+     }else{
+      if(!check(false,"non-note event on MIDI-only bus"))return 2;
+     }
+    }
+    pos+=data.numSamples;
+    ++blocks;
+    changes.clearQueue();
+   }
+   data.numSamples=512;
+   context.state=ProcessContext::kProjectTimeMusicValid |
+                 ProcessContext::kTempoValid;
+   context.projectTimeMusic=static_cast<double>(pos)*2./rate;
+   outgoing.clear();
+   if(!check(processor->process(data)==kResultOk,
+             "transport stop at irregular end"))return 2;
+   for(int n=0;n<outgoing.getEventCount();++n){
+    Event e{};
+    if(!check(outgoing.getEvent(n,e)==kResultOk &&
+              e.type==Event::kNoteOffEvent &&
+              e.sampleOffset==0 && noteActive,
+              "transport cleanup exact offset"))return 2;
+    noteActive=false;++noteOffs;
+   }
+   if(!check(!noteActive && noteOns>=3 && noteOns==noteOffs,
+             "balanced MIDI voices and nontrivial attacks"))return 2;
+   if(!check(processor->setProcessing(false)==kResultOk &&
+             fresh->setActive(false)==kResultOk,
+             "stress deactivate"))return 2;
+   std::cout<<"[PASS] Host MIDI stress "<<rate<<" Hz "
+            <<(processMode==kOffline?"offline":"realtime")
+            <<" blocks="<<blocks
+            <<" on="<<noteOns<<" off="<<noteOffs<<"\n";
+  }
+ }
  processor->release();
  std::cout<<"[PASS] Native VST3 KEY automation/ROOT state, redundant parameter, MIDI trigger\n";
  controller->terminate();
