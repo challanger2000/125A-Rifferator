@@ -49,7 +49,9 @@ VSTGUI::CMouseEventResult RifferatorPanel::onMouseDown(VSTGUI::CPoint& pos,
 }
 void RifferatorPanel::draw(VSTGUI::CDrawContext* dc) {
  using namespace VSTGUI;
- const auto& s=owner_->shown(),&pat=s.pattern,&music=s.musical;
+ const auto& s=owner_->shown();
+ const auto& pat=s.pattern;
+ const auto& music=s.musical;
  const int bar=owner_->bar(),selected=owner_->focused();
  dc->setDrawMode(kAntiAliasing);
  fill(dc,rect(0,0,1160,570),back,back);
