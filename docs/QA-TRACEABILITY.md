@@ -86,3 +86,6 @@ The new workflow builds the pinned 125A-Plugin-Tester source revision `70aeb0d9`
 
 ## Windows test-inventory correction, run #38406361914
 The new 4/8-bar CTest target was registered in CMake and passed 6/6 Linux, but was omitted from the explicit Windows cmake --build target list. Therefore Windows CTest reported NOT RUN (missing .exe) after the VST3 and five other tests compiled/passed. This is a CI build-target inventory defect, not a Rifferator engine failure. The Windows workflow now builds all six CTest targets before running ctest. Required 125A Plugin Tester host probes still pending the corrected Windows run.
+
+## Private QA dependency correction
+CI #38406858006 compiled the current VST3 and passed all six Windows CTest tests; a separate 125A Plugin Tester checkout failed because the runner's scoped GitHub token does not have access to the private QA repository. This was an AUTHENTICATION/INFRASTRUCTURE failure, not a plugin test failure. No private 125A tester code has been copied to the public repository. A new original, small SDK-hosted harness is built locally to test fresh-instance processor/controller state and 20 repeated native HWND Editor attach/detach cycles; it is not equivalent to the full 125A Plugin Tester, which remains a separate QA gate.

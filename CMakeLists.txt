@@ -66,6 +66,15 @@ if(RIFFERATOR_ENABLE_VST3)
  if(WIN32)
   target_sources(Rifferator PRIVATE "${vst3sdk_SOURCE_DIR}/public.sdk/source/main/dllmain.cpp")
  endif()
+  if(WIN32)
+    add_executable(RifferatorHostProbe
+      tests/vst3_host_lifecycle_probe.cpp
+      "${vst3sdk_SOURCE_DIR}/public.sdk/source/vst/hosting/module_win32.cpp"
+      "${vst3sdk_SOURCE_DIR}/public.sdk/source/common/memorystream.cpp")
+    target_link_libraries(RifferatorHostProbe PRIVATE
+      sdk_hosting sdk_common base pluginterfaces user32 ole32)
+    target_compile_definitions(RifferatorHostProbe PRIVATE _CRT_SECURE_NO_WARNINGS NOMINMAX)
+  endif()
  smtg_target_configure_version_file(Rifferator)
 endif()
 
