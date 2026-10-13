@@ -99,4 +99,43 @@ int main(){
   assert(strongPm[0].velocity==83);
   assert(!Velocity{29}.valid()&&!Velocity{84}.valid());
 
+  // Zero FILL must not make VARIATE a no-op. For each pattern size and seed,
+  // actual MIDI note velocity or timing must change; no fake GUI-only state.
+  for(int bars : {1,2,4,8})for(std::uint32_t seed=1;seed<=100;++seed){
+    Pattern original;assert(original.setBars(bars));
+    Step pm;pm.on=true;pm.articulation=code(Articulation::PalmMute);
+    for(int i=0;i<original.activeSteps();i+=4)
+      assert(original.setStep(i,pm));
+    Pattern candidate=original;
+    Settings noFill=s;noFill.fillIntensity=0;
+    const auto before=compileOneCycle(original,noFill,Velocity{});
+    assert(variate(candidate,noFill,seed));
+    const auto after=compileOneCycle(candidate,noFill,Velocity{});
+    bool audible=false;
+    assert(after.size()==before.size());
+    for(std::size_t i=0;i<before.size();++i)
+      if(before[i].tick!=after[i].tick ||
+         before[i].pitch!=after[i].pitch ||
+         before[i].velocity!=after[i].velocity)audible=true;
+    assert(audible);
+    Pattern sameSeed=original;
+    assert(variate(sameSeed,noFill,seed));
+    for(int i=0;i<original.activeSteps();++i){
+      assert(sameSeed.steps[i].on==candidate.steps[i].on);
+      assert(sameSeed.steps[i].degree==candidate.steps[i].degree);
+      assert(sameSeed.steps[i].articulation==candidate.steps[i].articulation);
+    }
+  }
+  {
+    Pattern allLocked;Step pm;pm.on=true;
+    for(int i=0;i<allLocked.activeSteps();++i)
+      assert(allLocked.setStep(i,pm)&&allLocked.setLock(i,true));
+    assert(!variate(allLocked,s,42));
+    for(int i=0;i<allLocked.activeSteps();++i)
+      assert(allLocked.steps[i].on&&allLocked.steps[i].locked);
+    Pattern empty;assert(variate(empty,s,42));
+    const auto generated=compileOneCycle(empty,s,Velocity{});
+    assert(!generated.empty()&&generated.front().noteOn);
+  }
+
 }

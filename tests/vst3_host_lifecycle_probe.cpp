@@ -20,6 +20,7 @@
 #include "../src/vst3/Parameters.hpp"
 #include <cmath>
 #include <algorithm>
+#include <array>
 #include <cstdint>
 #include <atomic>
 #include <cstring>
@@ -368,6 +369,68 @@ int main(int argc,char** argv){
  changes.clearQueue();incoming.clear();
  if(!check(processAt(0.,false)&&outgoing.getEventCount()==0,
            "no residual note after MIDI NoteOff"))return 2;
+
+ // Reproduce the actual Studio One failure: keep a MIDI-NOTE trigger held
+ // while changing a sounding riff and adding/removing active steps.
+ // No second input NoteOn is ever sent: phase and ownership must survive.
+ on.sampleOffset=0;
+ if(!check(incoming.addEvent(on)==kResultOk&&
+           processAt(0.,false)&&outgoing.getEventCount()==1&&
+           is(0,true,42,65,0),
+           "MIDI trigger starts 8-bar live-edit fixture"))return 2;
+ incoming.clear();changes.clearQueue();
+ if(!check(automate(a125::riff::vst::Type+1,0.) &&
+           automate(a125::riff::vst::On+3,1.) &&
+           automate(a125::riff::vst::Type+3,
+                    a125::riff::vst::n(2,0,3)),
+           "schedule live TYPE edit and additional note"))return 2;
+ if(!check(processAt(0.,false)&&outgoing.getEventCount()==0,
+           "live edit must not stop/restart MIDI trigger"))return 2;
+ changes.clearQueue();
+ struct MidiExpected{int sample;bool noteOn;int pitch;int velocity;};
+ const std::array<MidiExpected,4> timeline{{
+    {6000,false,42,0},{6000,true,44,65},
+    {12000,false,44,0},{18000,true,42,115}
+ }};
+ std::size_t index=0;
+ int elapsed=1024;
+ bool deleted=false;
+ while(elapsed<19500){
+  data.numSamples=std::min(512,19500-elapsed);
+  if(!deleted&&elapsed>=7000){
+   if(!check(automate(a125::riff::vst::On+1,0.),
+             "queue deletion while MIDI note remains held"))return 2;
+   deleted=true;
+  }
+  if(!check(processAt(0.,false),
+            "seamless MIDI-NOTE edit callback"))return 2;
+  for(int i=0;i<outgoing.getEventCount();++i){
+   Event e{};
+   if(!check(outgoing.getEvent(i,e)==kResultOk &&
+             index<timeline.size(),"unexpected live-edit output"))return 2;
+   const auto& expect=timeline[index++];
+   const int absolute=elapsed+e.sampleOffset;
+   if(!check(absolute==expect.sample &&
+             e.type==(expect.noteOn?Event::kNoteOnEvent:Event::kNoteOffEvent) &&
+             (expect.noteOn?e.noteOn.pitch==expect.pitch:
+                            e.noteOff.pitch==expect.pitch) &&
+             (!expect.noteOn||
+                std::abs(e.noteOn.velocity*127.-expect.velocity)<0.02),
+             "live-edit event at original phase/velocity"))return 2;
+  }
+  elapsed+=data.numSamples;
+  changes.clearQueue();
+ }
+ if(!check(deleted&&index==timeline.size(),
+           "playhead stayed continuous through add/delete"))return 2;
+ data.numSamples=512;
+ off.sampleOffset=100;
+ if(!check(incoming.addEvent(off)==kResultOk&&
+           processAt(0.,false)&&outgoing.getEventCount()==1&&
+           is(0,false,42,0,100),
+           "original matching NoteOff releases live-edited riff"))return 2;
+ incoming.clear();
+ std::cout<<"[PASS] MIDI NOTE seamless live insert/delete and original 6000/12000/18000 sample boundaries\n";
  if(!check(processor->setProcessing(false)==kResultOk &&
            fresh->setActive(false)==kResultOk,
            "host suspend"))return 2;

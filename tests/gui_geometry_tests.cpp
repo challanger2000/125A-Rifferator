@@ -171,6 +171,9 @@ int main(){
  assert(numericNudge(Target::Fill,100,1)==100);
  assert(numericNudge(Target::Fill,54,-1)==53);
  assert(hit(1100,40,false).target==Target::Zoom);
+ assert(hit(1038,35,false).target==Target::Zoom);
+ assert(hit(972,35,false).target==Target::None);
+ assert(hit(1030,64,false).target==Target::None);
  assert(hit(34,510,false).target==Target::Generate);
  assert(hit(720,510,false).target==Target::Export);
  assert(hit(1010,284,false).target==Target::StepOn);

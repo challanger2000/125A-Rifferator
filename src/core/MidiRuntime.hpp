@@ -41,6 +41,12 @@ public:
   SyncMode mode() const noexcept { return mode_; }
   int activePitch() const noexcept { return activePitch_; }
   bool triggerHeld() const noexcept { return held_; }
+  // Release one sounding output note without resetting MIDI NoteOn ownership
+  // or its phase. No allocations, no host commands, no trigger loss.
+  template<class Sink>
+  bool releaseVoice(int offset,Sink&& sink) noexcept {
+    return release(offset,sink);
+  }
   // Only call reset() when deactivating / disconnecting the output bus.
   // If a host is still playing, process a stop first to flush the active note.
   void reset() noexcept {

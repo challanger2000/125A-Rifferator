@@ -28,6 +28,12 @@ void label(CDrawContext* dc,const std::string& s,CRect r,
  dc->setFontColor(color);
  dc->drawString(s.c_str(),r,center?kCenterText:kLeftText);
 }
+void titleLabel(CDrawContext* dc,const std::string& s,CRect r,
+                const CColor& color){
+ dc->setFont(kNormalFontVeryBig);
+ dc->setFontColor(color);
+ dc->drawString(s.c_str(),r,kCenterText);
+}
 std::string pitchName(int pitch){
  static const char* notes[]={"C","C#","D","D#","E","F","F#","G","G#","A","A#","B"};
  if(pitch<0||pitch>127)return "--";
@@ -105,12 +111,14 @@ void RifferatorPanel::draw(VSTGUI::CDrawContext* dc) {
  fill(dc,rect(0,0,1160,570),back,back);
  fill(dc,rect(9,8,1142,554),panel,border);
  fill(dc,rect(20,18,1120,61),back,border);
- label(dc,"RIFFERATOR",rect(181,25,450,29),text);
- label(dc,"V1  /  HEAVIER7STRINGS  /  MIDI RIFF GENERATOR",
-       rect(181,53,570,18),muted);
- fill(dc,rect(972,25,152,40),red,redBorder);
+ // Product title is centered on the editor axis; the official logo
+ // stays on the left and a compact zoom switch occupies the right.
+ titleLabel(dc,"RIFFERATOR",rect(260,24,640,35),text);
+ label(dc,"V1.0.0  /  MIDI RIFF GENERATOR",
+       rect(260,57,640,17),muted,true);
+ fill(dc,rect(1036,34,88,30),red,redBorder);
  label(dc,std::string("ZOOM ")+(owner_->zoom()>1.25?"150%":"100%"),
-       rect(977,34,144,19),text,true);
+       rect(1038,40,84,18),text,true);
  fill(dc,rect(23,87,1113,79),dark,border);
  struct Selector {int x,w;const char* heading;std::string value;};
  const Selector selectors[]={

@@ -44,14 +44,43 @@ inline void generate(Pattern& pattern,const Settings& settings,std::uint32_t see
   }
   applyFill(pattern,settings,settings.fillIntensity,seed^0x6d2b79f5U);
 }
-inline void variate(Pattern& pattern,const Settings& settings,std::uint32_t seed) noexcept {
+// Audible by design: even FILL=0 and an all-PM pattern get 1..3 accents
+// with genuine H7 velocity differences. Musical beat/LOCK/STOP are preserved.
+inline bool variate(Pattern& pattern,const Settings& settings,std::uint32_t seed) noexcept {
+  if(!pattern.valid()||!settings.valid())return false;
   Random rng{seed};
+  const int target=1+rng.range(3);
+  int firstNote=-1,firstRest=-1,changed=0;
   for(int i=0;i<pattern.activeSteps();++i){
-    auto& s=pattern.steps[static_cast<std::size_t>(i)];
-    if(s.locked||!s.on||s.stop)continue;
-    if(rng.range(100)<15)s.articulation=code(Articulation::PalmMute);
+    auto& step=pattern.steps[static_cast<std::size_t>(i)];
+    if(step.locked)continue;
+    if(!step.on){
+      if(firstRest<0)firstRest=i;
+      continue;
+    }
+    if(step.stop)continue;
+    if(firstNote<0)firstNote=i;
+    if(changed>=target||rng.range(100)>=25)continue;
+    step.articulation=code(step.articulation==code(Articulation::OpenPowerchord)?
+                           Articulation::PalmMute:Articulation::OpenPowerchord);
+    ++changed;
   }
-  applyFill(pattern,settings,settings.fillIntensity,seed^0x9e3779b9U);
+  if(changed==0){
+    if(firstNote>=0){
+      auto& step=pattern.steps[static_cast<std::size_t>(firstNote)];
+      step.articulation=code(step.articulation==code(Articulation::OpenPowerchord)?
+                             Articulation::PalmMute:Articulation::OpenPowerchord);
+      ++changed;
+    }else if(firstRest>=0){
+      auto& step=pattern.steps[static_cast<std::size_t>(firstRest)];
+      step.on=true;step.stop=false;step.degree=0;
+      step.articulation=code(Articulation::PalmMute);
+      ++changed;
+    }
+  }
+  if(changed)
+    applyFill(pattern,settings,settings.fillIntensity,seed^0x9e3779b9U);
+  return changed>0;
 }
 
 } // namespace a125::riff::heavier

@@ -32,6 +32,7 @@ private:
  MidiRuntime runtime_{};
  double sampleRate_{48000.};
  bool cleanupPending_{false};
+ bool releasePitchOnly_{false};
 };
 class Controller final:public EditController,public VSTGUI::VST3EditorDelegate {
 

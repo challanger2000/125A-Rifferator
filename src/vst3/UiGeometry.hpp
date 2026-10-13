@@ -46,7 +46,7 @@ inline Hit hit(int x,int y,bool picker) noexcept {
    return {Target::Cell,c,r};
   return {};
  }
- if(inside(x,y,972,25,152,40))return {Target::Zoom};
+ if(inside(x,y,1036,34,88,30))return {Target::Zoom};
  if(inside(x,y,34,100,134,55))return {Target::Bars};
  if(inside(x,y,180,100,116,55))return {Target::Key};
  if(inside(x,y,308,100,174,55))return {Target::Scale};

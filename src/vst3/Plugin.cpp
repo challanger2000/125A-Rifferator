@@ -76,7 +76,6 @@ tresult PLUGIN_API Processor::setState(IBStream* stream){
 tresult PLUGIN_API Processor::process(ProcessData& data){
  if(data.numSamples<0)return kInvalidArgument;
  product::Snapshot candidate=snapshot_;
- bool patternEdited=false;
  if(data.inputParameterChanges){
   auto* changes=data.inputParameterChanges;
   // LOCK first prevents same-block user edits from silently modifying a locked step.
@@ -89,22 +88,19 @@ tresult PLUGIN_API Processor::process(ProcessData& data){
     if((pass==0)!=isLock)continue;
     int32 sample=0;ParamValue value=0.;
     if(queue->getPoint(queue->getPointCount()-1,sample,value)==kResultOk){
-      const auto previousValue=read(candidate,id);
-      if(apply(candidate,id,value)&&id>=On&&id<Lock+kMaxSteps&&
-         !(id>=Lock&&id<Lock+kMaxSteps)&&
-         read(candidate,id)!=previousValue)patternEdited=true;
+      // A live STEP/LOCK edit updates the next grid event, not the MIDI trigger.
+      apply(candidate,id,value);
     }
    }
   }
  }
  if(candidate.valid()){
-  if(patternEdited)cleanupPending_=true;
-  if(candidate.pattern.bars!=snapshot_.pattern.bars||
-     candidate.musical.key!=snapshot_.musical.key||
-     candidate.musical.rootMidi!=snapshot_.musical.rootMidi||
-     candidate.musical.scale!=snapshot_.musical.scale||
-     candidate.pmVelocity!=snapshot_.pmVelocity)
-   cleanupPending_=true;
+  // Only pitch-basis changes need a voice release. Do not reset held_
+  // or phaseTicks_ in MIDI NOTE when live-editing any pattern or velocity.
+  releasePitchOnly_=
+      candidate.musical.key!=snapshot_.musical.key||
+      candidate.musical.rootMidi!=snapshot_.musical.rootMidi||
+      candidate.musical.scale!=snapshot_.musical.scale;
   snapshot_=candidate;
  }
  auto& s=snapshot_;
@@ -157,6 +153,10 @@ tresult PLUGIN_API Processor::process(ProcessData& data){
   }
   return data.outputEvents->addEvent(event)==kResultOk;
  };
+ if(releasePitchOnly_&&!cleanupPending_){
+  if(!runtime_.releaseVoice(0,sink))return kResultFalse;
+ }
+ releasePitchOnly_=false;
  if(cleanupPending_){
   // Forced release using the *same* host output list before any new attacks.
   // setActive(false) itself has no output-event sink and must not erase state.
@@ -579,8 +579,12 @@ void Controller::click(int x,int y,bool shift,bool control){
           hit.target==Target::Clear){
   auto generated=visual_;
   if(hit.target==Target::Generate)heavier::generate(generated.pattern,generated.musical,++seed_);
-  else if(hit.target==Target::Variate)heavier::variate(generated.pattern,generated.musical,++seed_);
-  else generated.pattern.clear();
+  else if(hit.target==Target::Variate){
+   if(!heavier::variate(generated.pattern,generated.musical,++seed_)){
+    status_="NOTHING UNLOCKED TO VARIATE";
+    redraw();return;
+   }
+  }else generated.pattern.clear();
   publishPattern(generated);
   status_=hit.target==Target::Generate?"PATTERN GENERATED":
           hit.target==Target::Variate?"PATTERN VARIED":"PATTERN CLEARED";
