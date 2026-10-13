@@ -6,7 +6,7 @@ Source redesign staged 2026-10-13. **DAW interactions NOT VERIFIED.** This matri
 | --- | --- | --- | --- | --- |
 | 16× STEP ON `GuitarActive0..15` | 300..315, edit callback | Enable/disable one guitar step | GUI structural, processor state | NOT VERIFIED |
 | 16× articulation × six rows `GCell0_0..GCell5_15` | 400..415 with 300..315 | One exclusive articulation; STOP releases active guitar notes | 16-step matrix structural, scheduler regression | NOT VERIFIED |
-| 16× DOUBLE `GDouble0..15` | 448..463 | Two half-step strokes on the selected step only; PM second at velocity 75 with Heavier AUTO; no CC40 | Scheduler double regression | NOT VERIFIED |
+| 16× DOUBLE `GDouble0..15` | 448..463 | Two half-step strokes on the selected step only; both PM velocities strictly within PM MIN/MAX with Heavier AUTO; no CC40 or Kontakt velocity | Scheduler double regression | NOT VERIFIED |
 | 16× LOCK `GLock0..15` | 432..447 | Protects whole step vs live edit/generation | Generator and state tests | NOT VERIFIED |
 | 16× degree `DegreeValue0..15` plus ± | 416..431; direct `CTextEdit`, commands 800..831 | Relative scale degrees -13..15 | GUI, numeric, state | NOT VERIFIED |
 | ROOT NOTE `RootValue` plus ± | 103; direct `CTextEdit`, commands 900/901 | Guitars transpose; E2=40 | Numeric, scheduler, state | NOT VERIFIED |

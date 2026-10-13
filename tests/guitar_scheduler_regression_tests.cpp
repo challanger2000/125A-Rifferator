@@ -65,7 +65,8 @@ int main(){
  assert(shortOffsets.size()==3);
  assert(shortOffsets[0]==0&&shortOffsets[1]==22050&&shortOffsets[2]==33075);
  // Per-step DOUBLE is independent of the manual gallop grid.
- // Kontakt UP uses a second event at half a step with velocity 75.
+ // Both DOUBLE notes must use the CURRENT guitar library's PM range.
+ // Kontakt-specific fixed second velocities must never leak into Heavier7Strings.
  // Heavier7Strings AUTO selects physical stroke direction itself.
  emitted.clear();scheduler.reset();
  live.enabled.fill(false);live.enabled[8]=true;live.doubled[8]=true;
@@ -78,7 +79,17 @@ int main(){
  }
  assert(doubleOn==2&&doubleOff==2);
  assert(doubleOffsets[0]==0&&doubleOffsets[1]==3000);
- assert(doubleVels[0]>=30&&doubleVels[0]<=40&&doubleVels[1]==75);
+ assert(doubleVels[0]>=30&&doubleVels[0]<=40);
+ assert(doubleVels[1]>=30&&doubleVels[1]<=40);
+ assert(doubleVels[1]<=doubleVels[0]);
+ // A narrow PM band cannot cause the second strike to escape its bounds.
+ emitted.clear();scheduler.reset();
+ live.pmMin=36;live.pmMax=36;
+ scheduler.process(song.guitar,2.,2.25,6000,song.periodTicks,sink,true,live);
+ int narrowOn=0;
+ for(auto e:emitted)if(e.on){++narrowOn;assert(e.velocity==36);}
+ assert(narrowOn==2);
+ live.pmMin=30;live.pmMax=40;
  // Pure PM steps MUST NOT inject secondary hits unless DOUBLE enabled.
  emitted.clear();scheduler.reset();
  live.doubled.fill(false);
