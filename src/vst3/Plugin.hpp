@@ -64,6 +64,7 @@ private:
  VSTGUI::VST3Editor* editor_{nullptr};
  RifferatorPanel* panel_{nullptr};
  int bar_{0},focused_{0},pickerStep_{-1};
+ bool componentRestored_{false};
  double zoom_{1.0};
  std::uint32_t seed_{0x125A2026u};
  const char* status_{"READY"};

@@ -86,8 +86,10 @@ tresult PLUGIN_API Processor::process(ProcessData& data){
     if((pass==0)!=isLock)continue;
     int32 sample=0;ParamValue value=0.;
     if(queue->getPoint(queue->getPointCount()-1,sample,value)==kResultOk){
+      const auto previousValue=read(candidate,id);
       if(apply(candidate,id,value)&&id>=On&&id<Lock+kMaxSteps&&
-         !(id>=Lock&&id<Lock+kMaxSteps))patternEdited=true;
+         !(id>=Lock&&id<Lock+kMaxSteps)&&
+         read(candidate,id)!=previousValue)patternEdited=true;
     }
    }
   }
@@ -203,6 +205,7 @@ tresult PLUGIN_API Controller::setComponentState(IBStream* stream){
  product::Snapshot candidate;
  if(!loadSnapshot(stream,candidate))return kResultFalse;
  visual_=candidate;
+ componentRestored_=true;
  bar_=std::clamp(bar_,0,visual_.pattern.bars-1);
  focused_=bar_*16;
  pickerStep_=-1;
@@ -222,7 +225,8 @@ tresult PLUGIN_API Controller::setState(IBStream* stream){
     bytes!=sizeof(values)||values[0]!=0x52475531u||
     (values[1]!=100&&values[1]!=150)||values[2]>=kMaxBars)return kResultFalse;
  zoom_=values[1]/100.;
- bar_=std::min<int>(static_cast<int>(values[2]),visual_.pattern.bars-1);
+ bar_=static_cast<int>(values[2]);
+ if(componentRestored_)bar_=std::min(bar_,visual_.pattern.bars-1);
  focused_=bar_*16;
  pickerStep_=-1;
  if(editor_)editor_->setZoomFactor(zoom_);

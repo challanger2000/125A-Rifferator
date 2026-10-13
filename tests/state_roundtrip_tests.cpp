@@ -102,5 +102,28 @@ int main(){
   assert(a125::riff::vst::apply(mapped,a125::riff::vst::Pm,1.));
   assert(mapped.pmVelocity==83);
   assert(mapped.valid());
+  // KEY automation must follow a previous tonic rather than leave root in
+  // an incompatible mode (previously silently rejected by Processor).
+  a125::riff::product::Snapshot transposed;
+  using namespace a125::riff::vst;
+  assert(transposed.musical.key==4&&transposed.musical.rootMidi==40);
+  assert(apply(transposed,Key,n(6,0,11))); // E minor -> F# minor
+  assert(transposed.musical.key==6&&transposed.musical.rootMidi==42);
+  assert(transposed.valid());
+  // A non-tonic root becomes the nearest legal scale pitch on a mode change.
+  transposed.musical.key=4;
+  transposed.musical.rootMidi=43; // G2, valid in E natural minor
+  transposed.musical.scale=Scale::NaturalMinor;
+  assert(apply(transposed,ScaleId,0.)); // E major
+  assert(transposed.musical.rootMidi==44); // G#2, nearest allowed
+  assert(transposed.valid());
+  assert(apply(transposed,Root,n(41,0,127))); // F2 not in E major
+  assert(pitchInScale(transposed.musical.rootMidi,transposed.musical));
+  // B -> C tonic automation crosses the octave upward, never jumps down.
+  transposed.musical.key=11;
+  transposed.musical.scale=Scale::NaturalMinor;
+  transposed.musical.rootMidi=47;
+  assert(apply(transposed,Key,n(0,0,11)));
+  assert(transposed.musical.key==0&&transposed.musical.rootMidi==48);
 
 }

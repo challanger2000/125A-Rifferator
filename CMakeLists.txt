@@ -91,3 +91,13 @@ else()
  target_compile_options(rifferator_gui_geometry_tests PRIVATE -Wall -Wextra -Wpedantic -Werror -UNDEBUG)
 endif()
 add_test(NAME rifferator_gui_geometry COMMAND rifferator_gui_geometry_tests)
+
+# Source-level 4- and 8-bar transport/persistence regression.
+add_executable(rifferator_extended_timeline_tests tests/extended_timeline_tests.cpp)
+target_include_directories(rifferator_extended_timeline_tests PRIVATE src)
+if(MSVC)
+ target_compile_options(rifferator_extended_timeline_tests PRIVATE /W4 /WX /UNDEBUG)
+else()
+ target_compile_options(rifferator_extended_timeline_tests PRIVATE -Wall -Wextra -Wpedantic -Werror -UNDEBUG)
+endif()
+add_test(NAME rifferator_extended_timeline COMMAND rifferator_extended_timeline_tests)

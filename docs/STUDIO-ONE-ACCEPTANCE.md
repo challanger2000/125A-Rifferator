@@ -24,3 +24,6 @@ The current Windows bundle is experimental and not a final release. This is a hu
 - [ ] Automation of bars/global/step parameters updates the actual MIDI output and GUI consistently.
 
 **Release gate:** Steinberg Validator PASS and five isolated CTest passes do **not** substitute for this checklist, Editor Lifecycle Probe, and 125A Plugin Tester. No FINAL before positive user approval.
+
+### Automated probe extensions (pending)
+Pinned 125A-Plugin-Tester probes run on a Windows GitHub runner in one batch: state transfer, module reload, I/O and event stress, and 20 editor cycles (four independent five-cycle launches). These do not replace graphical Studio One checking, but can reduce the remaining manual work.
