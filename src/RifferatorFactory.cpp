@@ -86,6 +86,7 @@ public:
       // GENERATE starts a new pattern with no stale double strokes.
       // VARIATE preserves the existing stroke subdivision.
       if(command==GenerationCommand::Generate)publish(kGuitarDoubleBase+i,0.);
+      if(command==GenerationCommand::Generate)publish(kGuitarLengthBase+i,0.);
     }
   }
   unsigned drumGenerationCount_{};
@@ -105,13 +106,22 @@ public:
   std::array<VSTGUI::CControl*,16> stepOnButtons_{};
   std::array<VSTGUI::CControl*,16> lockButtons_{};
   std::array<VSTGUI::CControl*,16> doubleButtons_{};
+  std::array<VSTGUI::CControl*,16> lengthButtons_{};
   void refreshSwitch(Steinberg::Vst::ParamID id) {
     using namespace a125::rifferator;
     VSTGUI::CControl* control=nullptr;
     if(id>=kGuitarStepBase && id<kGuitarStepBase+16)control=stepOnButtons_[id-kGuitarStepBase];
     else if(id>=kGuitarLockBase && id<kGuitarLockBase+16)control=lockButtons_[id-kGuitarLockBase];
     else if(id>=kGuitarDoubleBase && id<kGuitarDoubleBase+16)control=doubleButtons_[id-kGuitarDoubleBase];
-    if(control){control->setValueNormalized(getParamNormalized(id)>=0.5?1.f:0.f);control->invalid();}
+    else if(id>=kGuitarLengthBase && id<kGuitarLengthBase+16)control=lengthButtons_[id-kGuitarLengthBase];
+    if(control){
+      const bool on=getParamNormalized(id)>=0.5;
+      control->setValueNormalized(on?1.f:0.f);
+      if(id>=kGuitarLengthBase && id<kGuitarLengthBase+16)
+        if(auto* button=dynamic_cast<VSTGUI::CTextButton*>(control))
+          button->setTitle(on?"1/8":"1/16");
+      control->invalid();
+    }
   }
   // One-to-one text-edit tags: 912 Root, 913 Gate, 915 Fill.
   std::array<VSTGUI::CTextEdit*,3> musicalDisplays_{};
@@ -226,10 +236,13 @@ public:
       step=static_cast<int>(id-kGuitarDegreeBase);
     else if(id>=kGuitarDoubleBase && id<kGuitarDoubleBase+16)
       step=static_cast<int>(id-kGuitarDoubleBase);
+    else if(id>=kGuitarLengthBase && id<kGuitarLengthBase+16)
+      step=static_cast<int>(id-kGuitarLengthBase);
     if(step>=0 && getParamNormalized(kGuitarLockBase+step)>=0.5) {
       refreshGuitarStep(step);
       if(id>=kGuitarStepBase && id<kGuitarStepBase+16)refreshSwitch(id);
       if(id>=kGuitarDoubleBase && id<kGuitarDoubleBase+16)refreshSwitch(id);
+      if(id>=kGuitarLengthBase && id<kGuitarLengthBase+16)refreshSwitch(id);
       if(id>=kGuitarDegreeBase && id<kGuitarDegreeBase+16)refreshDegree(step);
       return Steinberg::kResultOk;
     }
@@ -252,7 +265,8 @@ public:
       if(id>=a125::rifferator::kGuitarArticulationBase && id<a125::rifferator::kGuitarArticulationBase+16)refreshGuitarStep(static_cast<int>(id-a125::rifferator::kGuitarArticulationBase));
       if((id>=a125::rifferator::kGuitarStepBase && id<a125::rifferator::kGuitarStepBase+16) ||
          (id>=a125::rifferator::kGuitarLockBase && id<a125::rifferator::kGuitarLockBase+16) ||
-         (id>=a125::rifferator::kGuitarDoubleBase && id<a125::rifferator::kGuitarDoubleBase+16))refreshSwitch(id);
+         (id>=a125::rifferator::kGuitarDoubleBase && id<a125::rifferator::kGuitarDoubleBase+16) ||
+         (id>=a125::rifferator::kGuitarLengthBase && id<a125::rifferator::kGuitarLengthBase+16))refreshSwitch(id);
       if(id>=a125::rifferator::kGuitarDegreeBase && id<a125::rifferator::kGuitarDegreeBase+16)refreshDegree(static_cast<int>(id-a125::rifferator::kGuitarDegreeBase));
     }
     return result;
@@ -268,6 +282,7 @@ public:
       stepOnButtons_.fill(nullptr);
       lockButtons_.fill(nullptr);
       doubleButtons_.fill(nullptr);
+      lengthButtons_.fill(nullptr);
       pmDisplays_.fill(nullptr);
       musicalDisplays_.fill(nullptr);
     }
@@ -283,6 +298,7 @@ public:
       stepOnButtons_.fill(nullptr);
       lockButtons_.fill(nullptr);
       doubleButtons_.fill(nullptr);
+      lengthButtons_.fill(nullptr);
       pmDisplays_.fill(nullptr);
       musicalDisplays_.fill(nullptr);
       viewOwner_=editor;
@@ -290,7 +306,7 @@ public:
     if(auto* control=dynamic_cast<VSTGUI::CControl*>(view)) {
       const auto tag=control->getTag();
       if((tag>=500&&tag<596)||(tag==700||tag==701||tag==702||tag==721||tag==722)||
-         (tag>=300&&tag<316)||(tag>=432&&tag<464)||
+         (tag>=300&&tag<316)||(tag>=432&&tag<480)||
          (tag>=800&&tag<832)||(tag>=850&&tag<866)||
          (tag>=880&&tag<886)||(tag==900||tag==901||tag==902||tag==903||tag==906||tag==907)||
          tag==912||tag==913||tag==915)
@@ -307,6 +323,7 @@ public:
       if(tag>=300 && tag<316) {stepOnButtons_[tag-300]=control;refreshSwitch(tag);}
       if(tag>=432 && tag<448) {lockButtons_[tag-432]=control;refreshSwitch(tag);}
       if(tag>=448 && tag<464) {doubleButtons_[tag-448]=control;refreshSwitch(tag);}
+      if(tag>=464 && tag<480) {lengthButtons_[tag-464]=control;refreshSwitch(tag);}
       if(control->getTag()>=850 && control->getTag()<866) {
         degreeDisplays_[static_cast<std::size_t>(control->getTag()-850)]=dynamic_cast<VSTGUI::CTextEdit*>(control);
         refreshDegree(control->getTag()-850);
@@ -357,12 +374,12 @@ public:
       return;
     }
     if((command>=300 && command<316) ||
-       (command>=432 && command<464)) {
+       (command>=432 && command<480)) {
       const auto id=static_cast<Steinberg::Vst::ParamID>(command);
-      // A locked guitar step rejects both ON/OFF and DOUBLE edits.
-      // Restore the GUI immediately as the processor rejects those edits too.
-      if(((command>=300 && command<316) || (command>=448 && command<464)) &&
-         getParamNormalized(a125::rifferator::kGuitarLockBase+((command>=448?command-448:command-300)))>=0.5) {
+      // Locked steps reject ON/OFF, DOUBLE and NOTE LENGTH edits.
+      if(((command>=300 && command<316) || (command>=448 && command<480)) &&
+         getParamNormalized(a125::rifferator::kGuitarLockBase+
+           (command>=464?command-464:command>=448?command-448:command-300))>=0.5) {
         refreshSwitch(id);
         return;
       }
@@ -409,6 +426,11 @@ public:
         if(getParamNormalized(doubled)>=0.5) {
           beginEdit(doubled);setParamNormalized(doubled,0.);
           performEdit(doubled,0.);endEdit(doubled);
+        }
+        const auto length=kGuitarLengthBase+step;
+        if(getParamNormalized(length)>=0.5) {
+          beginEdit(length);setParamNormalized(length,0.);
+          performEdit(length,0.);endEdit(length);
         }
         refreshGuitarStep(step);
       }
@@ -473,8 +495,10 @@ public:
     parameters.addParameter(STR16("Root Note"),nullptr,127,40.0/127.0,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kRootPitch);
 
     parameters.addParameter(STR16("Fill Intensity"),STR16("%"),0,0.0,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kFillIntensity);
-    for(int i=0;i<16;++i)
+    for(int i=0;i<16;++i) {
       parameters.addParameter(STR16("Guitar DOUBLE"),nullptr,1,0.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kGuitarDoubleBase+i);
+      parameters.addParameter(STR16("Note 1/8"),nullptr,1,0.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kGuitarLengthBase+i);
+    }
     parameters.addParameter(STR16("Guitar Step 01"),nullptr,1,1.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kGuitarStepBase+0);
     parameters.addParameter(STR16("Guitar Step 02"),nullptr,1,0.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kGuitarStepBase+1);
     parameters.addParameter(STR16("Guitar Step 03"),nullptr,1,1.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kGuitarStepBase+2);
@@ -781,11 +805,13 @@ public:
       EditControllerEx1::setParamNormalized(kGuitarArticulationBase+i,static_cast<int>(st.articulation)/5.);
       EditControllerEx1::setParamNormalized(kGuitarDegreeBase+i,(st.degree+13)/28.);
       EditControllerEx1::setParamNormalized(kGuitarDoubleBase+i,st.doubled?1.:0.);
+      EditControllerEx1::setParamNormalized(kGuitarLengthBase+i,snapshot.eighth[i]?1.:0.);
       EditControllerEx1::setParamNormalized(kGuitarLockBase+i,st.locked?1.:0.);
     }
     refreshPmDisplays();refreshMusicalDisplays();
     for(int i=0;i<16;++i){refreshGuitarStep(i);refreshDegree(i);
-      refreshSwitch(kGuitarStepBase+i);refreshSwitch(kGuitarLockBase+i);refreshSwitch(kGuitarDoubleBase+i);}
+      refreshSwitch(kGuitarStepBase+i);refreshSwitch(kGuitarLockBase+i);refreshSwitch(kGuitarDoubleBase+i);
+      refreshSwitch(kGuitarLengthBase+i);}
     return Steinberg::kResultOk;
   }
   static Steinberg::FUnknown* createInstance(void*) {

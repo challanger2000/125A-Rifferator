@@ -14,7 +14,7 @@ struct ScheduledMidiEvent {
 struct GuitarLive {
   int root{40},preparedRoot{40},gate{95},pmMin{30},pmMax{40};
   std::array<int,7> scale{0,2,3,5,7,8,10};
-  std::array<bool,16> enabled{},locked{},doubled{};
+  std::array<bool,16> enabled{},locked{},doubled{},eighth{};
   std::array<int,16> articulation{},degree{};
   GuitarLive() noexcept {
     for(int i=0;i<16;++i) {
@@ -76,21 +76,21 @@ public:
         vel=lo+(hi-lo)*accent[step%4]/4;
       }
       const int64_t t=n.startTick;
-      int64_t boundary=n.boundaryTick;
-      // Only OPEN/FIFTH can sustain across empty steps.
-      if(art==4&&!live.doubled[step]) {
-        for(int distance=1;distance<=16;++distance) {
-          const int candidate=(step+distance)%16;
-          if(live.enabled[candidate]) {
-            boundary=t+static_cast<int64_t>(distance)*240;
-            break;
-          }
+      // A 1/8 note spans two 1/16 grid cells. To hear the full 1/8,
+      // the second cell is left OFF in the matrix. A following active
+      // step or STOP always clips it to prevent overlapping MIDI notes.
+      int64_t durationTicks=live.eighth[step]?480:240;
+      // Preserve previous OPEN sustain behavior when length is untouched.
+      if(art==4&&!live.eighth[step]&&!live.doubled[step])durationTicks=3840;
+      for(int distance=1;distance<=16&&distance*240<durationTicks;++distance) {
+        if(live.enabled[(step+distance)%16]) {
+          durationTicks=static_cast<int64_t>(distance)*240;break;
         }
-      } else boundary=std::min<int64_t>(boundary,t+240);
+      }
       const int attacks=live.doubled[step]?2:1;
       for(int hit=0;hit<attacks;++hit) {
-        const int64_t begin=t+(attacks==2?120*hit:0);
-        const int64_t limit=attacks==2?t+120*(hit+1):boundary;
+        const int64_t begin=t+durationTicks*hit/attacks;
+        const int64_t limit=t+durationTicks*(hit+1)/attacks;
         const int64_t off=std::max(begin+1,begin+(limit-begin)*live.gate/100);
         // DOUBLE is a rhythmic subdivision, not a Kontakt sample-articulation
         // instruction. Both hits must retain the current instrument's PM

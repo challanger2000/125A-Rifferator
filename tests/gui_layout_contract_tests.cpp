@@ -33,7 +33,7 @@ int main(){
  for(int i=0;i<16;++i) {
   for(int row=0;row<6;++row)
    assert(byName.count("GCell"+std::to_string(row)+"_"+std::to_string(i)));
-  for(const std::string prefix:{"GuitarActive","GDouble","GLock","DegreeValue"})
+  for(const std::string prefix:{"GuitarActive","GDouble","GLock","GLength","DegreeValue"})
    assert(byName.count(prefix+std::to_string(i)));
   assert(xml.find("class=\"CTextEdit\" control-tag=\"DegreeValue"+std::to_string(i)+"\"")!=std::string::npos);
  }
@@ -68,7 +68,8 @@ int main(){
  }
  assert(stack.size()==1);
  assert(seenViews.size()==byName.size());
- assert(interactive.size()==212);
+ assert(interactive.size()==228);
+ assert(xml.find("title=\"NOTE LENGTH\"")!=std::string::npos);
  std::ifstream processorFile("src/RifferatorProcessor.cpp");
  const std::string p((std::istreambuf_iterator<char>(processorFile)),std::istreambuf_iterator<char>());
  assert(p.find("addEventOutput(STR16(\"Guitar Out\")")!=std::string::npos);

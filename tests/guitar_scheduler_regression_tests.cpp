@@ -97,10 +97,59 @@ int main(){
  int singleOn=0;
  for(auto e:emitted)if(e.on)++singleOn;
  assert(singleOn==1);
+ // A normal manually-programmed metal gallop has 1/8 then 1/16 + 1/16
+ // WITHOUT applying DOUBLE anywhere: long PM at step 0, empty step 1,
+ // then short PMs at steps 2 and 3. Duration MUST differ, not just spacing.
+ emitted.clear();scheduler.reset();
+ live.enabled.fill(false);live.doubled.fill(false);live.eighth.fill(false);
+ for(int i:{0,2,3}) {live.enabled[i]=true;live.articulation[i]=2;}
+ live.eighth[0]=true;
+ scheduler.process(song.guitar,0.,1.,44100,song.periodTicks,sink,true,live);
+ int manualOns=0,manualOffs=0;
+ std::vector<int> hits,ends;
+ for(const auto& e:emitted) {
+   if(e.on){++manualOns;hits.push_back(e.sampleOffset);}
+   else {++manualOffs;ends.push_back(e.sampleOffset);}
+ }
+ assert(manualOns==3&&manualOffs==3);
+ assert(hits[0]==0&&hits[1]==22050&&hits[2]==33075);
+ assert(ends[0]>=20946&&ends[0]<=20949);
+ assert(ends[1]>=32523&&ends[1]<=32525);
+ assert(ends[2]>=43548&&ends[2]<=43550);
+ // Editing only one step's length must not alter the following note.
+ emitted.clear();scheduler.reset();
+ live.eighth[0]=false;
+ scheduler.process(song.guitar,0.,1.,44100,song.periodTicks,sink,true,live);
+ int short0Off=-1;
+ for(const auto& e:emitted)if(!e.on&&e.pitch==40){short0Off=e.sampleOffset;break;}
+ assert(short0Off>=10473&&short0Off<=10475);
+ // If another attack starts at the 2nd sixteenth, the eighth must end
+ // BEFORE that new attack; overlapping same-pitch NoteOff is forbidden.
+ emitted.clear();scheduler.reset();
+ live.enabled[1]=true;live.eighth[0]=true;
+ scheduler.process(song.guitar,0.,.5,22050,song.periodTicks,sink,true,live);
+ int firstEnd=-1,nextAttack=-1,onCount=0;
+ for(const auto& e:emitted){
+   if(e.on){++onCount;if(onCount==2)nextAttack=e.sampleOffset;}
+   else if(firstEnd<0)firstEnd=e.sampleOffset;
+ }
+ assert(firstEnd>=0&&nextAttack>=0&&firstEnd<nextAttack);
+ // Per-step DOUBLE remains independent of LEN=1/8, and sends exactly
+ // two sequential 1/16 PM strikes for one lengthened step.
+ emitted.clear();scheduler.reset();
+ live.enabled.fill(false);live.enabled[0]=true;
+ live.eighth.fill(false);live.eighth[0]=true;
+ live.doubled.fill(false);live.doubled[0]=true;
+ scheduler.process(song.guitar,0.,.5,22050,song.periodTicks,sink,true,live);
+ hits.clear();ends.clear();
+ for(const auto& e:emitted){if(e.on)hits.push_back(e.sampleOffset);else ends.push_back(e.sampleOffset);}
+ assert(hits.size()==2&&ends.size()==2);
+ assert(hits[0]==0&&hits[1]==11025);
+ assert(ends[0]<hits[1]&&ends[1]>hits[1]);
  // Host rejecting NoteOff cannot be followed by new attacks until flush.
  emitted.clear();scheduler.reset();
  live.enabled.fill(false);live.enabled[0]=true;
- live.doubled.fill(false);
+ live.doubled.fill(false);live.eighth.fill(false);
  scheduler.process(song.guitar,0.,.1,600,song.periodTicks,sink,true,live);
  int rejected=0;
  auto reject=[&](ScheduledMidiEvent e){if(!e.on){++rejected;return false;}return true;};

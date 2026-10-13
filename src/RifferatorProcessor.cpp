@@ -21,6 +21,7 @@ Processor::Processor() {
     live_.degree[i]=state_.step[i].degree;
     live_.locked[i]=state_.step[i].locked;
     live_.doubled[i]=state_.step[i].doubled;
+    live_.eighth[i]=state_.eighth[i];
   }
 }
 void Processor::prepareVariants() {
@@ -103,6 +104,13 @@ tresult PLUGIN_API Processor::process(ProcessData& data) {
         if(live_.doubled[step]!=doubled)flushPending_=true;
         live_.doubled[step]=doubled;state_.step[step].doubled=doubled;continue;
       }
+      if(id>=kGuitarLengthBase&&id<kGuitarLengthBase+16) {
+        const int step=static_cast<int>(id-kGuitarLengthBase);
+        if(live_.locked[step])continue;
+        const bool eighth=v>=.5;
+        if(live_.eighth[step]!=eighth)flushPending_=true;
+        live_.eighth[step]=eighth;state_.eighth[step]=eighth;continue;
+      }
       if(id==kRootPitch) {
         const int root=static_cast<int>(std::lround(v*127.));
         if(state_.root!=root)flushPending_=true;
@@ -179,6 +187,7 @@ tresult PLUGIN_API Processor::setState(IBStream* stream) {
     live_.articulation[i]=static_cast<int>(state_.step[i].articulation);
     live_.degree[i]=state_.step[i].degree;
     live_.doubled[i]=state_.step[i].doubled;
+    live_.eighth[i]=state_.eighth[i];
     live_.locked[i]=state_.step[i].locked;
   }
   flushPending_=true;

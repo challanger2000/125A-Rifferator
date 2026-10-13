@@ -137,3 +137,4 @@
 2026-10-13 FIX GUI CLIP: remove needless out-of-parent label under GALLOP (nested geometry preflight 0 errors)
 2026-10-13 SINGLE BUNDLED CORRECTION: remove unwanted global Gallop button; retain user-local PM/OFF grid; fix per-step DOUBLE PM second velocity using Kontakt reference; MIDI/UI regressions
 2026-10-13 BUNDLE: remove incorrect Kontakt fixed velocity 75 from guitar DOUBLE; both hits use configurable Heavier PM band with regression test incl. narrow range
+2026-10-13 ONE BUNDLE: add per-guitar-step 1/8 and 1/16 note length, no Gallop mode, preserve DOUBLE and LOCK, state V11 and MIDI regression suite

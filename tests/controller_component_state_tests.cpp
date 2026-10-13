@@ -17,6 +17,7 @@ int main(){
  assert(c.setComponentState(&state)==Steinberg::kResultOk);
  assert(std::abs(c.getParamNormalized(kRootPitch)-40./127.)<1e-5);
  assert(std::abs(c.getParamNormalized(kGuitarGate)-.95)<1e-5);
+ for(int i=0;i<16;++i)assert(c.getParamNormalized(kGuitarLengthBase+i)<0.5);
  MemoryStream zoom;
  assert(c.getState(&zoom)==Steinberg::kResultOk);
  assert(zoom.seek(0,Steinberg::IBStream::kIBSeekSet,nullptr)==Steinberg::kResultOk);

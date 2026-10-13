@@ -5,11 +5,11 @@
 #include <cstdint>
 namespace a125::rifferator {
 // One serializer shared by Processor and Controller: prevents state disagreement.
-// V10 is guitar-only; V1..V9 are read as legacy, including discarded buses.
+// V11 adds per-step note length; V1..V10 stay readable.
 struct GuitarSnapshot {
   int root{40},gate{95},fill{0},pmMin{30},pmMax{40};
   std::array<Step,16> step{};
-  std::array<bool,16> enabled{};
+  std::array<bool,16> enabled{},eighth{};
   GuitarSnapshot() noexcept {
     for(int i=0;i<16;++i) {
       step[i].articulation=Articulation::PalmMute;
@@ -38,21 +38,24 @@ inline bool readSnapshot(Steinberg::IBStream* stream,GuitarSnapshot& output) {
   std::uint32_t magic=0,version=0;
   std::int32_t count=0;
   if(!stateRead(stream,magic)||!stateRead(stream,version)||!stateRead(stream,count)||
-     magic!=0x31524641u||version<1||version>10)return false;
+     magic!=0x31524641u||version<1||version>11)return false;
   GuitarSnapshot s;
-  if(version==10) {
+  if(version==10||version==11) {
     if(count!=16)return false;
     std::array<std::int32_t,5> globals{};
     for(auto& v:globals)if(!stateRead(stream,v))return false;
     s.root=globals[0];s.gate=globals[1];s.fill=globals[2];
     s.pmMin=globals[3];s.pmMax=globals[4];
     for(int i=0;i<16;++i) {
-      std::array<std::int32_t,5> row{};
-      for(auto& v:row)if(!stateRead(stream,v))return false;
+      std::array<std::int32_t,6> row{};
+      for(int j=0;j<(version==11?6:5);++j)
+        if(!stateRead(stream,row[static_cast<std::size_t>(j)]))return false;
       if(row[0]<0||row[0]>1||row[1]<0||row[1]>5||row[2]<-13||
-         row[2]>15||row[3]<0||row[3]>1||row[4]<0||row[4]>1)return false;
+         row[2]>15||row[3]<0||row[3]>1||row[4]<0||row[4]>1||
+         row[5]<0||row[5]>1)return false;
       s.enabled[i]=row[0]!=0;s.step[i]={
         static_cast<Articulation>(row[1]),row[2],row[3]!=0,row[4]!=0};
+      s.eighth[i]=row[5]!=0;
     }
   } else {
     if(count<1||count>32)return false;
@@ -134,16 +137,16 @@ inline bool readSnapshot(Steinberg::IBStream* stream,GuitarSnapshot& output) {
 }
 inline bool writeSnapshot(Steinberg::IBStream* stream,const GuitarSnapshot& s) {
   if(!validSnapshot(s))return false;
-  const std::uint32_t magic=0x31524641u,version=10;
+  const std::uint32_t magic=0x31524641u,version=11;
   const std::int32_t count=16;
   if(!stateWrite(stream,magic)||!stateWrite(stream,version)||!stateWrite(stream,count))return false;
   const std::array<std::int32_t,5> cfg{s.root,s.gate,s.fill,s.pmMin,s.pmMax};
   for(auto v:cfg)if(!stateWrite(stream,v))return false;
   for(int i=0;i<16;++i) {
     const auto& st=s.step[i];
-    const std::array<std::int32_t,5> row{
+    const std::array<std::int32_t,6> row{
       s.enabled[i]?1:0,static_cast<int>(st.articulation),
-      st.degree,st.doubled?1:0,st.locked?1:0};
+      st.degree,st.doubled?1:0,st.locked?1:0,s.eighth[i]?1:0};
     for(auto v:row)if(!stateWrite(stream,v))return false;
   }
   return true;
