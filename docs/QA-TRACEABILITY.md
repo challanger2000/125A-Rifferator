@@ -114,3 +114,14 @@ A host-driven QA fixture was added to the existing native Windows lifecycle prob
 
 ## Host event-probe precondition correction — #38416726085
 The VST3 successfully compiled; all six Windows CTests passed. The new native event probe failed at the first expected transport attack, because it reused the state-recall fixture whose explicitly saved `syncMode=MidiNote` was correct for recall QA but **not** transport QA. This is a host-test fixture mismatch, not evidence of a plugin defect. The test now submits a real Mode=TRANSPORT VST3 parameter queue before expecting PPQ-driven attacks, then separately switches to Mode=MIDI NOTE later. Mode is deliberately changed through the same host automation API under test. The rest of the event/automation suite and validator remain NOT VERIFIED pending the corrected run.
+
+## Native host MIDI + automation verification (2026-10-13)
+
+Source commit `74a28db8bd7b6348d6a63a6008f9da2cc7db3bdf`; [Windows run #38417386319](https://github.com/challanger2000/125A-Rifferator/actions/runs/38417386319): **SUCCESS**.
+
+- Original Windows SDK host probe: **PASS** — actual VST3 ProcessData event output, PM velocity 65, OPEN velocity 115, STOP note release, transport STOP note release, KEY automation E minor→F# minor with correct emitted MIDI pitch and saved ROOT, unchanged STEP ON automation without spurious MIDI reattack, and MIDI NOTE mode NoteOn (offset 100) / NoteOff (offset 200).
+- Initial event-probe failure at #38416726085 was a **test setup fault**: previous non-default project state intentionally had MIDI NOTE selected. Test now explicitly automates TRANSPORT before PPQ tests and MIDI NOTE before trigger tests; both pass.
+- Non-default eight-bar Processor/Controller state and 150% UI/BAR restore: **PASS**.
+- Windows CTest **6/6 PASS**, editor **20/20 PASS**, Steinberg Validator **537/537 PASS**.
+- [Experimental Windows build artifact #11824563636](https://github.com/challanger2000/125A-Rifferator/actions/runs/38417386319/artifacts/11824563636).
+- Real Studio One project-save/reload, full 125A Plugin Tester I/O and event torture, all H7 articulation audition and precise 4/8-bar Studio One playback are **NOT YET VERIFIED**. This is not FINAL.

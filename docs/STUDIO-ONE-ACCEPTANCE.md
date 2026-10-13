@@ -43,3 +43,7 @@ The separate 125A Plugin Tester repository is private and inaccessible to the Ri
 
 ## Follow-up automated QA (2026-10-13)
 [Windows run #38414680086](https://github.com/challanger2000/125A-Rifferator/actions/runs/38414680086) confirmed 6/6 native CTest, full 537/537 Steinberg Validator, 20 HWND editor cycles, and non-default 8-bar Processor and Controller state roundtrip including 150% zoom, BAR 8, selected locked notes, trigger mode and PM velocity. The modal pitch picker no longer geometrically overlays STOP, proven by deterministic hitbox tests; its appearance and clicking in actual Studio One remain unverified. This evidence supplements, but does **not** replace, the outstanding Studio One and 125A Plugin Tester release requirements.
+ 
+## Windows event/automation host verification
+
+The [native Windows VST3 QA #38417386319](https://github.com/challanger2000/125A-Rifferator/actions/runs/38417386319) additionally passed actual ProcessData MIDI output and parameter-queue automation: PM65/OPEN115, STOP and transport NoteOff, KEY/ROOT transposition, no unnecessary reattack for unchanged ON, and NoteOn/NoteOff trigger sample offsets. This does not claim a Studio One-specific automation pass or full 125A Plugin Tester approval.
