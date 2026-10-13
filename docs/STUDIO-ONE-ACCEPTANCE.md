@@ -56,3 +56,6 @@ New RGU2 Controller state saves zoom, selected BAR and GENERATE/VARIATE RNG seed
 
 ## Revised header UX (2026-10-13, NOT YET HOST-VERIFIED)
 Single-click native selection menus now replace repeated-click cycling for KEY / SCALE / PATTERN / ROOT NOTE; ROOT has octave submenus and tonic-octave-2 reset to recover from the topmost MIDI pitches (such as G9). PM and FILL use absolute horizontal value strips (click anywhere in the field). Ctrl + left-click on the header controls resets defined defaults. Verify actual Studio One menus, single-click selection, 100/150% zoom pointer alignment, popup cancellation, ROOT recovery from extreme note, and parameter automation before marking PASS.
+
+## User control regression after reported GUI workflow problems — PENDING
+STOP grid cells now toggle ON/OFF with repeated clicks; Ctrl+click of an unlocked cell clears it, Ctrl+STEP ON resets OFF and Ctrl+LOCK unlocks while respecting locked-step invariants. Ctrl+commands no longer become inert. Pure controller-policy and MIDI-event regressions (CI pending) check 5×16 hitbox geometry, 1/2/4/8 bars, all four Heavier7Strings velocity modes and STOP. Actual Studio One cursor/click tests, 100/150% zoom, menu selection/cancellation and project reopen must be performed against the new build before release.

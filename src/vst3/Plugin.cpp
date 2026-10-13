@@ -2,6 +2,7 @@
 #include "RifferatorPanel.hpp"
 #include "BrandLogoView.hpp"
 #include "UiGeometry.hpp"
+#include "UiStepPolicy.hpp"
 #include "../core/StandardMidiFile.hpp"
 #include "vstgui/uidescription/uiattributes.h"
 #include "vstgui/lib/cfileselector.h"
@@ -432,21 +433,37 @@ void Controller::click(int x,int y,bool shift,bool control){
  const auto hit=ui::hit(x,y,pickerStep_>=0);
  using ui::Target;
  if(hit.target==Target::None)return;
- // Standard 125A reset gesture: Ctrl + left click.
- if(control){
+ // 125A default-reset gesture. Other controls must NOT become inert
+ // just because Ctrl is held (previously swallowed Export/Generate/etc.).
+ if(control&&ui::supportsReset(hit.target)){
   if(hit.target==Target::Key){
    publish(Key,n(4,0,11));
    publish(Root,n(40,0,127));
   }else if(hit.target==Target::Scale)publish(ScaleId,1.);
   else if(hit.target==Target::Root)
    publish(Root,n(36+visual_.musical.key,0,127));
-  else if(hit.target==Target::Bars)publish(Bars,0.);
-  else if(hit.target==Target::Pm)publish(Pm,n(30,30,83));
+  else if(hit.target==Target::Bars){
+   publish(Bars,0.);
+   bar_=0;focused_=0;pickerStep_=-1;
+  }else if(hit.target==Target::Pm)publish(Pm,n(30,30,83));
   else if(hit.target==Target::Fill)publish(Fill,0.);
   else if(hit.target==Target::Mode)publish(Mode,0.);
   else if(hit.target==Target::Zoom){
    zoom_=1.;
    if(editor_)editor_->setZoomFactor(zoom_);
+  }else if(hit.target==Target::StepOn){
+   if(visual_.pattern.steps[static_cast<std::size_t>(focused_)].locked)
+    status_="STEP LOCKED";
+   else publish(On+focused_,0.);
+  }else if(hit.target==Target::Lock)publish(Lock+focused_,0.);
+  else if(hit.target==Target::Cell){
+   focused_=bar_*16+hit.column;
+   auto reset=visual_;
+   if(ui::resetStep(reset.pattern,focused_)){
+    publishPattern(reset);
+    status_="STEP RESET";
+   }else status_="STEP LOCKED";
+   pickerStep_=-1;
   }
   redraw();
   return;
@@ -485,16 +502,12 @@ void Controller::click(int x,int y,bool shift,bool control){
   if(st.locked){status_="STEP LOCKED";redraw();return;}
   if(shift){pickerStep_=focused_;status_="SELECT SCALE NOTE";redraw();return;}
   pickerStep_=-1;
-  const int techniques[]={3,2,0,1};
-  if(hit.row==4){
-   publish(Stop+focused_,1.);
-   publish(On+focused_,1.);
-  }else{
-   const int technique=techniques[hit.row];
-   const bool already=st.on&&!st.stop&&st.articulation==technique;
-   publish(Stop+focused_,0.);
-   publish(Type+focused_,n(technique,0,3));
-   publish(On+focused_,already?0.:1.);
+  auto next=visual_;
+  if(ui::toggleStep(next.pattern,focused_,hit.row)){
+   publishPattern(next);
+   status_=next.pattern.steps[static_cast<std::size_t>(focused_)].on?
+             (hit.row==4?"STOP SET":"STEP SET"):
+             (hit.row==4?"STOP CLEARED":"STEP CLEARED");
   }
  }else if(hit.target==Target::Picker){
   if(pickerStep_>=0){

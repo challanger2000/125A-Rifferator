@@ -1,4 +1,6 @@
 #include "vst3/UiGeometry.hpp"
+#include "vst3/UiStepPolicy.hpp"
+#include "instruments/Heavier7Strings.hpp"
 #include "vst3/Parameters.hpp"
 #include <cassert>
 using namespace a125::riff::vst::ui;
@@ -63,6 +65,73 @@ int main(){
   assert(extreme.musical.rootMidi==40&&extreme.valid());
  }
 
+
+ // All five rows and all 128 step positions: toggle ON then OFF.
+ for(int bars : {1,2,4,8})for(int row=0;row<5;++row){
+  a125::riff::Pattern pattern;
+  assert(pattern.setBars(bars));
+  for(int i=0;i<pattern.activeSteps();++i){
+   assert(toggleStep(pattern,i,row));
+   const auto& step=pattern.steps[static_cast<std::size_t>(i)];
+   assert(step.on);
+   assert(step.stop==(row==4));
+   assert(toggleStep(pattern,i,row));
+   assert(!step.on&&!step.stop);
+   assert(resetStep(pattern,i));
+   assert(!step.on&&!step.stop&&step.degree==0&&step.articulation==0);
+  }
+ }
+ // Crucial STOP regression: clicking an already active STOP must remove it.
+ {
+  a125::riff::Pattern pattern;
+  assert(toggleStep(pattern,3,4));
+  assert(pattern.steps[3].on&&pattern.steps[3].stop);
+  assert(toggleStep(pattern,3,4));
+  assert(!pattern.steps[3].on&&!pattern.steps[3].stop);
+  // Switching an existing STOP to a guitar articulation must clear STOP.
+  assert(toggleStep(pattern,3,4));
+  assert(toggleStep(pattern,3,1));
+  assert(pattern.steps[3].on&&!pattern.steps[3].stop&&
+         pattern.steps[3].articulation==2);
+  assert(pattern.setLock(3,true));
+  const auto before=pattern.steps[3];
+  assert(!toggleStep(pattern,3,4));
+  assert(!resetStep(pattern,3));
+  assert(pattern.steps[3].on==before.on&&
+         pattern.steps[3].stop==before.stop&&
+         pattern.steps[3].locked);
+  assert(pattern.setLock(3,false));
+  assert(resetStep(pattern,3));
+  assert(!pattern.steps[3].on&&!pattern.steps[3].locked);
+ }
+ // Every control is classified for Ctrl+click, rather than treating Ctrl
+ // as an unconditional blocker of transport/navigation/export/commands.
+ for(const auto target : {Target::Bars,Target::Key,Target::Scale,Target::Root,
+                          Target::Pm,Target::Fill,Target::Mode,Target::Zoom,
+                          Target::StepOn,Target::Lock,Target::Cell})
+  assert(supportsReset(target));
+ for(const auto target : {Target::None,Target::Prev,Target::Next,
+                          Target::Generate,Target::Variate,Target::Clear,
+                          Target::Export,Target::Picker})
+  assert(!supportsReset(target));
+ // H7: activating one articulation row must emit the exact target
+ // note velocity; another click turns it off without a stuck MIDI event.
+ {
+  a125::riff::Pattern p;
+  a125::riff::Settings s;
+  for(int row=0;row<4;++row){
+   assert(toggleStep(p,0,row));
+   const auto events=a125::riff::compileOneCycle(
+        p,s,a125::riff::heavier::Velocity{});
+   assert(events.size()==2);
+   const int velocity[4]={127,115,30,20};
+   assert(events[0].noteOn&&events[0].velocity==velocity[row]);
+   assert(!events[1].noteOn);
+   assert(toggleStep(p,0,row));
+   assert(a125::riff::compileOneCycle(
+        p,s,a125::riff::heavier::Velocity{}).empty());
+  }
+ }
  assert(hit(1100,40,false).target==Target::Zoom);
  assert(hit(34,510,false).target==Target::Generate);
  assert(hit(720,510,false).target==Target::Export);
