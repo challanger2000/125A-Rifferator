@@ -290,8 +290,8 @@ public:
   // Keep host context-menu zoom, header buttons, and persisted controller
   // zoom state synchronized. This callback is invoked by VST3Editor when
   // its internal zoom genuinely changes, including via the native menu.
-  void onZoomChanged(VSTGUI::VST3Editor* editor,double factor) override {
-    if(editor && factor>0.) {
+  void onZoomChanged(VSTGUI::VST3Editor*,double factor) override {
+    if(std::isfinite(factor) && factor>0.) {
       zoomFactor_=factor>=1.25?1.5:1.;
       refreshCommands();
     }

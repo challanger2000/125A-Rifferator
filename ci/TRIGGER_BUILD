@@ -140,3 +140,4 @@
 2026-10-13 ONE BUNDLE: add per-guitar-step 1/8 and 1/16 note length, no Gallop mode, preserve DOUBLE and LOCK, state V11 and MIDI regression suite
 2026-10-13 ZOOM ROOT FIX BATCH: replace AspectRatioVST3Editor with fixed-factor VST3Editor; persist native zoom delegate callback; C++ and GUI QA regressions
 2026-10-13 ZOOM TEST: use real unattached VSTGUI editor pointer in callback smoke test; do not simulate null delegate
+2026-10-13 ZOOM QA HOSTLESS CORRECTION: stop instantiating plugin GUI outside DAW; exercise zoom state callback and static editor class safely
