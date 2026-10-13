@@ -53,10 +53,11 @@ public:
  int picker() const noexcept {return pickerStep_;}
  double zoom() const noexcept {return zoom_;}
  const char* notification() const noexcept {return status_;}
- void click(int x,int y,bool shift);
+ void click(int x,int y,bool shift,bool control=false);
 private:
  void publish(ParamID,double);
  void publishPattern(const product::Snapshot& target);
+ void openChoiceMenu(ParamID id,int x,int y);
  void redraw();
  void exportMidiFromUI();
 

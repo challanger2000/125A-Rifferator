@@ -6,6 +6,7 @@
 #include "vstgui/uidescription/uiattributes.h"
 #include "vstgui/lib/cfileselector.h"
 #include "vstgui/lib/cframe.h"
+#include "vstgui/lib/controls/coptionmenu.h"
 #include <fstream>
 #include <vector>
 #include <filesystem>
@@ -17,6 +18,7 @@
 #include <cmath>
 #include <cstdio>
 #include <cstring>
+#include <string>
 
 namespace a125::riff::vst {
 namespace {
@@ -360,10 +362,95 @@ void Controller::exportMidiFromUI(){
  selector->forget();
  redraw();
 }
-void Controller::click(int x,int y,bool shift){
+// Native VSTGUI popup menus allow a single direct choice; the Root menu is
+// grouped by octave so users can recover instantly even from MIDI G9.
+void Controller::openChoiceMenu(ParamID id,int x,int y){
+ if(!editor_||!editor_->getFrame()||!panel_)return;
+ auto* menu=new VSTGUI::COptionMenu;
+ const auto add=[&](VSTGUI::COptionMenu* to,const std::string& title,int value,
+                   bool current=false){
+  auto* item=new VSTGUI::CMenuItem(title.c_str(),value);
+  if(current)item->setChecked(true);
+  to->addEntry(item);
+ };
+ static constexpr const char* names[12]={
+  "C","C#","D","D#","E","F","F#","G","G#","A","A#","B"
+ };
+ if(id==Key){
+  for(int i=0;i<12;++i)add(menu,names[i],i,i==visual_.musical.key);
+ }else if(id==ScaleId){
+  add(menu,"MAJOR",0,visual_.musical.scale==Scale::Major);
+  add(menu,"NATURAL MINOR",1,visual_.musical.scale==Scale::NaturalMinor);
+ }else if(id==Bars){
+  for(int bars : {1,2,4,8})add(menu,std::to_string(bars)+" BARS",bars,
+                             bars==visual_.pattern.bars);
+ }else if(id==Root){
+  // Reset always uses the active key's tonic in octave 2; E2 at defaults.
+  add(menu,std::string("RESET TO ")+names[visual_.musical.key]+"2",
+      36+visual_.musical.key);
+  for(int octave=-1;octave<=9;++octave){
+   auto* group=new VSTGUI::COptionMenu;
+   for(int pitch=0;pitch<=127;++pitch){
+    if(pitch/12-1!=octave||!pitchInScale(pitch,visual_.musical))continue;
+    add(group,std::string(names[pitch%12])+std::to_string(octave),pitch,
+        pitch==visual_.musical.rootMidi);
+   }
+   if(group->getNbEntries()>0){
+    menu->addEntry(group,(std::string("OCTAVE ")+std::to_string(octave)).c_str());
+   }
+   group->forget();
+  }
+ }
+ VSTGUI::CPoint at(static_cast<VSTGUI::CCoord>(x),
+                    static_cast<VSTGUI::CCoord>(y));
+ panel_->localToFrame(at);
+ if(!menu->popup(editor_->getFrame(),at,[this,id](VSTGUI::COptionMenu* opened){
+   int index=-1;
+   auto* selected=opened->getLastItemMenu(index);
+   if(selected&&index>=0){
+    auto* item=selected->getEntry(index);
+    if(item&&item->getTag()>=0){
+     const int choice=item->getTag();
+     if(id==Bars){
+      const int ordinal=choice==1?0:choice==2?1:choice==4?2:3;
+      publish(Bars,n(ordinal,0,3));
+      if(bar_>=choice)bar_=choice-1;
+      focused_=bar_*16;
+      pickerStep_=-1;
+     }else if(id==Key)publish(Key,n(choice,0,11));
+     else if(id==ScaleId)publish(ScaleId,n(choice,0,1));
+     else if(id==Root)publish(Root,n(choice,0,127));
+    }
+   }
+   opened->forget();
+   redraw();
+ })){
+  menu->forget();
+ }
+}
+void Controller::click(int x,int y,bool shift,bool control){
  const auto hit=ui::hit(x,y,pickerStep_>=0);
  using ui::Target;
  if(hit.target==Target::None)return;
+ // Standard 125A reset gesture: Ctrl + left click.
+ if(control){
+  if(hit.target==Target::Key){
+   publish(Key,n(4,0,11));
+   publish(Root,n(40,0,127));
+  }else if(hit.target==Target::Scale)publish(ScaleId,1.);
+  else if(hit.target==Target::Root)
+   publish(Root,n(36+visual_.musical.key,0,127));
+  else if(hit.target==Target::Bars)publish(Bars,0.);
+  else if(hit.target==Target::Pm)publish(Pm,n(30,30,83));
+  else if(hit.target==Target::Fill)publish(Fill,0.);
+  else if(hit.target==Target::Mode)publish(Mode,0.);
+  else if(hit.target==Target::Zoom){
+   zoom_=1.;
+   if(editor_)editor_->setZoomFactor(zoom_);
+  }
+  redraw();
+  return;
+ }
  if(hit.target==Target::Zoom){
   zoom_=zoom_>1.25?1.:1.5;
   if(editor_)editor_->setZoomFactor(zoom_);
@@ -373,27 +460,17 @@ void Controller::click(int x,int y,bool shift){
   focused_=bar_*16;
   pickerStep_=-1;
  }else if(hit.target==Target::Bars){
-  const int b=visual_.pattern.bars;
-  const int next=b==8?1:b*2;
-  const double index=next==1?0.:next==2?1.:next==4?2.:3.;
-  publish(Bars,index/3.);
-  if(bar_>=next)bar_=next-1;
-  focused_=bar_*16;pickerStep_=-1;
+  openChoiceMenu(Bars,x,y);
  }else if(hit.target==Target::Key){
-  const int newKey=(visual_.musical.key+1)%12;
-  // The Key parameter mapper transposes tonic Root automatically.
-  publish(Key,n(newKey,0,11));
+  openChoiceMenu(Key,x,y);
  }else if(hit.target==Target::Scale){
-  publish(ScaleId,visual_.musical.scale==Scale::Major?1.:0.);
+  openChoiceMenu(ScaleId,x,y);
  }else if(hit.target==Target::Root){
-  const auto pitch=pitchForDegree(1,visual_.musical);
-  if(pitch>=0)publish(Root,n(pitch,0,127));
+  openChoiceMenu(Root,x,y);
  }else if(hit.target==Target::Pm){
-  const int next=visual_.pmVelocity>=83?30:std::min(83,visual_.pmVelocity+5);
-  publish(Pm,n(next,30,83));
+  publish(Pm,n(ui::numericValue(Target::Pm,x),30,83));
  }else if(hit.target==Target::Fill){
-  const int next=visual_.musical.fillIntensity>=100?0:std::min(100,visual_.musical.fillIntensity+10);
-  publish(Fill,n(next,0,100));
+  publish(Fill,n(ui::numericValue(Target::Fill,x),0,100));
  }else if(hit.target==Target::Mode){
   publish(Mode,visual_.syncMode==SyncMode::Transport?1.:0.);
  }else if(hit.target==Target::StepOn){

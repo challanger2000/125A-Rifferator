@@ -53,3 +53,6 @@ New RGU2 Controller state saves zoom, selected BAR and GENERATE/VARIATE RNG seed
 
 ## Release-audit host data (latest experimental build)
 [Windows CI #38424202886](https://github.com/challanger2000/125A-Rifferator/actions/runs/38424202886) confirmed SDK-native RGU1→RGU2 controller state migration (seed + zoom + BAR), 8-bar processor state, locked-step parameter readback, 20 Editor cycles, 44.1/96 kHz varying sample block realtime/offline MIDI balance, 6/6 CTest and 537/537 Validator. The remaining real Studio One actions—install that exact build, verify resave/reopen of all bars/LOCK/seed-related Generate continuity, live host automation and actual H7 articulations—are NOT VERIFIED. Do not mark complete based on SDK-host evidence.
+
+## Revised header UX (2026-10-13, NOT YET HOST-VERIFIED)
+Single-click native selection menus now replace repeated-click cycling for KEY / SCALE / PATTERN / ROOT NOTE; ROOT has octave submenus and tonic-octave-2 reset to recover from the topmost MIDI pitches (such as G9). PM and FILL use absolute horizontal value strips (click anywhere in the field). Ctrl + left-click on the header controls resets defined defaults. Verify actual Studio One menus, single-click selection, 100/150% zoom pointer alignment, popup cancellation, ROOT recovery from extreme note, and parameter automation before marking PASS.

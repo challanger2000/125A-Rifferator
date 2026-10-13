@@ -1,8 +1,24 @@
 #pragma once
+#include <algorithm>
 namespace a125::riff::vst::ui {
 constexpr int width=1160,height=570,gridLeft=180,gridTop=224;
 enum class Target { None,Zoom,Bars,Key,Scale,Root,Pm,Fill,Prev,Next,StepOn,Lock,Mode,Generate,Variate,Clear,Export,Cell,Picker };
 struct Hit {Target target{Target::None};int column{-1};int row{-1};};
+// Direct horizontal selection for PM VELOCITY and FILL. All values are
+// reachable, endpoints included, independent of GUI zoom.
+inline int numericValue(Target type,int x) noexcept {
+ if(type==Target::Pm){
+  constexpr int start=671,end=861;
+  const int px=std::clamp(x,start,end);
+  return 30+((px-start)*53+(end-start)/2)/(end-start);
+ }
+ if(type==Target::Fill){
+  constexpr int start=895,end=1115;
+  const int px=std::clamp(x,start,end);
+  return ((px-start)*100+(end-start)/2)/(end-start);
+ }
+ return -1;
+}
 inline bool inside(int x,int y,int left,int top,int w,int h) noexcept {
  return x>=left&&x<left+w&&y>=top&&y<top+h;
 }

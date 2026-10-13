@@ -44,7 +44,8 @@ VSTGUI::CMouseEventResult RifferatorPanel::onMouseDown(VSTGUI::CPoint& pos,
  if(!owner_||!(buttons&VSTGUI::kLButton))return VSTGUI::kMouseEventNotHandled;
  owner_->click(static_cast<int>(pos.x-getViewSize().left),
                static_cast<int>(pos.y-getViewSize().top),
-               (buttons&VSTGUI::kShift)!=0);
+               (buttons&VSTGUI::kShift)!=0,
+               (buttons&VSTGUI::kControl)!=0);
  return VSTGUI::kMouseDownEventHandledButDontNeedMovedOrUpEvents;
 }
 void RifferatorPanel::draw(VSTGUI::CDrawContext* dc) {
@@ -66,10 +67,10 @@ void RifferatorPanel::draw(VSTGUI::CDrawContext* dc) {
  fill(dc,rect(23,87,1113,79),dark,border);
  struct Selector {int x,w;const char* heading;std::string value;};
  const Selector selectors[]={
-  {34,134,"PATTERN",std::to_string(pat.bars)+" BARS"},
-  {180,116,"KEY",chordName(music.key)},
-  {308,174,"SCALE",music.scale==Scale::Major?"MAJOR":"NATURAL MINOR"},
-  {494,152,"ROOT NOTE",pitchName(music.rootMidi)},
+  {34,134,"PATTERN  ▼",std::to_string(pat.bars)+" BARS"},
+  {180,116,"KEY  ▼",chordName(music.key)},
+  {308,174,"SCALE  ▼",music.scale==Scale::Major?"MAJOR":"NATURAL MINOR"},
+  {494,152,"ROOT NOTE  ▼",pitchName(music.rootMidi)},
   {658,214,"PM VELOCITY",std::to_string(s.pmVelocity)},
   {884,242,"FILL INTENSITY",std::to_string(music.fillIntensity)+" %"}
  };
@@ -78,6 +79,12 @@ void RifferatorPanel::draw(VSTGUI::CDrawContext* dc) {
   label(dc,t.heading,rect(t.x+12,104,t.w-20,15),muted);
   label(dc,t.value,rect(t.x+12,120,t.w-20,29),text);
  }
+ // PM/FILL are absolute horizontal selection strips, not increment buttons.
+ fill(dc,rect(671,150,191,5),dark,border);
+ fill(dc,rect(671,150,
+              1+(s.pmVelocity-30)*190/53,5),red,redBorder);
+ fill(dc,rect(895,150,221,5),dark,border);
+ fill(dc,rect(895,150,1+music.fillIntensity*220/100,5),red,redBorder);
  fill(dc,rect(23,174,1113,43),panel,border);
  label(dc,"BAR",rect(37,186,42,22),text);
  fill(dc,rect(82,177,40,40),dark,border);label(dc,"<",rect(82,187,40,23),text,true);
