@@ -139,3 +139,4 @@
 2026-10-13 BUNDLE: remove incorrect Kontakt fixed velocity 75 from guitar DOUBLE; both hits use configurable Heavier PM band with regression test incl. narrow range
 2026-10-13 ONE BUNDLE: add per-guitar-step 1/8 and 1/16 note length, no Gallop mode, preserve DOUBLE and LOCK, state V11 and MIDI regression suite
 2026-10-13 ZOOM ROOT FIX BATCH: replace AspectRatioVST3Editor with fixed-factor VST3Editor; persist native zoom delegate callback; C++ and GUI QA regressions
+2026-10-13 ZOOM TEST: use real unattached VSTGUI editor pointer in callback smoke test; do not simulate null delegate
