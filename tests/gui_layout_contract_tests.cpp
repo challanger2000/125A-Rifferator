@@ -47,7 +47,8 @@ int main(){
   const std::string t=it->str();
   if(t.rfind("</view",0)==0){assert(stack.size()>1);stack.pop_back();continue;}
   assert(!stack.empty());
-  const auto [x,y]=xy(t,"origin"),[w,h]=xy(t,"size");
+  const auto [x,y]=xy(t,"origin");
+  const auto [w,h]=xy(t,"size");
   const auto parent=stack.back();
   assert(x>=0&&y>=0&&w>0&&h>0);
   assert(x+w<=parent.w&&y+h<=parent.h);
