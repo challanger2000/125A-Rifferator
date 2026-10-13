@@ -42,6 +42,26 @@ jobs:
           $inner = Join-Path $branded 'Contents/x86_64-win/Rifferator.vst3'
           if (-not (Test-Path $inner -PathType Leaf)) { throw "Missing Windows x64 module" }
           Move-Item -LiteralPath $inner -Destination (Join-Path $branded 'Contents/x86_64-win/125A Rifferator.vst3')
+      - name: Validate embedded GUI resources and root template
+        shell: pwsh
+        run: |
+          $bundle = Join-Path (Resolve-Path stage).Path '125A Rifferator.vst3'
+          $resources = Join-Path $bundle 'Contents/Resources'
+          $ui = Join-Path $resources 'rifferator.uidesc'
+          $logo = Join-Path $resources '125A_Logo_Master_FINAL.svg'
+          if (-not (Test-Path $ui -PathType Leaf)) { throw "Missing VSTGUI UIDESC in bundle" }
+          if (-not (Test-Path $logo -PathType Leaf)) { throw "Missing original 125A Master logo in bundle" }
+          [xml]$xml = Get-Content -Raw -LiteralPath $ui
+          if ($xml.DocumentElement.Name -ne 'vstgui-ui-description') { throw "UIDESC root invalid" }
+          $template = $xml.DocumentElement.SelectSingleNode('./template[@name="RifferatorView"]')
+          if ($null -eq $template) { throw "Missing root RifferatorView template" }
+          if ($template.GetAttribute('size') -ne '1160,570') { throw "Wrong VSTGUI root size" }
+          $panel = $template.SelectSingleNode('./view[@custom-view-name="RifferatorPanel"]')
+          $master = $template.SelectSingleNode('./view[@custom-view-name="RifferatorBrandLogo"]')
+          if ($null -eq $panel -or $null -eq $master) { throw "Missing custom VSTGUI panel or logo" }
+          $expectedHash = (Get-FileHash -Algorithm SHA256 'resource/125A_Logo_Master_FINAL.svg').Hash
+          $realHash = (Get-FileHash -Algorithm SHA256 $logo).Hash
+          if ($expectedHash -ne $realHash) { throw "Master logo asset differs from repository source" }
       - name: Archive experimental VST3 (NOT FINAL)
         uses: actions/upload-artifact@v4
         with:

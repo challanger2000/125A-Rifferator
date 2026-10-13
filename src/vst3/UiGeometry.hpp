@@ -3,8 +3,8 @@ namespace a125::riff::vst::ui {
 constexpr int width=1160,height=570,gridLeft=180,gridTop=224;
 enum class Target { None,Zoom,Bars,Key,Scale,Root,Pm,Fill,Prev,Next,StepOn,Lock,Mode,Generate,Variate,Clear,Export,Cell,Picker };
 struct Hit {Target target{Target::None};int column{-1};int row{-1};};
-inline bool inside(int x,int y,int left,int top,int width,int height) noexcept {
- return x>=left&&x<left+width&&y>=top&&y<top+height;
+inline bool inside(int x,int y,int left,int top,int w,int h) noexcept {
+ return x>=left&&x<left+w&&y>=top&&y<top+h;
 }
 inline Hit hit(int x,int y,bool picker) noexcept {
  if(x<0||y<0||x>=width||y>=height)return {};

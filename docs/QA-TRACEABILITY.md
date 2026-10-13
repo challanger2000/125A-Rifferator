@@ -67,3 +67,5 @@ At commit ba3207c, [Windows CI #38392621834](https://github.com/challanger2000/1
 
 ## Interactive VSTGUI source staging
 One custom-drawn VSTGUI panel (1160×570), original logo vector resource, 16×5 step cells, SHIFT+left click diatonic note-picker overlay, BAR prev/next, global selectors, STEP ON/LOCK, GENERATE/VARIATE/CLEAR, EXPORT MIDI dialog and exact 100/150% VST3Editor zoom. All parameters flow through Controller beginEdit/setParamNormalized/performEdit/endEdit. SDK-free hitbox geometry tests added. THIS SOURCE IS NOT YET COMPILED OR STUDIO ONE VERIFIED; the first Windows VSTGUI build must settle integration and resource validation. The controller uses UI-only zoom state and host-independent pattern editing, not the old Rifferator implementation.
+
+Windows GUI MSVC stage #38395611145: new VST3 GUI code compiled/linked, but UI geometry test /WX failed on C4459 variable shadowing. Corrected local parameter names without changing hitbox logic. Also added processor NoteOff cleanup when editing active step parameters, and an embedded UIDESC/SVG bundle audit. Full Windows CI result PENDING for these changes; do not count the failed workflow as PASS.

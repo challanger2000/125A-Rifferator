@@ -73,6 +73,7 @@ tresult PLUGIN_API Processor::setState(IBStream* stream){
 tresult PLUGIN_API Processor::process(ProcessData& data){
  if(data.numSamples<0)return kInvalidArgument;
  product::Snapshot candidate=snapshot_;
+ bool patternEdited=false;
  if(data.inputParameterChanges){
   auto* changes=data.inputParameterChanges;
   // LOCK first prevents same-block user edits from silently modifying a locked step.
@@ -84,12 +85,15 @@ tresult PLUGIN_API Processor::process(ProcessData& data){
     const bool isLock=(id>=Lock&&id<Lock+kMaxSteps);
     if((pass==0)!=isLock)continue;
     int32 sample=0;ParamValue value=0.;
-    if(queue->getPoint(queue->getPointCount()-1,sample,value)==kResultOk)
-      apply(candidate,id,value);
+    if(queue->getPoint(queue->getPointCount()-1,sample,value)==kResultOk){
+      if(apply(candidate,id,value)&&id>=On&&id<Lock+kMaxSteps&&
+         !(id>=Lock&&id<Lock+kMaxSteps))patternEdited=true;
+    }
    }
   }
  }
  if(candidate.valid()){
+  if(patternEdited)cleanupPending_=true;
   if(candidate.pattern.bars!=snapshot_.pattern.bars||
      candidate.musical.key!=snapshot_.musical.key||
      candidate.musical.rootMidi!=snapshot_.musical.rootMidi||
