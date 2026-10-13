@@ -1,22 +1,20 @@
-# 125A RIFFERATOR
+# 125A Rifferator — guitar-only development
 
-**THE INDUSTRIAL RIFF MACHINE**
+**Status: Development / NOT FINAL.** One authoritative 16-step guitar riff generator for Windows VST3. This branch intentionally replaces the previous four-output companion prototype. A successful compile or validator does not establish Studio One or musical acceptance.
 
-Development V1.0.0 on `develop/v1.0.0` — guitar-first Windows VST3 MIDI generator with **four separate event outputs** (Guitar, Bass, Drums, Chords), each using MIDI channel 1.
+## Current product scope
 
-- **GUITAR:** Full-size 16-step articulation matrix with STEP ON/DOUBLE/LOCK/DEGREE, dedicated Root MIDI, Guitar/Bass Gate, Fill and PM Velocity settings, plus seeded GENERATE/VARIATE/CLEAR. **GUITAR** and **BASS / CHORDS / DRUMS** are separate, mutually exclusive GUI pages in a 1120×640 editor; 100%/150% zoom.
-- **BASS:** FOLLOW, EBM and HYBRID modes, plus direct MIDI velocity, gate and EBM style controls.
-- **DRUMS:** Editable 16-step GM Kick 36 / Snare 38 / Closed Hat 42, Drums ON/OFF, STANDARD BEAT reset and seeded GENERATE/VARIATE drum commands. Independent drum locks are not implemented in this V1 editor.
-- **CHORDS:** Guitar-following output with chord-quality and root-only modes.
+- **One MIDI event output:** Guitar Out (bus 0, MIDI channel 1). No bass, drum or separate chord event outputs; no background EBM engine.
+- **16-step guitar matrix:** active/off, STOP, NOISE, PM, SOFT, OPEN/FIFTH, HARMONIC, scale degree, LOCK and DOUBLE.
+- **Controls:** PM velocity MIN/MAX (adjust for the *actual* guitar library articulation map), editable ROOT NOTE (E2/G2 etc.), GTR GATE, FILL INTENSITY, editable step degrees, GENERATE / VARIATE / CLEAR.
+- **0% gate** suppresses notes; **0% fill** disables fills. STOP is an active NoteOff command; an inactive step is silence, not a STOP.
+- **100% and 150% zoom**, one uncluttered page. VST3 parameter IDs for existing guitar functions remain stable.
+- **Project migration:** V1–V9 multi-bus states can be read; only the guitar part is restored. New guitar-only state is V10; discarded bass, chords and drums are not written back.
 
-## Development and verification status
+## Development and QA
 
-The Windows CI compiles the plugin, runs deterministic core/GUI-layout regression tests and the Steinberg validator. A green CI run does **not** establish a host-attached GUI lifecycle PASS or visual approval.
+The git history retains the previous design as the baseline. Current source lives on `develop/v1.0.0` until independently accepted. Follow [125A Engineering START-HERE](https://github.com/challanger2000/125A-Engineering/blob/main/START-HERE.md) and [Guitar-specific host QA](docs/HOST-GUI-QA.md).
 
-The earlier standalone editor create/release test was **removed from CTest** because it produced a segmentation fault outside a correctly initialized native VST3 host. It is **not** evidence of a verified GUI lifecycle and must not be restored as an equivalent test.
+CI checks compilation, deterministic scheduler/regressions, state migration, static GUI structure and Steinberg Validator. **Still required:** real Studio One display, note tracing under looping/stop/start, editing all numbers, 20 editor reopen cycles, 125A Plugin Tester, final user sound approval. Never call release-ready without them.
 
-**Real host acceptance protocol:** [Studio One GUI/lifecycle QA](docs/HOST-GUI-QA.md).
-
-Development build artifacts are attached to successful GitHub Actions runs. The latest independently confirmed CI baseline is [#38260745327](https://github.com/challanger2000/125A-Rifferator/actions/runs/38260745327), validating seeded GENERATE/VARIATE. The seven additional GUI control groups passed [#38289271370](https://github.com/challanger2000/125A-Rifferator/actions/runs/38289271370). The most recent independently verified baseline is [#38293244458](https://github.com/challanger2000/125A-Rifferator/actions/runs/38293244458), **29/29 CTest + 537/537 validator PASS**. A new two-page GUI redesign and controller-state v2 are **awaiting their first CI build and actual Studio One visual/click acceptance**; do not use the old green artifact as evidence that the overlapping GUI is repaired. Do not ship a Final or Gumroad package before the Studio One host protocol, agreed V1 scope and 125A release QA pass.
-
-See [bass integration contract](docs/BASS-INTEGRATION-CONTRACT.md).
+The separate EBM bass instrument is a **future independent project**, not part of this binary.

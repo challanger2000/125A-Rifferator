@@ -1,3 +1,5 @@
+> **ARCHIVED / SUPERSEDED (2026-10-13):** The full audit below describes the discontinued four-bus Rifferator prototype. It is preserved only as historical QA evidence. The guitar-only development contract and QA gates now live in [PRODUCT-SPEC](PRODUCT-SPEC.md), [HOST-GUI-QA](HOST-GUI-QA.md), and [GUITAR-CONTROL-TRACEABILITY](GUITAR-CONTROL-TRACEABILITY.md). All previously cited four-bus PASS results do **not** validate the redesigned guitar-only plugin. Release status: **NOT FINAL**.
+
 # 125A Rifferator V1.0.0 — Release-level audit
 
 **Decision: BLOCKED / NOT FINAL.** This is a source-and-CI evidence ledger, not an assertion of a completed Studio One host test.

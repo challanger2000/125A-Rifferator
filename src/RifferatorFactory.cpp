@@ -11,6 +11,9 @@
 #include "vstgui/plugin-bindings/vst3editor.h"
 #include "vstgui/lib/controls/ccontrol.h"
 #include "vstgui/lib/controls/cbuttons.h"
+#include "vstgui/lib/controls/ctextedit.h"
+#include "RifferatorNumericEdit.hpp"
+#include "RifferatorState.hpp"
 #include "vstgui/uidescription/uiattributes.h"
 #include <cstring>
 #include <string>
@@ -86,160 +89,115 @@ public:
     }
   }
   unsigned drumGenerationCount_{};
-  void publishDrumSteps(const a125::rifferator::DrumPattern& pattern) {
-    using namespace a125::rifferator;
-    const std::array<std::array<bool,16>,3> rows{
-      pattern.kick,pattern.snare,pattern.hat};
-    for(int row=0;row<3;++row)for(int step=0;step<16;++step) {
-      const auto id=kDrumStepBase+row*16+step;
-      const double value=rows[static_cast<std::size_t>(row)]
-                              [static_cast<std::size_t>(step)]?1.:0.;
-      if((getParamNormalized(id)>=0.5)==(value>=0.5))continue;
-      beginEdit(id);setParamNormalized(id,value);
-      performEdit(id,value);endEdit(id);
-    }
-  }
-  void runDrumGeneration(a125::rifferator::GenerationCommand command) {
-    using namespace a125::rifferator;
-    DrumPattern original;
-    for(int step=0;step<16;++step) {
-      const auto i=static_cast<std::size_t>(step);
-      original.kick[i]=getParamNormalized(kDrumStepBase+step)>=0.5;
-      original.snare[i]=getParamNormalized(kDrumStepBase+16+step)>=0.5;
-      original.hat[i]=getParamNormalized(kDrumStepBase+32+step)>=0.5;
-    }
-    original.enabled=getParamNormalized(kDrumEnabled)>=0.5;
-    DrumGenerationOptions options;
-    options.seed=0x125A2026u ^ (++drumGenerationCount_*0x9E3779B9u);
-    options.variationPercent=25;
-    // Drum-lock UI is not part of this V1 editor. Do not invent hidden
-    // locks or silently reuse guitar lock IDs for independent drum steps.
-    const DrumLocks noDrumLocks{};
-    publishDrumSteps(generateDrums(original,noDrumLocks,options,command));
-  }
-  void restoreStandardDrums() {
-    publishDrumSteps(a125::rifferator::DrumPattern::standard());
-    // The drum ON/OFF switch is global and intentionally remains unchanged.
-  }
+
+
+
   VSTGUI::VST3Editor* activeEditor_{};
   VSTGUI::VST3Editor* viewOwner_{};
-  // Separate Guitar and Rhythm surfaces avoid overcrowding and preserve
-  // full-size step controls at 100/150% without changing MIDI parameter IDs.
-  bool rhythmPageSelected_{};
-  VSTGUI::CView* guitarPageView_{};
-  VSTGUI::CView* rhythmPageView_{};
-  std::array<VSTGUI::CControl*,2> pageButtons_{};
-  void refreshPages() {
-    if(guitarPageView_)guitarPageView_->setVisible(!rhythmPageSelected_);
-    if(rhythmPageView_)rhythmPageView_->setVisible(rhythmPageSelected_);
-    for(int i=0;i<2;++i)if(auto* button=pageButtons_[static_cast<std::size_t>(i)]) {
-      button->setValueNormalized((rhythmPageSelected_==(i==1))?1.f:0.f);
-      button->invalid();
-    }
-  }
-  void selectPage(bool rhythm) {
-    rhythmPageSelected_=rhythm;
-    refreshPages();
-  }
+  // Guitar-only editor: no secondary page.
   std::array<VSTGUI::CControl*,25> commandButtons_{};
   void refreshCommands() {
-    const auto selected=[&](int tag) -> bool {
-      using namespace a125::rifferator;
-      if(tag==701||tag==702)return zoomFactor_==(tag==701?1.:1.5);
-      if(tag>=710&&tag<=712)return std::clamp(static_cast<int>(getParamNormalized(kBassMode)*2.+0.5),0,2)==tag-710;
-      if(tag>=713&&tag<=717)return std::clamp(static_cast<int>(getParamNormalized(kChordsQuality)*4.+0.5),0,4)==tag-713;
-      if(tag==718)return getParamNormalized(kChordsEnabled)>=0.5;
-      if(tag==719)return getParamNormalized(kBassEnabled)>=0.5;
-      if(tag==720)return getParamNormalized(kChordsMode)>=0.5;
-      if(tag==724)return getParamNormalized(kDrumEnabled)>=0.5;
-      return false;
-    };
-    for(int tag=701;tag<=724;++tag)if(auto* button=commandButtons_[static_cast<std::size_t>(tag-700)]) {
-      button->setValueNormalized(selected(tag)?1.f:0.f);
-      button->invalid();
+    for(int tag:{701,702}) if(auto* c=commandButtons_[static_cast<std::size_t>(tag-700)]){
+      c->setValueNormalized(zoomFactor_==(tag==701?1.:1.5)?1.f:0.f);
+      c->invalid();
     }
   }
   std::array<VSTGUI::CControl*,16> stepOnButtons_{};
   std::array<VSTGUI::CControl*,16> lockButtons_{};
   std::array<VSTGUI::CControl*,16> doubleButtons_{};
-  std::array<VSTGUI::CControl*,48> drumButtons_{};
   void refreshSwitch(Steinberg::Vst::ParamID id) {
     using namespace a125::rifferator;
     VSTGUI::CControl* control=nullptr;
     if(id>=kGuitarStepBase && id<kGuitarStepBase+16)control=stepOnButtons_[id-kGuitarStepBase];
     else if(id>=kGuitarLockBase && id<kGuitarLockBase+16)control=lockButtons_[id-kGuitarLockBase];
     else if(id>=kGuitarDoubleBase && id<kGuitarDoubleBase+16)control=doubleButtons_[id-kGuitarDoubleBase];
-    else if(id>=kDrumStepBase && id<kDrumStepBase+48)control=drumButtons_[id-kDrumStepBase];
     if(control){control->setValueNormalized(getParamNormalized(id)>=0.5?1.f:0.f);control->invalid();}
   }
-  // Six previously host-only musical controls are now available directly
-  // in the editor. Tags 900..911 are +/- actions; 912..917 are readouts.
-  // No new VST3 parameter IDs or processor state words are introduced.
-  std::array<VSTGUI::CTextButton*,6> musicalDisplays_{};
+  // One-to-one text-edit tags: 912 Root, 913 Gate, 915 Fill.
+  std::array<VSTGUI::CTextEdit*,3> musicalDisplays_{};
+  std::array<VSTGUI::CTextEdit*,2> pmDisplays_{};
   static Steinberg::Vst::ParamID musicalParam(int index) noexcept {
     using namespace a125::rifferator;
-    constexpr Steinberg::Vst::ParamID ids[6]{
-      kRootPitch,kGuitarGate,kBassGate,kFillIntensity,kBassVelocity,kEbmStyle};
-    return ids[static_cast<std::size_t>(std::clamp(index,0,5))];
+    constexpr Steinberg::Vst::ParamID ids[]{kRootPitch,kGuitarGate,kFillIntensity};
+    return ids[std::clamp(index,0,2)];
   }
   static int musicalValue(int index,double normalized) noexcept {
-    const double n=std::clamp(normalized,0.,1.);
-    if(index==0)return std::clamp(static_cast<int>(std::lround(n*127.)),0,127);
-    if(index==4)return std::clamp(1+static_cast<int>(std::lround(n*126.)),1,127);
-    if(index==5)return std::clamp(static_cast<int>(std::lround(n*4.)),0,4);
-    return std::clamp(static_cast<int>(std::lround(n*100.)),0,100);
+    return std::clamp(static_cast<int>(std::lround(std::clamp(normalized,0.,1.)*(index==0?127.:100.))),0,index==0?127:100);
   }
   static double musicalNormalized(int index,int value) noexcept {
-    if(index==0)return std::clamp(value,0,127)/127.;
-    if(index==4)return (std::clamp(value,1,127)-1)/126.;
-    if(index==5)return std::clamp(value,0,4)/4.;
-    return std::clamp(value,0,100)/100.;
+    return static_cast<double>(std::clamp(value,0,index==0?127:100))/(index==0?127.:100.);
   }
   void applyMusicalStepCommand(int command) {
-    if(command<900 || command>=912)return;
-    const int index=(command-900)/2;
+    const int index=(command==900||command==901)?0:
+      (command==902||command==903)?1:(command==906||command==907)?2:-1;
+    if(index<0)return;
     const auto id=musicalParam(index);
-    const int original=musicalValue(index,getParamNormalized(id));
-    const int minimum=index==4?1:0;
-    const int maximum=index==0||index==4?127:index==5?4:100;
-    const int updated=std::clamp(
-      original+(command%2==0?-1:1),minimum,maximum);
-    if(updated==original)return;
-    const double normalized=musicalNormalized(index,updated);
-    beginEdit(id);setParamNormalized(id,normalized);
-    performEdit(id,normalized);endEdit(id);
-  }
-  void toggleDrumsEnabled() {
-    const auto id=a125::rifferator::kDrumEnabled;
-    const double value=getParamNormalized(id)>=0.5?0.:1.;
-    beginEdit(id);setParamNormalized(id,value);
-    performEdit(id,value);endEdit(id);
+    const int old=musicalValue(index,getParamNormalized(id));
+    const int next=std::clamp(old+(command%2==0?-1:1),0,index==0?127:100);
+    if(next==old)return;
+    const auto norm=musicalNormalized(index,next);
+    beginEdit(id);setParamNormalized(id,norm);performEdit(id,norm);endEdit(id);
   }
   void refreshMusicalDisplays() {
-    static constexpr const char* styles[5]{
-      "CLASSIC","CHROMATIC","OCTAVE","INDUSTRIAL","ROLLING"};
-    for(int i=0;i<6;++i)if(auto* display=musicalDisplays_[static_cast<std::size_t>(i)]) {
+    for(int i=0;i<3;++i)if(auto* edit=musicalDisplays_[static_cast<std::size_t>(i)]) {
       const int value=musicalValue(i,getParamNormalized(musicalParam(i)));
-      const auto label=i==5?std::string(styles[value]):
-        std::to_string(value)+(i>=1 && i<=3?"%":"");
-      display->setTitle(label.c_str());display->invalid();
+      const std::string label=i==0?a125::rifferator::noteName(value):std::to_string(value)+"%";
+      edit->setText(label.c_str());edit->invalid();
     }
   }
-  std::array<VSTGUI::CTextButton*,2> pmDisplays_{};
   void refreshPmDisplays() {
     const Steinberg::Vst::ParamID ids[2]{a125::rifferator::kPmMin,a125::rifferator::kPmMax};
-    for(int i=0;i<2;++i)if(auto* display=pmDisplays_[static_cast<std::size_t>(i)]) {
-      const int velocity=1+static_cast<int>(std::lround(getParamNormalized(ids[i])*126.));
-      display->setTitle(std::to_string(velocity).c_str());display->invalid();
+    for(int i=0;i<2;++i)if(auto* edit=pmDisplays_[static_cast<std::size_t>(i)]) {
+      const int value=1+static_cast<int>(std::lround(getParamNormalized(ids[i])*126.));
+      edit->setText(std::to_string(value).c_str());edit->invalid();
     }
   }
-  std::array<VSTGUI::CTextButton*,16> degreeDisplays_{};
+  bool editTextValue(int tag,const std::string& text) {
+    using namespace a125::rifferator;
+    int value=0;
+    Steinberg::Vst::ParamID id=0;
+    if(tag==912||tag==913||tag==915) {
+      const int index=tag==912?0:tag==913?1:2;
+      if(!(index==0?parseNote(text,value):parseInteger(text,value))) {
+        refreshMusicalDisplays();return true;
+      }
+      value=std::clamp(value,0,index==0?127:100);
+      id=musicalParam(index);
+      const auto norm=musicalNormalized(index,value);
+      beginEdit(id);setParamNormalized(id,norm);performEdit(id,norm);endEdit(id);
+      refreshMusicalDisplays();return true;
+    }
+    if(tag==884||tag==885) {
+      if(!parseInteger(text,value)) {refreshPmDisplays();return true;}
+      id=tag==884?kPmMin:kPmMax;
+      const auto other=id==kPmMin?kPmMax:kPmMin;
+      const int limit=1+static_cast<int>(std::lround(getParamNormalized(other)*126.));
+      value=std::clamp(value,1,127);
+      value=id==kPmMin?std::min(value,limit):std::max(value,limit);
+      const auto norm=(value-1)/126.;
+      beginEdit(id);setParamNormalized(id,norm);performEdit(id,norm);endEdit(id);
+      refreshPmDisplays();return true;
+    }
+    if(tag>=850&&tag<866) {
+      const int step=tag-850;
+      if(getParamNormalized(kGuitarLockBase+step)>=.5||!parseInteger(text,value)) {
+        refreshDegree(step);return true;
+      }
+      value=std::clamp(value,-13,15);
+      id=kGuitarDegreeBase+step;
+      const auto norm=(value+13)/28.;
+      beginEdit(id);setParamNormalized(id,norm);performEdit(id,norm);endEdit(id);
+      refreshDegree(step);return true;
+    }
+    return false;
+  }
+  std::array<VSTGUI::CTextEdit*,16> degreeDisplays_{};
   void refreshDegree(int step) {
     if(step<0 || step>=16)return;
     if(auto* button=degreeDisplays_[static_cast<std::size_t>(step)]) {
       const int degree=std::clamp(static_cast<int>(std::lround(
         getParamNormalized(a125::rifferator::kGuitarDegreeBase+step)*28.))-13,-13,15);
-      button->setTitle(std::to_string(degree).c_str());
+      button->setText(std::to_string(degree).c_str());
       button->invalid();
     }
   }
@@ -287,16 +245,14 @@ public:
     const auto result=EditControllerEx1::setParamNormalized(id,value);
     if(result==Steinberg::kResultOk) {
       if(id==a125::rifferator::kPmMin || id==a125::rifferator::kPmMax)refreshPmDisplays();
-      if(id==a125::rifferator::kBassMode || id==a125::rifferator::kChordsQuality || id==a125::rifferator::kChordsEnabled || id==a125::rifferator::kBassEnabled || id==a125::rifferator::kChordsMode || id==a125::rifferator::kDrumEnabled)refreshCommands();
-      for(int i=0;i<6;++i)if(id==musicalParam(i)) {
+      for(int i=0;i<3;++i)if(id==musicalParam(i)) {
         refreshMusicalDisplays();break;
       }
       if(id>=a125::rifferator::kGuitarStepBase && id<a125::rifferator::kGuitarStepBase+16)refreshGuitarStep(static_cast<int>(id-a125::rifferator::kGuitarStepBase));
       if(id>=a125::rifferator::kGuitarArticulationBase && id<a125::rifferator::kGuitarArticulationBase+16)refreshGuitarStep(static_cast<int>(id-a125::rifferator::kGuitarArticulationBase));
       if((id>=a125::rifferator::kGuitarStepBase && id<a125::rifferator::kGuitarStepBase+16) ||
          (id>=a125::rifferator::kGuitarLockBase && id<a125::rifferator::kGuitarLockBase+16) ||
-         (id>=a125::rifferator::kGuitarDoubleBase && id<a125::rifferator::kGuitarDoubleBase+16) ||
-         (id>=a125::rifferator::kDrumStepBase && id<a125::rifferator::kDrumStepBase+48))refreshSwitch(id);
+         (id>=a125::rifferator::kGuitarDoubleBase && id<a125::rifferator::kGuitarDoubleBase+16))refreshSwitch(id);
       if(id>=a125::rifferator::kGuitarDegreeBase && id<a125::rifferator::kGuitarDegreeBase+16)refreshDegree(static_cast<int>(id-a125::rifferator::kGuitarDegreeBase));
     }
     return result;
@@ -308,16 +264,12 @@ public:
       // Never retain pointers after this editor destroys its views.
       for(auto& row:guitarCells_)row.fill(nullptr);
       commandButtons_.fill(nullptr);
-      guitarPageView_=nullptr;
-      rhythmPageView_=nullptr;
-      pageButtons_.fill(nullptr);
       degreeDisplays_.fill(nullptr);
       stepOnButtons_.fill(nullptr);
       lockButtons_.fill(nullptr);
       doubleButtons_.fill(nullptr);
       pmDisplays_.fill(nullptr);
       musicalDisplays_.fill(nullptr);
-      drumButtons_.fill(nullptr);
     }
   }
   VSTGUI::CView* verifyView(VSTGUI::CView* view,
@@ -327,53 +279,39 @@ public:
     if(viewOwner_!=editor) {
       for(auto& row:guitarCells_)row.fill(nullptr);
       commandButtons_.fill(nullptr);
-      guitarPageView_=nullptr;
-      rhythmPageView_=nullptr;
-      pageButtons_.fill(nullptr);
       degreeDisplays_.fill(nullptr);
       stepOnButtons_.fill(nullptr);
       lockButtons_.fill(nullptr);
       doubleButtons_.fill(nullptr);
       pmDisplays_.fill(nullptr);
       musicalDisplays_.fill(nullptr);
-      drumButtons_.fill(nullptr);
       viewOwner_=editor;
     }
-    // Match the same identifier-based page ownership used by Midiator.
-    // A controller may retain its selected page across editor reopen, but
-    // never a CView pointer belonging to an already destroyed editor.
-    if(const auto* id=attributes.getAttributeValue("rifferator-page")) {
-      if(*id=="guitar")guitarPageView_=view;
-      else if(*id=="rhythm")rhythmPageView_=view;
-      refreshPages();
-    }
     if(auto* control=dynamic_cast<VSTGUI::CControl*>(view)) {
-      if((control->getTag()>=500 && control->getTag()<596) || (control->getTag()>=700 && control->getTag()<=729) || (control->getTag()>=800 && control->getTag()<832) || (control->getTag()>=200 && control->getTag()<248) || (control->getTag()>=300 && control->getTag()<316) || (control->getTag()>=432 && control->getTag()<464) || (control->getTag()>=880 && control->getTag()<884) || (control->getTag()>=900 && control->getTag()<912) || control->getTag()==724)
-        control->setListener(this);
       const auto tag=control->getTag();
-      if(tag==728 || tag==729) {
-        pageButtons_[static_cast<std::size_t>(tag-728)]=control;
-        refreshPages();
-      }
-      if(tag>=912 && tag<918) {
-        musicalDisplays_[static_cast<std::size_t>(tag-912)]=
-          dynamic_cast<VSTGUI::CTextButton*>(control);
+      if((tag>=500&&tag<596)||(tag==700||tag==701||tag==702||tag==721||tag==722)||
+         (tag>=300&&tag<316)||(tag>=432&&tag<464)||
+         (tag>=800&&tag<832)||(tag>=850&&tag<866)||
+         (tag>=880&&tag<886)||(tag==900||tag==901||tag==902||tag==903||tag==906||tag==907)||
+         tag==912||tag==913||tag==915)
+        control->setListener(this);
+      if(tag==912||tag==913||tag==915) {
+        musicalDisplays_[static_cast<std::size_t>(tag==912?0:tag==913?1:2)]=
+          dynamic_cast<VSTGUI::CTextEdit*>(control);
         refreshMusicalDisplays();
       }
       if(tag>=884 && tag<886) {
-        pmDisplays_[static_cast<std::size_t>(tag-884)]=dynamic_cast<VSTGUI::CTextButton*>(control);
+        pmDisplays_[static_cast<std::size_t>(tag-884)]=dynamic_cast<VSTGUI::CTextEdit*>(control);
         refreshPmDisplays();
       }
-      if(tag>=200 && tag<248) {drumButtons_[tag-200]=control;refreshSwitch(tag);}
       if(tag>=300 && tag<316) {stepOnButtons_[tag-300]=control;refreshSwitch(tag);}
       if(tag>=432 && tag<448) {lockButtons_[tag-432]=control;refreshSwitch(tag);}
       if(tag>=448 && tag<464) {doubleButtons_[tag-448]=control;refreshSwitch(tag);}
       if(control->getTag()>=850 && control->getTag()<866) {
-        degreeDisplays_[static_cast<std::size_t>(control->getTag()-850)]=dynamic_cast<VSTGUI::CTextButton*>(control);
+        degreeDisplays_[static_cast<std::size_t>(control->getTag()-850)]=dynamic_cast<VSTGUI::CTextEdit*>(control);
         refreshDegree(control->getTag()-850);
       }
-      if((control->getTag()>=701 && control->getTag()<=720) ||
-         control->getTag()==724) {
+      if(control->getTag()==701 || control->getTag()==702) {
         commandButtons_[static_cast<std::size_t>(control->getTag()-700)]=control;
         refreshCommands();
       }
@@ -388,12 +326,8 @@ public:
   void valueChanged(VSTGUI::CControl* control) override {
     if(!control)return;
     const int command=control->getTag();
-    // Navigation/zoom are exclusive selectors, never off/on toggles.
-    // Even a second click on the selected button restores its highlight.
-    if(command==728 || command==729) {
-      selectPage(command==729);
-      return;
-    }
+    if(auto* edit=dynamic_cast<VSTGUI::CTextEdit*>(control))
+      if(editTextValue(command,edit->getText().getString()))return;
     if(command==701 || command==702) {
       zoomFactor_=command==701?1.:1.5;
       // Use the attached view owner when available, not a potentially stale
@@ -422,7 +356,7 @@ public:
       refreshGuitarStep(step);
       return;
     }
-    if((command>=200 && command<248) || (command>=300 && command<316) ||
+    if((command>=300 && command<316) ||
        (command>=432 && command<464)) {
       const auto id=static_cast<Steinberg::Vst::ParamID>(command);
       // A locked guitar step rejects both ON/OFF and DOUBLE edits.
@@ -487,46 +421,8 @@ public:
       performEdit(id,value);
       endEdit(id);
     };
-    if(command>=710 && command<=712) {
-      send(a125::rifferator::kBassMode,static_cast<double>(command-710)/2.);
-      return;
-    }
-    if(command>=713 && command<=717) {
-      send(a125::rifferator::kChordsQuality,static_cast<double>(command-713)/4.);
-      return;
-    }
-    if(command==718) {
-      const auto id=a125::rifferator::kChordsEnabled;
-      send(id,getParamNormalized(id)>=0.5?0.:1.);
-      return;
-    }
-    if(command==719) {
-      const auto id=a125::rifferator::kBassEnabled;
-      send(id,getParamNormalized(id)>=0.5?0.:1.);
-      return;
-    }
-    if(command==720) {
-      const auto id=a125::rifferator::kChordsMode;
-      send(id,getParamNormalized(id)>=0.5?0.:1.);
-      return;
-    }
-    if(command>=900 && command<912) {
+    if(command==900||command==901||command==902||command==903||command==906||command==907) {
       applyMusicalStepCommand(command);
-      return;
-    }
-    if(command==724) {
-      toggleDrumsEnabled();
-      return;
-    }
-
-    if(command==725) {
-      restoreStandardDrums();
-      return;
-    }
-    if(command==726 || command==727) {
-      runDrumGeneration(command==726?
-        a125::rifferator::GenerationCommand::Generate:
-        a125::rifferator::GenerationCommand::Variate);
       return;
     }
     if(command==700 || command==722) {
@@ -572,58 +468,10 @@ public:
     using namespace Steinberg::Vst;
     if(EditControllerEx1::initialize(context)!=Steinberg::kResultOk) return Steinberg::kResultFalse;
     parameters.addParameter(STR16("PM MIN"),nullptr,126,29.0/126.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kPmMin);
-    parameters.addParameter(STR16("PM MAX"),nullptr,126,49.0/126.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kPmMax);
+    parameters.addParameter(STR16("PM MAX"),nullptr,126,39.0/126.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kPmMax);
     parameters.addParameter(STR16("Guitar Gate"),STR16("%"),0,0.95,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kGuitarGate);
-    parameters.addParameter(STR16("Bass Gate"),STR16("%"),0,0.95,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kBassGate);
-    {
-      auto* mode=new StringListParameter(STR16("Bass Mode"),a125::rifferator::kBassMode);
-      mode->appendString(STR16("FOLLOW"));
-      mode->appendString(STR16("EBM"));
-      mode->appendString(STR16("HYBRID"));
-      parameters.addParameter(mode);
-      auto* style=new StringListParameter(STR16("EBM Style"),a125::rifferator::kEbmStyle);
-      style->appendString(STR16("CLASSIC"));
-      style->appendString(STR16("CHROMATIC"));
-      style->appendString(STR16("OCTAVE"));
-      style->appendString(STR16("INDUSTRIAL"));
-      style->appendString(STR16("ROLLING"));
-      parameters.addParameter(style);
-    }
-    {
-      auto* quality=new StringListParameter(STR16("Chord Quality"),a125::rifferator::kChordsQuality);
-      quality->appendString(STR16("MINOR"));
-      quality->appendString(STR16("MAJOR"));
-      quality->appendString(STR16("POWER"));
-      quality->appendString(STR16("SUS2"));
-      quality->appendString(STR16("SUS4"));
-      parameters.addParameter(quality);
-    }
-    parameters.addParameter(STR16("Chords Enabled"),nullptr,1,1.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kChordsEnabled);
-    {
-      auto* mode=new StringListParameter(STR16("Chords Output"),a125::rifferator::kChordsMode);
-      mode->appendString(STR16("CHORD"));
-      mode->appendString(STR16("ROOT"));
-      parameters.addParameter(mode);
-    }
-    parameters.addParameter(STR16("Harmony Bar 01"),nullptr,128,1.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kHybridRootBase+0);
-    parameters.addParameter(STR16("Harmony Bar 02"),nullptr,128,1.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kHybridRootBase+1);
-    parameters.addParameter(STR16("Harmony Bar 03"),nullptr,128,1.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kHybridRootBase+2);
-    parameters.addParameter(STR16("Harmony Bar 04"),nullptr,128,1.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kHybridRootBase+3);
-    parameters.addParameter(STR16("Harmony Bar 05"),nullptr,128,1.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kHybridRootBase+4);
-    parameters.addParameter(STR16("Harmony Bar 06"),nullptr,128,1.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kHybridRootBase+5);
-    parameters.addParameter(STR16("Harmony Bar 07"),nullptr,128,1.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kHybridRootBase+6);
-    parameters.addParameter(STR16("Harmony Bar 08"),nullptr,128,1.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kHybridRootBase+7);
-    parameters.addParameter(STR16("Harmony Bar 09"),nullptr,128,1.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kHybridRootBase+8);
-    parameters.addParameter(STR16("Harmony Bar 10"),nullptr,128,1.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kHybridRootBase+9);
-    parameters.addParameter(STR16("Harmony Bar 11"),nullptr,128,1.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kHybridRootBase+10);
-    parameters.addParameter(STR16("Harmony Bar 12"),nullptr,128,1.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kHybridRootBase+11);
-    parameters.addParameter(STR16("Harmony Bar 13"),nullptr,128,1.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kHybridRootBase+12);
-    parameters.addParameter(STR16("Harmony Bar 14"),nullptr,128,1.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kHybridRootBase+13);
-    parameters.addParameter(STR16("Harmony Bar 15"),nullptr,128,1.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kHybridRootBase+14);
-    parameters.addParameter(STR16("Harmony Bar 16"),nullptr,128,1.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kHybridRootBase+15);
-    parameters.addParameter(STR16("Bass Enabled"),nullptr,1,1.0,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kBassEnabled);
-    parameters.addParameter(STR16("Root MIDI"),nullptr,127,40.0/127.0,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kRootPitch);
-    parameters.addParameter(STR16("Bass Velocity"),nullptr,126,99.0/126.0,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kBassVelocity);
+    parameters.addParameter(STR16("Root Note"),nullptr,127,40.0/127.0,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kRootPitch);
+
     parameters.addParameter(STR16("Fill Intensity"),STR16("%"),0,0.0,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kFillIntensity);
     for(int i=0;i<16;++i)
       parameters.addParameter(STR16("Guitar DOUBLE"),nullptr,1,0.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kGuitarDoubleBase+i);
@@ -867,55 +715,7 @@ public:
     }
     parameters.addParameter(STR16("Guitar Degree 16"),nullptr,28,14./28.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kGuitarDegreeBase+15);
     parameters.addParameter(STR16("Guitar Lock 16"),nullptr,1,0.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kGuitarLockBase+15);
-    parameters.addParameter(STR16("Drums Enabled"),nullptr,1,1.0,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kDrumEnabled);
-    parameters.addParameter(STR16("Kick 01"),nullptr,1,1.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kDrumStepBase+0);
-    parameters.addParameter(STR16("Kick 02"),nullptr,1,0.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kDrumStepBase+1);
-    parameters.addParameter(STR16("Kick 03"),nullptr,1,0.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kDrumStepBase+2);
-    parameters.addParameter(STR16("Kick 04"),nullptr,1,0.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kDrumStepBase+3);
-    parameters.addParameter(STR16("Kick 05"),nullptr,1,1.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kDrumStepBase+4);
-    parameters.addParameter(STR16("Kick 06"),nullptr,1,0.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kDrumStepBase+5);
-    parameters.addParameter(STR16("Kick 07"),nullptr,1,0.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kDrumStepBase+6);
-    parameters.addParameter(STR16("Kick 08"),nullptr,1,0.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kDrumStepBase+7);
-    parameters.addParameter(STR16("Kick 09"),nullptr,1,1.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kDrumStepBase+8);
-    parameters.addParameter(STR16("Kick 10"),nullptr,1,0.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kDrumStepBase+9);
-    parameters.addParameter(STR16("Kick 11"),nullptr,1,0.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kDrumStepBase+10);
-    parameters.addParameter(STR16("Kick 12"),nullptr,1,0.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kDrumStepBase+11);
-    parameters.addParameter(STR16("Kick 13"),nullptr,1,1.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kDrumStepBase+12);
-    parameters.addParameter(STR16("Kick 14"),nullptr,1,0.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kDrumStepBase+13);
-    parameters.addParameter(STR16("Kick 15"),nullptr,1,0.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kDrumStepBase+14);
-    parameters.addParameter(STR16("Kick 16"),nullptr,1,0.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kDrumStepBase+15);
-    parameters.addParameter(STR16("Snare 01"),nullptr,1,0.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kDrumStepBase+16);
-    parameters.addParameter(STR16("Snare 02"),nullptr,1,0.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kDrumStepBase+17);
-    parameters.addParameter(STR16("Snare 03"),nullptr,1,0.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kDrumStepBase+18);
-    parameters.addParameter(STR16("Snare 04"),nullptr,1,0.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kDrumStepBase+19);
-    parameters.addParameter(STR16("Snare 05"),nullptr,1,1.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kDrumStepBase+20);
-    parameters.addParameter(STR16("Snare 06"),nullptr,1,0.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kDrumStepBase+21);
-    parameters.addParameter(STR16("Snare 07"),nullptr,1,0.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kDrumStepBase+22);
-    parameters.addParameter(STR16("Snare 08"),nullptr,1,0.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kDrumStepBase+23);
-    parameters.addParameter(STR16("Snare 09"),nullptr,1,0.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kDrumStepBase+24);
-    parameters.addParameter(STR16("Snare 10"),nullptr,1,0.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kDrumStepBase+25);
-    parameters.addParameter(STR16("Snare 11"),nullptr,1,0.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kDrumStepBase+26);
-    parameters.addParameter(STR16("Snare 12"),nullptr,1,0.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kDrumStepBase+27);
-    parameters.addParameter(STR16("Snare 13"),nullptr,1,1.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kDrumStepBase+28);
-    parameters.addParameter(STR16("Snare 14"),nullptr,1,0.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kDrumStepBase+29);
-    parameters.addParameter(STR16("Snare 15"),nullptr,1,0.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kDrumStepBase+30);
-    parameters.addParameter(STR16("Snare 16"),nullptr,1,0.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kDrumStepBase+31);
-    parameters.addParameter(STR16("Hat 01"),nullptr,1,1.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kDrumStepBase+32);
-    parameters.addParameter(STR16("Hat 02"),nullptr,1,1.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kDrumStepBase+33);
-    parameters.addParameter(STR16("Hat 03"),nullptr,1,1.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kDrumStepBase+34);
-    parameters.addParameter(STR16("Hat 04"),nullptr,1,1.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kDrumStepBase+35);
-    parameters.addParameter(STR16("Hat 05"),nullptr,1,1.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kDrumStepBase+36);
-    parameters.addParameter(STR16("Hat 06"),nullptr,1,1.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kDrumStepBase+37);
-    parameters.addParameter(STR16("Hat 07"),nullptr,1,1.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kDrumStepBase+38);
-    parameters.addParameter(STR16("Hat 08"),nullptr,1,1.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kDrumStepBase+39);
-    parameters.addParameter(STR16("Hat 09"),nullptr,1,1.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kDrumStepBase+40);
-    parameters.addParameter(STR16("Hat 10"),nullptr,1,1.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kDrumStepBase+41);
-    parameters.addParameter(STR16("Hat 11"),nullptr,1,1.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kDrumStepBase+42);
-    parameters.addParameter(STR16("Hat 12"),nullptr,1,1.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kDrumStepBase+43);
-    parameters.addParameter(STR16("Hat 13"),nullptr,1,1.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kDrumStepBase+44);
-    parameters.addParameter(STR16("Hat 14"),nullptr,1,1.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kDrumStepBase+45);
-    parameters.addParameter(STR16("Hat 15"),nullptr,1,1.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kDrumStepBase+46);
-    parameters.addParameter(STR16("Hat 16"),nullptr,1,1.,Steinberg::Vst::ParameterInfo::kCanAutomate,a125::rifferator::kDrumStepBase+47);
+
     return Steinberg::kResultOk;
   }
   // VST3 stores edit-controller state independently from the processor's
@@ -927,7 +727,7 @@ public:
     constexpr uint32 magic=0x315A4652u; // "RFZ1" (little endian)
     constexpr uint32 version=2u;
     const uint32 zoom=zoomFactor_>=1.25?150u:100u;
-    const uint32 fields[4]{magic,version,zoom,rhythmPageSelected_?1u:0u};
+    const uint32 fields[4]{magic,version,zoom,0u};
     for(auto field:fields) {
       int32 written=0;
       if(stream->write(&field,sizeof(field),&written)!=kResultOk ||
@@ -957,140 +757,36 @@ public:
     // Publish only after every field was read and validated. A truncated
     // project cannot corrupt zoom/page or a currently attached editor.
     zoomFactor_=fields[2]==150u?1.5:1.0;
-    selectPage(page==1u);
+    // Saved legacy Rhythm page is ignored in guitar-only mode.
     auto* editor=viewOwner_?viewOwner_:activeEditor_;
     if(editor && std::abs(editor->getZoomFactor()-zoomFactor_)>1.e-9)
       editor->setZoomFactor(zoomFactor_);
     refreshCommands();
     return kResultOk;
   }
-  Steinberg::tresult PLUGIN_API setComponentState(Steinberg::IBStream* state) override {
-    using namespace Steinberg;
-    using namespace Steinberg::Vst;
-    if(!state)return kResultFalse;
-    auto read32=[&](uint32_t& v) {
-      int32 read=0;
-      return state->read(&v,sizeof(v),&read)==kResultOk && read==sizeof(v);
-    };
-    uint32_t magic=0,version=0,count=0;
-    if(!read32(magic)||!read32(version)||!read32(count) ||
-       magic!=0x31524641u || (version!=1 && version!=2 && version!=3 && version!=4 && version!=5 && version!=6 && version!=7 && version!=8 && version!=9) ||
-       count<1 || count>32) return kResultFalse;
-    std::array<uint32_t,7> values{};
-    for(auto& v:values)if(!read32(v))return kResultFalse;
-    uint32_t fill=0;
-    if(version>=2 && !read32(fill))return kResultFalse;
-    if(values[0]>127 || values[1]<1 || values[1]>127 ||
-       values[3]>100 || values[4]>100 || values[6]>1 ||
-       fill>100)return kResultFalse;
-    // Validate the entire serialized riff before publishing parameter values.
-    // A truncated pattern must never partially restore the controller.
-    std::array<uint32_t,32> storedDouble{},storedArt{},storedLocks{};
-    std::array<int32_t,32> storedDegree{};
-    for(uint32_t i=0;i<count;++i) {
-      std::array<uint32_t,4> step{};
-      for(auto& value:step)if(!read32(value))return kResultFalse;
-      const int32_t degree=static_cast<int32_t>(step[1]);
-      if(step[0]>5 || degree<-13 || degree>15 ||
-         step[2]>1 || step[3]>1)return kResultFalse;
-      storedDouble[i]=step[2];storedArt[i]=step[0];storedDegree[i]=degree;storedLocks[i]=step[3];
-    }
-    std::array<uint32_t,49> drumValues{};
-    if(version>=3) {
-      uint32_t enabled=0;
-      if(!read32(enabled)||enabled>1)return kResultFalse;
-      drumValues[0]=enabled;
-      for(int i=0;i<48;++i) {
-        uint32_t active=0;
-        if(!read32(active)||active>1)return kResultFalse;
-        drumValues[static_cast<std::size_t>(i+1)]=active;
-      }
-    }
-    std::array<uint32_t,16> guitarActive{};
-    if(version>=4) {
-      for(auto& value:guitarActive)if(!read32(value)||value>1)return kResultFalse;
-    }
-    std::array<uint32_t,16> guitarArt{},guitarDegrees{},guitarLocks{};
-    if(version>=5) {
-      for(auto& value:guitarArt)if(!read32(value)||value>5)return kResultFalse;
-      for(auto& value:guitarDegrees) {
-        if(!read32(value))return kResultFalse;
-        const auto degree=static_cast<int32_t>(value);
-        if(degree<-13||degree>15)return kResultFalse;
-      }
-      for(auto& value:guitarLocks)if(!read32(value)||value>1)return kResultFalse;
-    }
-    uint32_t restoredMode=0,restoredStyle=0;
-    if(version>=6 && (!read32(restoredMode)||restoredMode>2||
-                      !read32(restoredStyle)||restoredStyle>4))
-      return kResultFalse;
-    uint32_t chordsEnabled=0,chordsMode=0;
-    std::array<uint32_t,16> harmonyRoots{};
-    harmonyRoots.fill(128);
-    if(version>=7) {
-      if(!read32(chordsEnabled)||chordsEnabled>1||
-         !read32(chordsMode)||chordsMode>1)return kResultFalse;
-      for(auto& root:harmonyRoots)if(!read32(root)||root>128)return kResultFalse;
-    }
-    uint32_t quality=0;
-    if(version>=8 && (!read32(quality)||quality>4))return kResultFalse;
-    uint32_t pmMin=30,pmMax=50;
-    if(version>=9 && (!read32(pmMin)||!read32(pmMax)||
-        pmMin<1||pmMax>127||pmMin>pmMax))return kResultFalse;
-    // Set the bound that expands the current interval first; this also
-    // restores ranges wholly above or below the default 30..50.
-    const auto minId=a125::rifferator::kPmMin,maxId=a125::rifferator::kPmMax;
-    const auto restoreMin=[&](){setParamNormalized(minId,(pmMin-1)/126.);};
-    const auto restoreMax=[&](){setParamNormalized(maxId,(pmMax-1)/126.);};
-    if((pmMax-1)/126. < getParamNormalized(minId)) {
-      restoreMin();restoreMax();
-    } else {
-      restoreMax();restoreMin();
-    }
-    // An older project may have left steps locked in the current controller.
-    // After validating the incoming state, clear existing locks first so that
-    // full project recall can replace every step even if it was locked before.
-    // The incoming lock flags are restored only after their step values.
+  Steinberg::tresult PLUGIN_API setComponentState(Steinberg::IBStream* stream) override {
+    using namespace a125::rifferator;
+    GuitarSnapshot snapshot;
+    if(!readSnapshot(stream,snapshot))return Steinberg::kResultFalse;
     for(int i=0;i<16;++i)
-      setParamNormalized(a125::rifferator::kGuitarLockBase+i,0.);
-    // The processor owns the pattern. The controller only synchronizes
-    // the automatable parameter values presented to the host/GUI.
-    setParamNormalized(a125::rifferator::kChordsQuality,quality/4.);
-    setParamNormalized(a125::rifferator::kChordsEnabled,chordsEnabled?1.:0.);
-    setParamNormalized(a125::rifferator::kChordsMode,chordsMode?1.:0.);
-    for(int i=0;i<16;++i)
-      setParamNormalized(a125::rifferator::kHybridRootBase+i,harmonyRoots[static_cast<std::size_t>(i)]/128.);
-    setParamNormalized(a125::rifferator::kBassMode,restoredMode/2.);
-    setParamNormalized(a125::rifferator::kEbmStyle,restoredStyle/4.);
-    setParamNormalized(a125::rifferator::kRootPitch,double(values[0])/127.);
-    setParamNormalized(a125::rifferator::kBassVelocity,double(values[1]-1)/126.);
-    setParamNormalized(a125::rifferator::kGuitarGate,double(values[3])/100.);
-    setParamNormalized(a125::rifferator::kBassGate,double(values[4])/100.);
-    setParamNormalized(a125::rifferator::kBassEnabled,values[6]?1.:0.);
-    setParamNormalized(a125::rifferator::kFillIntensity,double(fill)/100.);
-    for(int i=0;i<16;++i)
-      setParamNormalized(a125::rifferator::kGuitarDoubleBase+i,
-        storedDouble[static_cast<std::size_t>(i%count)]?1.:0.);
+      EditControllerEx1::setParamNormalized(kGuitarLockBase+i,0.);
+    EditControllerEx1::setParamNormalized(kRootPitch,snapshot.root/127.);
+    EditControllerEx1::setParamNormalized(kGuitarGate,snapshot.gate/100.);
+    EditControllerEx1::setParamNormalized(kFillIntensity,snapshot.fill/100.);
+    EditControllerEx1::setParamNormalized(kPmMin,(snapshot.pmMin-1)/126.);
+    EditControllerEx1::setParamNormalized(kPmMax,(snapshot.pmMax-1)/126.);
     for(int i=0;i<16;++i) {
-      const auto j=static_cast<std::size_t>(i%count);
-      const bool enabled=version>=4?guitarActive[static_cast<std::size_t>(i)]!=0:storedArt[j]!=0;
-      setParamNormalized(a125::rifferator::kGuitarStepBase+i,enabled?1.:0.);
+      const auto& st=snapshot.step[i];
+      EditControllerEx1::setParamNormalized(kGuitarStepBase+i,snapshot.enabled[i]?1.:0.);
+      EditControllerEx1::setParamNormalized(kGuitarArticulationBase+i,static_cast<int>(st.articulation)/5.);
+      EditControllerEx1::setParamNormalized(kGuitarDegreeBase+i,(st.degree+13)/28.);
+      EditControllerEx1::setParamNormalized(kGuitarDoubleBase+i,st.doubled?1.:0.);
+      EditControllerEx1::setParamNormalized(kGuitarLockBase+i,st.locked?1.:0.);
     }
-    for(int i=0;i<16;++i) {
-      const auto j=static_cast<std::size_t>(i);
-      const auto legacy=static_cast<std::size_t>(i%count);
-      const int32_t degree=version>=5?static_cast<int32_t>(guitarDegrees[j]):storedDegree[legacy];
-      setParamNormalized(a125::rifferator::kGuitarArticulationBase+i,
-        (version>=5?guitarArt[j]:storedArt[legacy])/5.);
-      setParamNormalized(a125::rifferator::kGuitarDegreeBase+i,(degree+13)/28.);
-      setParamNormalized(a125::rifferator::kGuitarLockBase+i,
-        (version>=5?guitarLocks[j]:storedLocks[legacy])?1.:0.);
-    }
-    if(version>=3) {
-      setParamNormalized(a125::rifferator::kDrumEnabled,drumValues[0]?1.:0.);
-      for(int i=0;i<48;++i)setParamNormalized(a125::rifferator::kDrumStepBase+i,drumValues[static_cast<std::size_t>(i+1)]?1.:0.);
-    }
-    return kResultOk;
+    refreshPmDisplays();refreshMusicalDisplays();
+    for(int i=0;i<16;++i){refreshGuitarStep(i);refreshDegree(i);
+      refreshSwitch(kGuitarStepBase+i);refreshSwitch(kGuitarLockBase+i);refreshSwitch(kGuitarDoubleBase+i);}
+    return Steinberg::kResultOk;
   }
   static Steinberg::FUnknown* createInstance(void*) {
     return static_cast<Steinberg::Vst::IEditController*>(new Controller);

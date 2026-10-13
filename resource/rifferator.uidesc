@@ -66,50 +66,17 @@
   <control-tag name="GuitarGenerate" tag="700"/>
   <control-tag name="ClearPattern" tag="721"/>
   <control-tag name="GuitarVariate" tag="722"/>
-  <control-tag name="DrumsEnabledAction" tag="724"/>
-  <control-tag name="StandardDrums" tag="725"/>
-  <control-tag name="GenerateDrums" tag="726"/>
-  <control-tag name="VariateDrums" tag="727"/>
-  <control-tag name="GuitarPage" tag="728"/>
-  <control-tag name="RhythmPage" tag="729"/>
   <control-tag name="RootMinus" tag="900"/>
   <control-tag name="RootPlus" tag="901"/>
   <control-tag name="RootValue" tag="912"/>
   <control-tag name="GtrGateMinus" tag="902"/>
   <control-tag name="GtrGatePlus" tag="903"/>
   <control-tag name="GtrGateValue" tag="913"/>
-  <control-tag name="BassGateMinus" tag="904"/>
-  <control-tag name="BassGatePlus" tag="905"/>
-  <control-tag name="BassGateValue" tag="914"/>
   <control-tag name="FillMinus" tag="906"/>
   <control-tag name="FillPlus" tag="907"/>
   <control-tag name="FillValue" tag="915"/>
-  <control-tag name="BassVelocityMinus" tag="908"/>
-  <control-tag name="BassVelocityPlus" tag="909"/>
-  <control-tag name="BassVelocityValue" tag="916"/>
-  <control-tag name="EbmStyleMinus" tag="910"/>
-  <control-tag name="EbmStylePlus" tag="911"/>
-  <control-tag name="EbmStyleValue" tag="917"/>
   <control-tag name="Action701" tag="701"/>
   <control-tag name="Action702" tag="702"/>
-  <control-tag name="Action703" tag="703"/>
-  <control-tag name="Action704" tag="704"/>
-  <control-tag name="Action705" tag="705"/>
-  <control-tag name="Action706" tag="706"/>
-  <control-tag name="Action707" tag="707"/>
-  <control-tag name="Action708" tag="708"/>
-  <control-tag name="Action709" tag="709"/>
-  <control-tag name="Action710" tag="710"/>
-  <control-tag name="Action711" tag="711"/>
-  <control-tag name="Action712" tag="712"/>
-  <control-tag name="Action713" tag="713"/>
-  <control-tag name="Action714" tag="714"/>
-  <control-tag name="Action715" tag="715"/>
-  <control-tag name="Action716" tag="716"/>
-  <control-tag name="Action717" tag="717"/>
-  <control-tag name="Action718" tag="718"/>
-  <control-tag name="Action719" tag="719"/>
-  <control-tag name="Action720" tag="720"/>
   <control-tag name="GCell0_0" tag="500"/>
   <control-tag name="GCell0_1" tag="501"/>
   <control-tag name="GCell0_2" tag="502"/>
@@ -206,8 +173,6 @@
   <control-tag name="GCell5_13" tag="593"/>
   <control-tag name="GCell5_14" tag="594"/>
   <control-tag name="GCell5_15" tag="595"/>
-  <control-tag name="GArt0" tag="400"/>
-  <control-tag name="GDegree0" tag="416"/>
   <control-tag name="GDouble0" tag="448"/>
   <control-tag name="GDouble1" tag="449"/>
   <control-tag name="GDouble2" tag="450"/>
@@ -225,50 +190,20 @@
   <control-tag name="GDouble14" tag="462"/>
   <control-tag name="GDouble15" tag="463"/>
   <control-tag name="GLock0" tag="432"/>
-  <control-tag name="GArt1" tag="401"/>
-  <control-tag name="GDegree1" tag="417"/>
   <control-tag name="GLock1" tag="433"/>
-  <control-tag name="GArt2" tag="402"/>
-  <control-tag name="GDegree2" tag="418"/>
   <control-tag name="GLock2" tag="434"/>
-  <control-tag name="GArt3" tag="403"/>
-  <control-tag name="GDegree3" tag="419"/>
   <control-tag name="GLock3" tag="435"/>
-  <control-tag name="GArt4" tag="404"/>
-  <control-tag name="GDegree4" tag="420"/>
   <control-tag name="GLock4" tag="436"/>
-  <control-tag name="GArt5" tag="405"/>
-  <control-tag name="GDegree5" tag="421"/>
   <control-tag name="GLock5" tag="437"/>
-  <control-tag name="GArt6" tag="406"/>
-  <control-tag name="GDegree6" tag="422"/>
   <control-tag name="GLock6" tag="438"/>
-  <control-tag name="GArt7" tag="407"/>
-  <control-tag name="GDegree7" tag="423"/>
   <control-tag name="GLock7" tag="439"/>
-  <control-tag name="GArt8" tag="408"/>
-  <control-tag name="GDegree8" tag="424"/>
   <control-tag name="GLock8" tag="440"/>
-  <control-tag name="GArt9" tag="409"/>
-  <control-tag name="GDegree9" tag="425"/>
   <control-tag name="GLock9" tag="441"/>
-  <control-tag name="GArt10" tag="410"/>
-  <control-tag name="GDegree10" tag="426"/>
   <control-tag name="GLock10" tag="442"/>
-  <control-tag name="GArt11" tag="411"/>
-  <control-tag name="GDegree11" tag="427"/>
   <control-tag name="GLock11" tag="443"/>
-  <control-tag name="GArt12" tag="412"/>
-  <control-tag name="GDegree12" tag="428"/>
   <control-tag name="GLock12" tag="444"/>
-  <control-tag name="GArt13" tag="413"/>
-  <control-tag name="GDegree13" tag="429"/>
   <control-tag name="GLock13" tag="445"/>
-  <control-tag name="GArt14" tag="414"/>
-  <control-tag name="GDegree14" tag="430"/>
   <control-tag name="GLock14" tag="446"/>
-  <control-tag name="GArt15" tag="415"/>
-  <control-tag name="GDegree15" tag="431"/>
   <control-tag name="GLock15" tag="447"/>
   <control-tag name="GuitarActive0" tag="300"/>
   <control-tag name="GuitarActive1" tag="301"/>
@@ -286,65 +221,14 @@
   <control-tag name="GuitarActive13" tag="313"/>
   <control-tag name="GuitarActive14" tag="314"/>
   <control-tag name="GuitarActive15" tag="315"/>
-  <control-tag name="Drum0_0" tag="200"/>
-  <control-tag name="Drum0_1" tag="201"/>
-  <control-tag name="Drum0_2" tag="202"/>
-  <control-tag name="Drum0_3" tag="203"/>
-  <control-tag name="Drum0_4" tag="204"/>
-  <control-tag name="Drum0_5" tag="205"/>
-  <control-tag name="Drum0_6" tag="206"/>
-  <control-tag name="Drum0_7" tag="207"/>
-  <control-tag name="Drum0_8" tag="208"/>
-  <control-tag name="Drum0_9" tag="209"/>
-  <control-tag name="Drum0_10" tag="210"/>
-  <control-tag name="Drum0_11" tag="211"/>
-  <control-tag name="Drum0_12" tag="212"/>
-  <control-tag name="Drum0_13" tag="213"/>
-  <control-tag name="Drum0_14" tag="214"/>
-  <control-tag name="Drum0_15" tag="215"/>
-  <control-tag name="Drum1_0" tag="216"/>
-  <control-tag name="Drum1_1" tag="217"/>
-  <control-tag name="Drum1_2" tag="218"/>
-  <control-tag name="Drum1_3" tag="219"/>
-  <control-tag name="Drum1_4" tag="220"/>
-  <control-tag name="Drum1_5" tag="221"/>
-  <control-tag name="Drum1_6" tag="222"/>
-  <control-tag name="Drum1_7" tag="223"/>
-  <control-tag name="Drum1_8" tag="224"/>
-  <control-tag name="Drum1_9" tag="225"/>
-  <control-tag name="Drum1_10" tag="226"/>
-  <control-tag name="Drum1_11" tag="227"/>
-  <control-tag name="Drum1_12" tag="228"/>
-  <control-tag name="Drum1_13" tag="229"/>
-  <control-tag name="Drum1_14" tag="230"/>
-  <control-tag name="Drum1_15" tag="231"/>
-  <control-tag name="Drum2_0" tag="232"/>
-  <control-tag name="Drum2_1" tag="233"/>
-  <control-tag name="Drum2_2" tag="234"/>
-  <control-tag name="Drum2_3" tag="235"/>
-  <control-tag name="Drum2_4" tag="236"/>
-  <control-tag name="Drum2_5" tag="237"/>
-  <control-tag name="Drum2_6" tag="238"/>
-  <control-tag name="Drum2_7" tag="239"/>
-  <control-tag name="Drum2_8" tag="240"/>
-  <control-tag name="Drum2_9" tag="241"/>
-  <control-tag name="Drum2_10" tag="242"/>
-  <control-tag name="Drum2_11" tag="243"/>
-  <control-tag name="Drum2_12" tag="244"/>
-  <control-tag name="Drum2_13" tag="245"/>
-  <control-tag name="Drum2_14" tag="246"/>
-  <control-tag name="Drum2_15" tag="247"/>
-<control-tag name="DrumsEnabled" tag="106"/>
 </control-tags>
 <template name="RifferatorView" class="CViewContainer" origin="0, 0" size="1120, 640" transparent="false" background-color="Bg">
  <view class="CTextLabel" origin="912, 20" size="55, 18" title="ZOOM" font="Small" font-color="Text" transparent="true"/>
  <view class="CTextButton" control-tag="Action701" origin="967, 17" size="58, 28" title="100%" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
  <view class="CTextButton" control-tag="Action702" origin="1030, 17" size="58, 28" title="150%" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
  <view class="CTextLabel" origin="360, 14" size="400, 38" title="125A RIFFERATOR" font="Title" font-color="Text" text-alignment="center" transparent="true"/>
- <view class="CTextLabel" origin="360, 53" size="400, 20" title="THE INDUSTRIAL RIFF MACHINE" font="Small" font-color="Accent" text-alignment="center" transparent="true"/>
- <view class="CTextButton" control-tag="GuitarPage" origin="35, 75" size="170, 29" title="GUITAR" font="Normal" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
- <view class="CTextButton" control-tag="RhythmPage" origin="217, 75" size="260, 29" title="BASS / CHORDS / DRUMS" font="Normal" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
- <view class="CViewContainer" rifferator-page="guitar" origin="0, 106" size="1120, 534" transparent="true">
+ <view class="CTextLabel" origin="360, 53" size="400, 20" title="THE INDUSTRIAL GUITAR RIFF MACHINE" font="Small" font-color="Accent" text-alignment="center" transparent="true"/>
+ <view class="CViewContainer" origin="0, 106" size="1120, 534" transparent="true">
  <view class="CViewContainer" origin="22, 2" size="1076, 383" background-color="Panel" transparent="false">
   <view class="CTextLabel" origin="16, 12" size="500, 24" title="GUITAR  |  16-STEP RIFF MATRIX" font="Normal" font-color="Accent" transparent="true"/>
   <view class="CTextLabel" origin="16, 44" size="116, 25" title="STEP" font="Small" font-color="Text" transparent="true"/>
@@ -405,67 +289,67 @@
   <view class="CTextButton" control-tag="GuitarActive15" origin="991, 326" size="43, 18" title="ON" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
   <view class="CTextButton" control-tag="GDouble15" origin="991, 350" size="43, 18" title="2x" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
   <view class="CTextButton" control-tag="DegreeMinus0" origin="151, 265" size="12, 19" title="-" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
-  <view class="CTextButton" control-tag="DegreeValue0" origin="163, 265" size="28, 19" title="1" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-width="1" kick-style="false" mouse-enabled="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
+ <view class="CTextEdit" control-tag="DegreeValue0" origin="163, 265" size="28, 19" title="1" font="Small" font-color="Text" back-color="Panel" frame-color="Line" frame-width="1" text-alignment="center"/>
   <view class="CTextButton" control-tag="DegreePlus0" origin="191, 265" size="12, 19" title="+" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
   <view class="CTextButton" control-tag="GLock0" origin="151, 300" size="43, 23" title="L" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
   <view class="CTextButton" control-tag="DegreeMinus1" origin="207, 265" size="12, 19" title="-" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
-  <view class="CTextButton" control-tag="DegreeValue1" origin="219, 265" size="28, 19" title="1" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-width="1" kick-style="false" mouse-enabled="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
+ <view class="CTextEdit" control-tag="DegreeValue1" origin="219, 265" size="28, 19" title="1" font="Small" font-color="Text" back-color="Panel" frame-color="Line" frame-width="1" text-alignment="center"/>
   <view class="CTextButton" control-tag="DegreePlus1" origin="247, 265" size="12, 19" title="+" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
   <view class="CTextButton" control-tag="GLock1" origin="207, 300" size="43, 23" title="L" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
   <view class="CTextButton" control-tag="DegreeMinus2" origin="263, 265" size="12, 19" title="-" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
-  <view class="CTextButton" control-tag="DegreeValue2" origin="275, 265" size="28, 19" title="1" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-width="1" kick-style="false" mouse-enabled="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
+ <view class="CTextEdit" control-tag="DegreeValue2" origin="275, 265" size="28, 19" title="1" font="Small" font-color="Text" back-color="Panel" frame-color="Line" frame-width="1" text-alignment="center"/>
   <view class="CTextButton" control-tag="DegreePlus2" origin="303, 265" size="12, 19" title="+" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
   <view class="CTextButton" control-tag="GLock2" origin="263, 300" size="43, 23" title="L" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
   <view class="CTextButton" control-tag="DegreeMinus3" origin="319, 265" size="12, 19" title="-" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
-  <view class="CTextButton" control-tag="DegreeValue3" origin="331, 265" size="28, 19" title="1" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-width="1" kick-style="false" mouse-enabled="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
+ <view class="CTextEdit" control-tag="DegreeValue3" origin="331, 265" size="28, 19" title="1" font="Small" font-color="Text" back-color="Panel" frame-color="Line" frame-width="1" text-alignment="center"/>
   <view class="CTextButton" control-tag="DegreePlus3" origin="359, 265" size="12, 19" title="+" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
   <view class="CTextButton" control-tag="GLock3" origin="319, 300" size="43, 23" title="L" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
   <view class="CTextButton" control-tag="DegreeMinus4" origin="375, 265" size="12, 19" title="-" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
-  <view class="CTextButton" control-tag="DegreeValue4" origin="387, 265" size="28, 19" title="1" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-width="1" kick-style="false" mouse-enabled="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
+ <view class="CTextEdit" control-tag="DegreeValue4" origin="387, 265" size="28, 19" title="1" font="Small" font-color="Text" back-color="Panel" frame-color="Line" frame-width="1" text-alignment="center"/>
   <view class="CTextButton" control-tag="DegreePlus4" origin="415, 265" size="12, 19" title="+" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
   <view class="CTextButton" control-tag="GLock4" origin="375, 300" size="43, 23" title="L" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
   <view class="CTextButton" control-tag="DegreeMinus5" origin="431, 265" size="12, 19" title="-" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
-  <view class="CTextButton" control-tag="DegreeValue5" origin="443, 265" size="28, 19" title="1" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-width="1" kick-style="false" mouse-enabled="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
+ <view class="CTextEdit" control-tag="DegreeValue5" origin="443, 265" size="28, 19" title="1" font="Small" font-color="Text" back-color="Panel" frame-color="Line" frame-width="1" text-alignment="center"/>
   <view class="CTextButton" control-tag="DegreePlus5" origin="471, 265" size="12, 19" title="+" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
   <view class="CTextButton" control-tag="GLock5" origin="431, 300" size="43, 23" title="L" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
   <view class="CTextButton" control-tag="DegreeMinus6" origin="487, 265" size="12, 19" title="-" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
-  <view class="CTextButton" control-tag="DegreeValue6" origin="499, 265" size="28, 19" title="1" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-width="1" kick-style="false" mouse-enabled="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
+ <view class="CTextEdit" control-tag="DegreeValue6" origin="499, 265" size="28, 19" title="1" font="Small" font-color="Text" back-color="Panel" frame-color="Line" frame-width="1" text-alignment="center"/>
   <view class="CTextButton" control-tag="DegreePlus6" origin="527, 265" size="12, 19" title="+" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
   <view class="CTextButton" control-tag="GLock6" origin="487, 300" size="43, 23" title="L" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
   <view class="CTextButton" control-tag="DegreeMinus7" origin="543, 265" size="12, 19" title="-" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
-  <view class="CTextButton" control-tag="DegreeValue7" origin="555, 265" size="28, 19" title="1" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-width="1" kick-style="false" mouse-enabled="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
+ <view class="CTextEdit" control-tag="DegreeValue7" origin="555, 265" size="28, 19" title="1" font="Small" font-color="Text" back-color="Panel" frame-color="Line" frame-width="1" text-alignment="center"/>
   <view class="CTextButton" control-tag="DegreePlus7" origin="583, 265" size="12, 19" title="+" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
   <view class="CTextButton" control-tag="GLock7" origin="543, 300" size="43, 23" title="L" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
   <view class="CTextButton" control-tag="DegreeMinus8" origin="599, 265" size="12, 19" title="-" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
-  <view class="CTextButton" control-tag="DegreeValue8" origin="611, 265" size="28, 19" title="1" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-width="1" kick-style="false" mouse-enabled="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
+ <view class="CTextEdit" control-tag="DegreeValue8" origin="611, 265" size="28, 19" title="1" font="Small" font-color="Text" back-color="Panel" frame-color="Line" frame-width="1" text-alignment="center"/>
   <view class="CTextButton" control-tag="DegreePlus8" origin="639, 265" size="12, 19" title="+" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
   <view class="CTextButton" control-tag="GLock8" origin="599, 300" size="43, 23" title="L" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
   <view class="CTextButton" control-tag="DegreeMinus9" origin="655, 265" size="12, 19" title="-" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
-  <view class="CTextButton" control-tag="DegreeValue9" origin="667, 265" size="28, 19" title="1" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-width="1" kick-style="false" mouse-enabled="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
+ <view class="CTextEdit" control-tag="DegreeValue9" origin="667, 265" size="28, 19" title="1" font="Small" font-color="Text" back-color="Panel" frame-color="Line" frame-width="1" text-alignment="center"/>
   <view class="CTextButton" control-tag="DegreePlus9" origin="695, 265" size="12, 19" title="+" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
   <view class="CTextButton" control-tag="GLock9" origin="655, 300" size="43, 23" title="L" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
   <view class="CTextButton" control-tag="DegreeMinus10" origin="711, 265" size="12, 19" title="-" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
-  <view class="CTextButton" control-tag="DegreeValue10" origin="723, 265" size="28, 19" title="1" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-width="1" kick-style="false" mouse-enabled="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
+ <view class="CTextEdit" control-tag="DegreeValue10" origin="723, 265" size="28, 19" title="1" font="Small" font-color="Text" back-color="Panel" frame-color="Line" frame-width="1" text-alignment="center"/>
   <view class="CTextButton" control-tag="DegreePlus10" origin="751, 265" size="12, 19" title="+" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
   <view class="CTextButton" control-tag="GLock10" origin="711, 300" size="43, 23" title="L" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
   <view class="CTextButton" control-tag="DegreeMinus11" origin="767, 265" size="12, 19" title="-" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
-  <view class="CTextButton" control-tag="DegreeValue11" origin="779, 265" size="28, 19" title="1" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-width="1" kick-style="false" mouse-enabled="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
+ <view class="CTextEdit" control-tag="DegreeValue11" origin="779, 265" size="28, 19" title="1" font="Small" font-color="Text" back-color="Panel" frame-color="Line" frame-width="1" text-alignment="center"/>
   <view class="CTextButton" control-tag="DegreePlus11" origin="807, 265" size="12, 19" title="+" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
   <view class="CTextButton" control-tag="GLock11" origin="767, 300" size="43, 23" title="L" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
   <view class="CTextButton" control-tag="DegreeMinus12" origin="823, 265" size="12, 19" title="-" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
-  <view class="CTextButton" control-tag="DegreeValue12" origin="835, 265" size="28, 19" title="1" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-width="1" kick-style="false" mouse-enabled="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
+ <view class="CTextEdit" control-tag="DegreeValue12" origin="835, 265" size="28, 19" title="1" font="Small" font-color="Text" back-color="Panel" frame-color="Line" frame-width="1" text-alignment="center"/>
   <view class="CTextButton" control-tag="DegreePlus12" origin="863, 265" size="12, 19" title="+" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
   <view class="CTextButton" control-tag="GLock12" origin="823, 300" size="43, 23" title="L" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
   <view class="CTextButton" control-tag="DegreeMinus13" origin="879, 265" size="12, 19" title="-" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
-  <view class="CTextButton" control-tag="DegreeValue13" origin="891, 265" size="28, 19" title="1" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-width="1" kick-style="false" mouse-enabled="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
+ <view class="CTextEdit" control-tag="DegreeValue13" origin="891, 265" size="28, 19" title="1" font="Small" font-color="Text" back-color="Panel" frame-color="Line" frame-width="1" text-alignment="center"/>
   <view class="CTextButton" control-tag="DegreePlus13" origin="919, 265" size="12, 19" title="+" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
   <view class="CTextButton" control-tag="GLock13" origin="879, 300" size="43, 23" title="L" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
   <view class="CTextButton" control-tag="DegreeMinus14" origin="935, 265" size="12, 19" title="-" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
-  <view class="CTextButton" control-tag="DegreeValue14" origin="947, 265" size="28, 19" title="1" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-width="1" kick-style="false" mouse-enabled="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
+ <view class="CTextEdit" control-tag="DegreeValue14" origin="947, 265" size="28, 19" title="1" font="Small" font-color="Text" back-color="Panel" frame-color="Line" frame-width="1" text-alignment="center"/>
   <view class="CTextButton" control-tag="DegreePlus14" origin="975, 265" size="12, 19" title="+" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
   <view class="CTextButton" control-tag="GLock14" origin="935, 300" size="43, 23" title="L" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
   <view class="CTextButton" control-tag="DegreeMinus15" origin="991, 265" size="12, 19" title="-" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
-  <view class="CTextButton" control-tag="DegreeValue15" origin="1003, 265" size="28, 19" title="1" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-width="1" kick-style="false" mouse-enabled="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
+ <view class="CTextEdit" control-tag="DegreeValue15" origin="1003, 265" size="28, 19" title="1" font="Small" font-color="Text" back-color="Panel" frame-color="Line" frame-width="1" text-alignment="center"/>
   <view class="CTextButton" control-tag="DegreePlus15" origin="1031, 265" size="12, 19" title="+" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
   <view class="CTextButton" control-tag="GLock15" origin="991, 300" size="43, 23" title="L" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
   <view class="CTextButton" control-tag="GCell0_0" origin="151, 75" size="43, 24" title="&#x2022;" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
@@ -571,116 +455,30 @@
 
  <view class="CTextLabel" origin="45, 387" size="230, 20" title="PM VELOCITY" font="Small" font-color="Accent" transparent="true"/>
  <view class="CTextButton" control-tag="PmMinMinus" origin="45, 425" size="25, 27" title="-" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
- <view class="CTextButton" control-tag="PmMinValue" origin="75, 425" size="47, 27" title="30" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" mouse-enabled="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
+ <view class="CTextEdit" control-tag="PmMinValue" origin="75, 425" size="47, 27" title="30" font="Small" font-color="Text" back-color="Panel" frame-color="Line" frame-width="1" text-alignment="center"/>
  <view class="CTextButton" control-tag="PmMinPlus" origin="127, 425" size="25, 27" title="+" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
  <view class="CTextButton" control-tag="PmMaxMinus" origin="165, 425" size="25, 27" title="-" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
- <view class="CTextButton" control-tag="PmMaxValue" origin="195, 425" size="47, 27" title="50" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" mouse-enabled="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
+ <view class="CTextEdit" control-tag="PmMaxValue" origin="195, 425" size="47, 27" title="50" font="Small" font-color="Text" back-color="Panel" frame-color="Line" frame-width="1" text-alignment="center"/>
  <view class="CTextButton" control-tag="PmMaxPlus" origin="247, 425" size="25, 27" title="+" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
  <view class="CTextLabel" origin="74, 410" size="62, 15" title="MIN" font="Small" font-color="Text" transparent="true"/>
  <view class="CTextLabel" origin="194, 410" size="62, 15" title="MAX" font="Small" font-color="Text" transparent="true"/>
- <view class="CTextLabel" origin="309, 391" size="145, 20" title="ROOT MIDI" font="Small" font-color="Text" transparent="true"/>
+ <view class="CTextLabel" origin="309, 391" size="145, 20" title="ROOT NOTE" font="Small" font-color="Text" transparent="true"/>
  <view class="CTextButton" control-tag="RootMinus" origin="309, 425" size="25, 27" title="-" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
- <view class="CTextButton" control-tag="RootValue" origin="339, 425" size="55, 27" title="40" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" mouse-enabled="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
+ <view class="CTextEdit" control-tag="RootValue" origin="339, 425" size="55, 27" title="E2" font="Small" font-color="Text" back-color="Panel" frame-color="Line" frame-width="1" text-alignment="center"/>
  <view class="CTextButton" control-tag="RootPlus" origin="399, 425" size="25, 27" title="+" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
  <view class="CTextLabel" origin="488, 391" size="145, 20" title="GTR GATE" font="Small" font-color="Text" transparent="true"/>
  <view class="CTextButton" control-tag="GtrGateMinus" origin="488, 425" size="25, 27" title="-" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
- <view class="CTextButton" control-tag="GtrGateValue" origin="518, 425" size="55, 27" title="95%" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" mouse-enabled="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
+ <view class="CTextEdit" control-tag="GtrGateValue" origin="518, 425" size="55, 27" title="95%" font="Small" font-color="Text" back-color="Panel" frame-color="Line" frame-width="1" text-alignment="center"/>
  <view class="CTextButton" control-tag="GtrGatePlus" origin="578, 425" size="25, 27" title="+" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
- <view class="CTextLabel" origin="665, 391" size="145, 20" title="BASS GATE" font="Small" font-color="Text" transparent="true"/>
- <view class="CTextButton" control-tag="BassGateMinus" origin="665, 425" size="25, 27" title="-" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
- <view class="CTextButton" control-tag="BassGateValue" origin="695, 425" size="55, 27" title="95%" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" mouse-enabled="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
- <view class="CTextButton" control-tag="BassGatePlus" origin="755, 425" size="25, 27" title="+" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
- <view class="CTextLabel" origin="844, 391" size="185, 20" title="FILL INTENSITY" font="Small" font-color="Text" transparent="true"/>
- <view class="CTextButton" control-tag="FillMinus" origin="844, 425" size="25, 27" title="-" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
- <view class="CTextButton" control-tag="FillValue" origin="874, 425" size="60, 27" title="0%" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" mouse-enabled="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
- <view class="CTextButton" control-tag="FillPlus" origin="939, 425" size="25, 27" title="+" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
+ <view class="CTextLabel" origin="665, 391" size="185, 20" title="FILL INTENSITY" font="Small" font-color="Text" transparent="true"/>
+ <view class="CTextButton" control-tag="FillMinus" origin="665, 425" size="25, 27" title="-" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
+ <view class="CTextEdit" control-tag="FillValue" origin="695, 425" size="60, 27" title="0%" font="Small" font-color="Text" back-color="Panel" frame-color="Line" frame-width="1" text-alignment="center"/>
+ <view class="CTextButton" control-tag="FillPlus" origin="760, 425" size="25, 27" title="+" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
  <view class="CTextButton" control-tag="GuitarGenerate" origin="35, 478" size="235, 39" title="GENERATE GUITAR" font="Normal" text-color="Text" text-color-highlighted="Accent" frame-color="Accent" frame-color-highlighted="Accent" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
  <view class="CTextButton" control-tag="ClearPattern" origin="285, 478" size="235, 39" title="CLEAR PATTERN" font="Normal" text-color="Text" text-color-highlighted="Accent" frame-color="Accent" frame-color-highlighted="Accent" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
  <view class="CTextButton" control-tag="GuitarVariate" origin="535, 478" size="235, 39" title="VARIATE GUITAR" font="Normal" text-color="Text" text-color-highlighted="Accent" frame-color="Accent" frame-color-highlighted="Accent" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
  <view class="CTextLabel" origin="791, 488" size="270, 22" title="LOCKED STEPS PROTECTED" font="Small" font-color="Text" transparent="true"/>
  </view>
- <view class="CViewContainer" rifferator-page="rhythm" origin="0, 106" size="1120, 534" visible="false" transparent="true">
- <view class="CViewContainer" origin="22, 9" size="1076, 153" background-color="Panel" transparent="false"></view>
- <view class="CViewContainer" origin="22, 175" size="1076, 118" background-color="Panel" transparent="false"></view>
- <view class="CViewContainer" origin="22, 301" size="1076, 226" background-color="Panel" transparent="false"></view>
-  <view class="CTextLabel" origin="38, 20" size="960, 29" title="BASS  |  ROOT-FOCUSED EBM COMPANION" font="Normal" font-color="Accent" transparent="true"/>
- <view class="CTextButton" control-tag="Action710" origin="40, 71" size="120, 34" title="FOLLOW" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
- <view class="CTextButton" control-tag="Action711" origin="173, 71" size="120, 34" title="EBM" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
- <view class="CTextButton" control-tag="Action712" origin="306, 71" size="120, 34" title="HYBRID" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
- <view class="CTextButton" control-tag="Action719" origin="439, 71" size="140, 34" title="BASS ON/OFF" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
- <view class="CTextLabel" origin="620, 50" size="145, 19" title="BASS VEL" font="Small" font-color="Text" transparent="true"/>
- <view class="CTextButton" control-tag="BassVelocityMinus" origin="620, 71" size="28, 34" title="-" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
- <view class="CTextButton" control-tag="BassVelocityValue" origin="655, 71" size="60, 34" title="100" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" mouse-enabled="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
- <view class="CTextButton" control-tag="BassVelocityPlus" origin="722, 71" size="28, 34" title="+" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
- <view class="CTextLabel" origin="789, 50" size="160, 19" title="EBM STYLE" font="Small" font-color="Text" transparent="true"/>
- <view class="CTextButton" control-tag="EbmStyleMinus" origin="789, 71" size="28, 34" title="-" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
- <view class="CTextButton" control-tag="EbmStyleValue" origin="824, 71" size="126, 34" title="CLASSIC" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" mouse-enabled="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
- <view class="CTextButton" control-tag="EbmStylePlus" origin="957, 71" size="28, 34" title="+" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
- <view class="CTextLabel" origin="38, 184" size="960, 29" title="CHORDS  |  FOLLOW GUITAR HARMONY" font="Normal" font-color="Accent" transparent="true"/>
- <view class="CTextButton" control-tag="Action718" origin="40, 229" size="135, 35" title="ON / OFF" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
- <view class="CTextButton" control-tag="Action713" origin="190, 229" size="128, 35" title="MINOR" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
- <view class="CTextButton" control-tag="Action714" origin="330, 229" size="128, 35" title="MAJOR" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
- <view class="CTextButton" control-tag="Action715" origin="470, 229" size="128, 35" title="POWER" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
- <view class="CTextButton" control-tag="Action716" origin="610, 229" size="128, 35" title="SUS2" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
- <view class="CTextButton" control-tag="Action717" origin="750, 229" size="128, 35" title="SUS4" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
- <view class="CTextButton" control-tag="Action720" origin="890, 229" size="155, 35" title="CHORD / ROOT" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
- <view class="CTextLabel" origin="38, 308" size="840, 29" title="DRUMS  |  GM 36 / 38 / 42" font="Normal" font-color="Accent" transparent="true"/>
- <view class="CTextButton" control-tag="StandardDrums" origin="347, 346" size="174, 34" title="STANDARD BEAT" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
- <view class="CTextButton" control-tag="GenerateDrums" origin="534, 346" size="174, 34" title="GENERATE DRUMS" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
- <view class="CTextButton" control-tag="VariateDrums" origin="721, 346" size="174, 34" title="VARIATE DRUMS" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
- <view class="CTextButton" control-tag="DrumsEnabledAction" origin="908, 346" size="158, 34" title="DRUMS ON/OFF" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="true" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
  
- <view class="CTextLabel" origin="45, 403" size="76, 25" title="KICK" font="Small" font-color="Text" transparent="true"/>
- <view class="CTextLabel" origin="45, 441" size="76, 25" title="SNARE" font="Small" font-color="Text" transparent="true"/>
- <view class="CTextLabel" origin="45, 479" size="76, 25" title="HAT" font="Small" font-color="Text" transparent="true"/>
- <view class="CTextButton" control-tag="Drum0_0" origin="130, 403" size="43, 25" title="&#x2022;" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
- <view class="CTextButton" control-tag="Drum0_1" origin="186, 403" size="43, 25" title="&#x2022;" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
- <view class="CTextButton" control-tag="Drum0_2" origin="242, 403" size="43, 25" title="&#x2022;" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
- <view class="CTextButton" control-tag="Drum0_3" origin="298, 403" size="43, 25" title="&#x2022;" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
- <view class="CTextButton" control-tag="Drum0_4" origin="354, 403" size="43, 25" title="&#x2022;" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
- <view class="CTextButton" control-tag="Drum0_5" origin="410, 403" size="43, 25" title="&#x2022;" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
- <view class="CTextButton" control-tag="Drum0_6" origin="466, 403" size="43, 25" title="&#x2022;" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
- <view class="CTextButton" control-tag="Drum0_7" origin="522, 403" size="43, 25" title="&#x2022;" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
- <view class="CTextButton" control-tag="Drum0_8" origin="578, 403" size="43, 25" title="&#x2022;" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
- <view class="CTextButton" control-tag="Drum0_9" origin="634, 403" size="43, 25" title="&#x2022;" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
- <view class="CTextButton" control-tag="Drum0_10" origin="690, 403" size="43, 25" title="&#x2022;" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
- <view class="CTextButton" control-tag="Drum0_11" origin="746, 403" size="43, 25" title="&#x2022;" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
- <view class="CTextButton" control-tag="Drum0_12" origin="802, 403" size="43, 25" title="&#x2022;" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
- <view class="CTextButton" control-tag="Drum0_13" origin="858, 403" size="43, 25" title="&#x2022;" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
- <view class="CTextButton" control-tag="Drum0_14" origin="914, 403" size="43, 25" title="&#x2022;" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
- <view class="CTextButton" control-tag="Drum0_15" origin="970, 403" size="43, 25" title="&#x2022;" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
- <view class="CTextButton" control-tag="Drum1_0" origin="130, 441" size="43, 25" title="&#x2022;" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
- <view class="CTextButton" control-tag="Drum1_1" origin="186, 441" size="43, 25" title="&#x2022;" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
- <view class="CTextButton" control-tag="Drum1_2" origin="242, 441" size="43, 25" title="&#x2022;" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
- <view class="CTextButton" control-tag="Drum1_3" origin="298, 441" size="43, 25" title="&#x2022;" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
- <view class="CTextButton" control-tag="Drum1_4" origin="354, 441" size="43, 25" title="&#x2022;" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
- <view class="CTextButton" control-tag="Drum1_5" origin="410, 441" size="43, 25" title="&#x2022;" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
- <view class="CTextButton" control-tag="Drum1_6" origin="466, 441" size="43, 25" title="&#x2022;" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
- <view class="CTextButton" control-tag="Drum1_7" origin="522, 441" size="43, 25" title="&#x2022;" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
- <view class="CTextButton" control-tag="Drum1_8" origin="578, 441" size="43, 25" title="&#x2022;" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
- <view class="CTextButton" control-tag="Drum1_9" origin="634, 441" size="43, 25" title="&#x2022;" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
- <view class="CTextButton" control-tag="Drum1_10" origin="690, 441" size="43, 25" title="&#x2022;" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
- <view class="CTextButton" control-tag="Drum1_11" origin="746, 441" size="43, 25" title="&#x2022;" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
- <view class="CTextButton" control-tag="Drum1_12" origin="802, 441" size="43, 25" title="&#x2022;" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
- <view class="CTextButton" control-tag="Drum1_13" origin="858, 441" size="43, 25" title="&#x2022;" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
- <view class="CTextButton" control-tag="Drum1_14" origin="914, 441" size="43, 25" title="&#x2022;" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
- <view class="CTextButton" control-tag="Drum1_15" origin="970, 441" size="43, 25" title="&#x2022;" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
- <view class="CTextButton" control-tag="Drum2_0" origin="130, 479" size="43, 25" title="&#x2022;" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
- <view class="CTextButton" control-tag="Drum2_1" origin="186, 479" size="43, 25" title="&#x2022;" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
- <view class="CTextButton" control-tag="Drum2_2" origin="242, 479" size="43, 25" title="&#x2022;" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
- <view class="CTextButton" control-tag="Drum2_3" origin="298, 479" size="43, 25" title="&#x2022;" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
- <view class="CTextButton" control-tag="Drum2_4" origin="354, 479" size="43, 25" title="&#x2022;" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
- <view class="CTextButton" control-tag="Drum2_5" origin="410, 479" size="43, 25" title="&#x2022;" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
- <view class="CTextButton" control-tag="Drum2_6" origin="466, 479" size="43, 25" title="&#x2022;" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
- <view class="CTextButton" control-tag="Drum2_7" origin="522, 479" size="43, 25" title="&#x2022;" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
- <view class="CTextButton" control-tag="Drum2_8" origin="578, 479" size="43, 25" title="&#x2022;" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
- <view class="CTextButton" control-tag="Drum2_9" origin="634, 479" size="43, 25" title="&#x2022;" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
- <view class="CTextButton" control-tag="Drum2_10" origin="690, 479" size="43, 25" title="&#x2022;" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
- <view class="CTextButton" control-tag="Drum2_11" origin="746, 479" size="43, 25" title="&#x2022;" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
- <view class="CTextButton" control-tag="Drum2_12" origin="802, 479" size="43, 25" title="&#x2022;" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
- <view class="CTextButton" control-tag="Drum2_13" origin="858, 479" size="43, 25" title="&#x2022;" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
- <view class="CTextButton" control-tag="Drum2_14" origin="914, 479" size="43, 25" title="&#x2022;" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
- <view class="CTextButton" control-tag="Drum2_15" origin="970, 479" size="43, 25" title="&#x2022;" font="Small" text-color="Text" text-color-highlighted="Accent" frame-color="Line" frame-color-highlighted="Accent" frame-width="1" kick-style="false" gradient="125AButtonOff" gradient-highlighted="125AButtonOn"/>
- </view>
 </template>
 </vstgui-ui-description>

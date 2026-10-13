@@ -1,355 +1,160 @@
 #pragma once
 #include "RiffEngine.hpp"
-#include "ChordCompanion.hpp"
-#include "IndustrialGuitarGroove.hpp"
 #include <array>
-#include <cmath>
-#include <cstdint>
 #include <algorithm>
+#include <cstdint>
+#include <cmath>
+#include <vector>
 
-// Zero-allocation block scheduler: render() is used only off the audio callback.
-// The VST3 adapter supplies the authoritative host PPQ and sample rate.
 namespace a125::rifferator {
 struct ScheduledMidiEvent {
-  int bus{}, sampleOffset{}, pitch{}, velocity{}, noteId{-1};
+  int bus{},sampleOffset{},pitch{},velocity{},noteId{-1};
   bool on{};
 };
-struct LiveControls {
-  int pmMin{30}; int pmMax{50};
-  int guitarGate{95}; int bassGate{95}; int rootSemitones{}; int absoluteRoot{-1}; int bassOffset{-12}; int preparedRoot{40};
-  int bassVelocity{100}; bool bassEnabled{true}; bool drumsEnabled{true}; bool externalBassMode{false}; bool chordsEnabled{false}; bool chordsRootOnly{false}; int chordQuality{0}; bool chordsAuto{true};
-  HarmonyMap harmony{};
+struct GuitarLive {
+  int root{40},preparedRoot{40},gate{95},pmMin{30},pmMax{40};
   std::array<int,7> scale{0,2,3,5,7,8,10};
-  std::array<std::array<bool,16>,3> drumSteps{};
-  std::array<bool,16> guitarSteps{};
-  std::array<int,16> guitarArticulation{};
-  std::array<int,16> guitarDegree{};
-  std::array<bool,16> guitarLocks{};
-  std::array<bool,16> guitarDouble{};
-  LiveControls() noexcept {
+  std::array<bool,16> enabled{},locked{},doubled{};
+  std::array<int,16> articulation{},degree{};
+  GuitarLive() noexcept {
     for(int i=0;i<16;++i) {
-      drumSteps[0][i]=i%4==0;
-      drumSteps[1][i]=i==4||i==12;
-      drumSteps[2][i]=true;
-      guitarSteps[i]=true;
-      guitarArticulation[i]=2;
-      guitarDegree[i]=1;
+      enabled[i]=i%2==0; articulation[i]=2;degree[i]=1;
     }
   }
 };
 class BlockScheduler {
 public:
   static constexpr int kCapacity=1024;
-  void reset() noexcept { active_={}; haveExpected_=false; recoveryPending_=false; }
-  // When a host rejects a pending NoteOff, the processor may skip one
-  // otherwise continuous audio callback. Account for that time without
-  // scheduling new notes or treating the next callback as a transport seek.
-  // Real host jumps remain discontinuities; unresolved scheduler recovery
-  // must never be bypassed.
-  void advanceSkippedBlock(double startPpq,double endPpq) noexcept {
-    if(haveExpected_ && !recoveryPending_ &&
-       std::isfinite(startPpq) && std::isfinite(endPpq) &&
-       endPpq>startPpq && std::abs(startPpq-expectedPpq_)<=0.002)
-      expectedPpq_=endPpq;
+  template<class Sink> bool flush(Sink&& sink,int offset) noexcept {
+    bool ok=true;
+    for(int pitch=0;pitch<128;++pitch) if(active_[pitch]) {
+      if(sink(ScheduledMidiEvent{0,offset,pitch,0,-1,false})) active_[pitch]=false;
+      else ok=false;
+    }
+    return ok;
   }
-  void setDrums(const std::vector<MidiNote>* notes) noexcept { drums_=notes; }
-  void setChords(const std::vector<MidiNote>* notes) noexcept { chords_=notes; }
+  void reset() noexcept {active_.fill(false);haveExpected_=false;recover_=false;}
   template<class Sink>
-  void process(const Pair& pattern, double startPpq, double endPpq,
-               int blockSize, int64_t patternTicks, Sink&& sink, bool playing,
-               LiveControls live={}) noexcept {
-    if(blockSize<=0) return;
-    // A rejected host event may have left notes active. Finish releasing them
-    // before generating any more NoteOns, even on a continuous timeline.
-    if(recoveryPending_) {
-      if(flush(sink,0)) { recoveryPending_=false; haveExpected_=false; }
-      return;
+  void process(const std::vector<MidiNote>& notes,double start,double end,
+               int samples,int64_t periodTicks,Sink&& sink,bool playing,
+               const GuitarLive& live) noexcept {
+    if(samples<=0)return;
+    if(recover_) {
+      if(flush(sink,0)){recover_=false;haveExpected_=false;}
+      return; // Do not dispatch new NoteOns until releases have succeeded.
     }
-    if(!playing || !std::isfinite(startPpq) || !std::isfinite(endPpq) ||
-       endPpq<=startPpq) {
-      if(!flush(sink,0)) { recoveryPending_=true; return; }
+    if(!playing||!std::isfinite(start)||!std::isfinite(end)||end<=start||
+       periodTicks<=0||std::abs(start)>1.e12||std::abs(end)>1.e12) {
+      if(!flush(sink,0))recover_=true;
       haveExpected_=false;
       return;
     }
-    // Bound all float-to-int64 cycle conversions before scheduling. Host values
-    // can be finite but far outside the representable cycle-index range.
-    // Invalid periods/positions fail closed without starting new notes.
-    const int64_t period=patternTicks;
-    if(period<=0 || std::abs(startPpq)>1.0e12 || std::abs(endPpq)>1.0e12) {
-      if(flush(sink,0))haveExpected_=false;
-      else recoveryPending_=true;
-      return;
-    }
-    if(haveExpected_ && std::abs(startPpq-expectedPpq_)>0.002) {
-      if(!flush(sink,0)) { recoveryPending_=true; return; }
-    }
-    expectedPpq_=endPpq; haveExpected_=true;
+    if(haveExpected_&&std::abs(start-expected_)>0.002)
+      if(!flush(sink,0)){recover_=true;return;}
+    haveExpected_=true;expected_=end;
     std::array<ScheduledMidiEvent,kCapacity> events{};
-    int count=0;
-    bool eventOverflow=false;
-    bool invalidWindow=false;
-    auto collect=[&](const std::vector<MidiNote>& notes,int bus) {
-      if(bus==1 && (!live.bassEnabled || live.externalBassMode))return;
-      if(bus==2 && !live.drumsEnabled)return;
-      if(bus==3 && !live.chordsEnabled)return;
-      for(const auto& note:notes) {
-        if(bus==0 || bus==1) {
-          const int step=static_cast<int>((note.startTick/240)%16);
-          if(step<0 || !live.guitarSteps[static_cast<std::size_t>(step)] ||
-             live.guitarArticulation[static_cast<std::size_t>(step)]==0)continue;
-          if(bus==1 && (live.guitarArticulation[static_cast<std::size_t>(step)]==1 ||
-                        live.guitarArticulation[static_cast<std::size_t>(step)]==5))continue;
-        }
-        if(bus==3 && (live.chordsRootOnly || live.chordQuality==2) && note.note==42)continue;
-        if(bus==3 && live.chordsRootOnly && note.note!=40)continue;
-        if(bus==2) {
-          const int row=note.note==36?0:note.note==38?1:note.note==42?2:-1;
-          const int step=static_cast<int>((note.startTick/240)%16);
-          if(row<0||step<0||!live.drumSteps[static_cast<std::size_t>(row)][static_cast<std::size_t>(step)])continue;
-        }
-        const double periodPpq=static_cast<double>(period)/960.0;
-        const double phase=static_cast<double>(note.startTick)/960.0;
-        const int64_t first=static_cast<int64_t>(std::floor((startPpq-phase)/periodPpq))-1;
-        const int64_t last=static_cast<int64_t>(std::ceil((endPpq-phase)/periodPpq))+1;
-        // protect realtime complexity on corrupt/huge host jumps
-        if(last<first || last-first>64) { invalidWindow=true; return; }
-        for(int64_t n=first;n<=last;++n) {
-          const double cycle=periodPpq*static_cast<double>(n);
-          auto push=[&](double t,bool on,int fifth=0,bool secondStroke=false) {
-            if(t<startPpq || t>=endPpq)return;
-            if(count>=kCapacity) {eventOverflow=true;return;}
-            const auto offset=static_cast<int>(std::floor(
-              (t-startPpq)/(endPpq-startPpq)*blockSize));
-            int pitch=note.note+live.rootSemitones;
-            int velocity=note.velocity;
-            if(bus==3) {
-              const int bar=static_cast<int>(note.startTick/3840)%16;
-              const auto quality=static_cast<ChordQuality>(std::clamp(live.chordQuality,0,4));
-              const int interval=chordInterval(note.note-40,quality);
-              pitch=chordOutputPitch(40+interval,bar,live.harmony,40+live.rootSemitones);
-            } else if(bus!=2) {
-              const int step=static_cast<int>((note.startTick/240)%16);
-              if(step>=0) {
-                const int degree=live.guitarDegree[static_cast<std::size_t>(step)];
-                // Use the active musical scale, shared with chord/bass routing.
-                // Prepared riff notes already contain the scale degree.
-                // Live degree control is absolute, not an additional transpose.
-                const int busOffset=bus==1?live.bassOffset:0;
-                const int preparedPitch=live.preparedRoot+busOffset;
-                // The prepared 16-bar phrase adds its FILL variation as a
-                // pitch delta from the neutral source note. LOCK can change
-                // during playback, long after those variations were rendered.
-                // Suppress only the cached FILL delta for locked steps; retain
-                // the user's own live degree on both guitar and follow bass.
-                const int fillDelta=live.guitarLocks[static_cast<std::size_t>(step)]
-                  ?0:(note.note-preparedPitch);
-                pitch=(live.absoluteRoot>=0?live.absoluteRoot:40+live.rootSemitones)+degreeOffset(degree,live.scale)+busOffset+fillDelta;
-              }
-            }
-            if(bus==0) {
-              velocity=guitarStepVelocity(static_cast<int>((note.startTick/240)%16),live.guitarArticulation[static_cast<std::size_t>((note.startTick/240)%16)]);
-              if(live.guitarArticulation[static_cast<std::size_t>((note.startTick/240)%16)]==2) {
-                const int lower=std::clamp(live.pmMin,1,127);
-                const int upper=std::clamp(live.pmMax,lower,127);
-                // Both PM controls shape the actual MIDI dynamics. A fixed
-                // Heavier PM velocity (50) merely clamped to the interval
-                // made most MIN/MAX changes completely inaudible.
-                // Deterministic four-step accents never escape the user's
-                // PM articulation zone, including a single-value range.
-                constexpr int kPmAccentFourth[4]{4,1,3,2};
-                const int pmStep=static_cast<int>((note.startTick/240)%16);
-                velocity=lower+(upper-lower)*kPmAccentFourth[pmStep%4]/4;
-                if(on && secondStroke)
-                  velocity=std::max(lower,velocity-std::min(4,(upper-lower)/3));
-              }
-              pitch+=fifth;
-            }
-            if(bus==1)velocity=live.bassVelocity;
-            if(bus==2)pitch=note.note;
-            events[static_cast<std::size_t>(count++)]={
-              bus,offset,std::clamp(pitch,0,127),on?velocity:0,-1,on};
-          };
-          const int gate=(bus==2 || bus==3)?100:std::clamp(bus==0?live.guitarGate:live.bassGate,0,100);
-          const int64_t scaled=note.startTick+(note.boundaryTick-note.startTick)*gate/100;
-          int64_t endTick=std::max(note.startTick+1,scaled);
-          if(gate<=0) continue;
-          // OPEN/FIFTH is a sustained sampled-library articulation. Empty
-          // matrix steps do not rearticulate it: keep the NoteOn alive until
-          // the next enabled guitar step, including the next bar's first step.
-          // At STOP the release is exact; otherwise the last sixteenth
-          // retains the chosen gate so new attacks remain distinct.
-          if(bus==0) {
-            const int step=static_cast<int>((note.startTick/240)%16);
-            if(live.guitarArticulation[static_cast<std::size_t>(step)]==4 &&
-               !live.guitarDouble[static_cast<std::size_t>(step)]) {
-              // An arrangement shorter than one bar uses only its actual
-              // step count. Ignore STOP/active flags beyond that period;
-              // wrapping them used to schedule stray NoteOffs mid-loop.
-              const int loopSteps=std::clamp(
-                static_cast<int>(period/240),1,16);
-              int nextDistance=loopSteps;
-              for(int delta=1;delta<=loopSteps;++delta) {
-                const int candidate=(step+delta)%loopSteps;
-                if(live.guitarSteps[static_cast<std::size_t>(candidate)]) {
-                  nextDistance=delta;break;
-                }
-              }
-              const int nextStep=(step+nextDistance)%loopSteps;
-              const bool stop=live.guitarSteps[static_cast<std::size_t>(nextStep)] &&
-                              live.guitarArticulation[static_cast<std::size_t>(nextStep)]==0;
-              if(nextDistance>1 || stop) {
-                const int64_t boundary=note.startTick+static_cast<int64_t>(nextDistance)*240;
-                endTick=stop?boundary:
-                  std::max<int64_t>(note.startTick+1,
-                    boundary-static_cast<int64_t>(240)*(100-gate)/100);
-              }
-            }
-          }
-          // The second attack retains the selected instrument articulation's
-          // velocity zone; the Kontakt reference's fixed 75 would change PM
-          // to a different articulation on velocity-switched guitar VSTis.
-          // Original Thrash DI UP reference: one normal stroke at the step
-          // start, followed by a second stroke halfway through the step.
-          // Each gets its own NoteOff and must never spill into the next step.
-          if((bus==0 || bus==1) && live.guitarDouble[static_cast<std::size_t>((note.startTick/240)%16)]) {
-            // DOUBLE retriggers halfway through its 16th grid step,
-            // not halfway through the duration of a sustained OPEN note.
-            const int64_t stepEnd=std::min<int64_t>(note.boundaryTick,note.startTick+240);
-            const int64_t half=std::max<int64_t>(1,(stepEnd-note.startTick)/2);
-            const int64_t midpoint=note.startTick+half;
-            const int64_t firstOff=std::max<int64_t>(note.startTick+1,
-              std::min<int64_t>(midpoint,note.startTick+half*gate/100));
-            const int64_t secondOff=std::max<int64_t>(midpoint+1,
-              std::min<int64_t>(stepEnd,midpoint+(stepEnd-midpoint)*gate/100));
-            // Both guitar and FOLLOW bass inherit the two rhythmic attacks.
-            // The guitar sample library owns PM and FIFTH voicing: never
-            // synthesize an extra fifth or generate more than two attacks.
-            push(cycle+static_cast<double>(firstOff)/960.0,false);
-            push(cycle+phase,true);
-            push(cycle+static_cast<double>(secondOff)/960.0,false);
-            push(cycle+static_cast<double>(midpoint)/960.0,true,0,true);
-            continue;
-          }
-          if(bus==3) {
-            // Sustain a chord voice across bars when its next pitch is
-            // unchanged. A new transport start still emits the required On
-            // because the runtime active-note state is initially empty.
-            const int bar=static_cast<int>(note.startTick/3840)%16;
-            const auto quality=static_cast<ChordQuality>(std::clamp(live.chordQuality,0,4));
-            const int interval=chordInterval(note.note-40,quality);
-            const int current=chordOutputPitch(40+interval,bar,live.harmony,40+live.rootSemitones);
-            const int next=chordOutputPitch(40+interval,(bar+1)%16,live.harmony,40+live.rootSemitones);
-            if(bar==15 || current!=next)
-              push(cycle+static_cast<double>(endTick)/960.0,false);
-          } else {
-            push(cycle+static_cast<double>(endTick)/960.0,false);
-          }
-          push(cycle+phase,true);
-        }
-      }
+    int count=0;bool overflow=false;
+    const double period=static_cast<double>(periodTicks)/960.;
+    auto push=[&](double when,int pitch,int vel,bool on) noexcept {
+      if(when<start||when>=end)return;
+      if(count==kCapacity){overflow=true;return;}
+      const int offset=std::clamp(static_cast<int>(std::floor((when-start)/(end-start)*samples)),0,samples-1);
+      events[static_cast<std::size_t>(count++)]={0,offset,pitch,on?vel:0,-1,on};
     };
-    collect(pattern.guitar,0); collect(pattern.bass,1);
-    // STOP is a command, not an empty step: it releases currently active
-    // guitar notes at the exact step boundary. Empty steps emit no command.
-    // Insert it into the same sorted event batch so it also works when the
-    // preceding NoteOn and this STOP occur within one audio block.
-    // The arrangement can span 16 bars, but the live step matrix is a
-    // one-bar loop. STOP must occur in EVERY bar, not once per arrangement.
-    // For patterns shorter than a bar, repeat within their actual period.
-    const int64_t stopCycleTicks=std::min<int64_t>(period,16*240);
-    const double stopCyclePpq=static_cast<double>(stopCycleTicks)/960.0;
-    for(int step=0;step<16;++step) {
-      if(static_cast<int64_t>(step)*240>=stopCycleTicks)break;
-      if(!live.guitarSteps[static_cast<std::size_t>(step)] ||
-         live.guitarArticulation[static_cast<std::size_t>(step)]!=0)continue;
-      const double phase=static_cast<double>(step*240)/960.0;
-      const int64_t first=static_cast<int64_t>(std::floor((startPpq-phase)/stopCyclePpq))-1;
-      const int64_t last=static_cast<int64_t>(std::ceil((endPpq-phase)/stopCyclePpq))+1;
-      if(last<first || last-first>64){invalidWindow=true;break;}
-      for(int64_t n=first;n<=last;++n) {
-        const double t=stopCyclePpq*static_cast<double>(n)+phase;
-        if(t<startPpq || t>=endPpq)continue;
-        if(count>=kCapacity){eventOverflow=true;break;}
-        const int offset=std::clamp(static_cast<int>(std::floor(
-          (t-startPpq)/(endPpq-startPpq)*blockSize)),0,blockSize-1);
-        events[static_cast<std::size_t>(count++)]={0,offset,-1,0,-1,false};
+    for(const auto& n:notes) {
+      const int step=static_cast<int>((n.startTick/240)%16);
+      if(step<0||step>=16||!live.enabled[step])continue;
+      const int art=live.articulation[step];
+      if(art<=0||art>5||live.gate==0)continue;
+      const int delta=live.locked[step]?0:n.note-live.preparedRoot;
+      const int pitch=std::clamp(live.root+degreeOffset(live.degree[step],live.scale)+delta,0,127);
+      int vel=guitarStepVelocity(art);
+      if(art==2) {
+        const int lo=std::clamp(live.pmMin,1,127);
+        const int hi=std::clamp(live.pmMax,lo,127);
+        constexpr int accent[4]{4,1,3,2};
+        vel=lo+(hi-lo)*accent[step%4]/4;
       }
+      const int64_t t=n.startTick;
+      int64_t boundary=n.boundaryTick;
+      // Only OPEN/FIFTH can sustain across empty steps.
+      if(art==4&&!live.doubled[step]) {
+        for(int distance=1;distance<=16;++distance) {
+          const int candidate=(step+distance)%16;
+          if(live.enabled[candidate]) {
+            boundary=t+static_cast<int64_t>(distance)*240;
+            break;
+          }
+        }
+      } else boundary=std::min<int64_t>(boundary,t+240);
+      const int attacks=live.doubled[step]?2:1;
+      for(int hit=0;hit<attacks;++hit) {
+        const int64_t begin=t+(attacks==2?120*hit:0);
+        const int64_t limit=attacks==2?t+120*(hit+1):boundary;
+        const int64_t off=std::max(begin+1,begin+(limit-begin)*live.gate/100);
+        const int v=art==2&&hit==1?std::max(live.pmMin,vel-std::min(4,(live.pmMax-live.pmMin)/3)):vel;
+        const double phase=static_cast<double>(begin)/960.;
+        const double release=static_cast<double>(off)/960.;
+        const int64_t first=static_cast<int64_t>(std::floor((start-phase)/period))-1;
+        const int64_t last=static_cast<int64_t>(std::ceil((end-phase)/period))+1;
+        if(last-first>64){overflow=true;break;}
+        for(int64_t cycle=first;cycle<=last;++cycle) {
+          const double anchor=period*static_cast<double>(cycle);
+          push(anchor+release,pitch,0,false);
+          push(anchor+phase,pitch,v,true);
+        }
+      }
+      if(overflow)break;
     }
-
-    if(drums_)collect(*drums_,2);
-    if(chords_)collect(*chords_,3);
-    if(eventOverflow || invalidWindow) {
-      // Do not deliver a partial batch that may have omitted NoteOff events.
-      if(!flush(sink,0))recoveryPending_=true;
+    // STOP is a deliberate active step; OFF is an inactive step.
+    // STOP must release every held guitar pitch, including across loops.
+    if(!overflow)for(int step=0;step<16;++step) {
+      if(!live.enabled[step]||live.articulation[step]!=0)continue;
+      const double phase=static_cast<double>(step)*.25;
+      const double loop=4.;
+      const int64_t first=static_cast<int64_t>(std::floor((start-phase)/loop))-1;
+      const int64_t last=static_cast<int64_t>(std::ceil((end-phase)/loop))+1;
+      if(last-first>64){overflow=true;break;}
+      for(int64_t cycle=first;cycle<=last;++cycle)
+        push(static_cast<double>(cycle)*loop+phase,-1,0,false);
+    }
+    if(overflow) {
+      if(!flush(sink,0))recover_=true;
       haveExpected_=false;
       return;
     }
-    // Fail closed on capacity overflow rather than silently losing Note-Offs.
-    // The processor should retain a pending recovery flag when a host rejects events.
-    // Stable tie order: NoteOff before NoteOn at the same sample and pitch.
+    // Stable ordering: release or STOP before attack at coincident offsets.
     for(int i=1;i<count;++i) {
-      auto key=events[static_cast<std::size_t>(i)];int j=i-1;
-      while(j>=0 && (events[static_cast<std::size_t>(j)].sampleOffset>key.sampleOffset ||
-        (events[static_cast<std::size_t>(j)].sampleOffset==key.sampleOffset &&
-         events[static_cast<std::size_t>(j)].on && !key.on))) {
-        events[static_cast<std::size_t>(j+1)]=events[static_cast<std::size_t>(j)];--j;
+      const auto key=events[static_cast<std::size_t>(i)];
+      int j=i-1;
+      while(j>=0&&(events[static_cast<std::size_t>(j)].sampleOffset>key.sampleOffset||
+        (events[static_cast<std::size_t>(j)].sampleOffset==key.sampleOffset&&
+         events[static_cast<std::size_t>(j)].on&&!key.on))) {
+        events[static_cast<std::size_t>(j+1)]=events[static_cast<std::size_t>(j)];
+        --j;
       }
       events[static_cast<std::size_t>(j+1)]=key;
     }
     for(int i=0;i<count;++i) {
       const auto e=events[static_cast<std::size_t>(i)];
-      if(e.bus==0 && e.pitch==-1) {
-        if(!flushBus(0,sink,e.sampleOffset)){recoveryPending_=true;return;}
+      if(e.pitch==-1) {
+        if(!flush(sink,e.sampleOffset)){recover_=true;return;}
         continue;
       }
-      if(!e.on && !active_[static_cast<std::size_t>(e.bus)][static_cast<std::size_t>(e.pitch)]) continue;
-      if(e.on && e.bus==3 && active_[3][static_cast<std::size_t>(e.pitch)])continue;
-      if(e.on && active_[static_cast<std::size_t>(e.bus)][static_cast<std::size_t>(e.pitch)]) {
-        // Retrigger only this pitch. A bus-wide flush used to cut unrelated
-        // held guitar/bass notes whenever one pitch was retriggered.
-        if(!sink(ScheduledMidiEvent{e.bus,e.sampleOffset,e.pitch,0,-1,false})) {
-          recoveryPending_=true;return;
+      if(!e.on&&!active_[e.pitch])continue;
+      if(e.on&&active_[e.pitch]) {
+        if(!sink(ScheduledMidiEvent{0,e.sampleOffset,e.pitch,0,-1,false})){
+          recover_=true;return;
         }
-        active_[static_cast<std::size_t>(e.bus)][static_cast<std::size_t>(e.pitch)]=false;
+        active_[e.pitch]=false;
       }
-      if(sink(e)) active_[static_cast<std::size_t>(e.bus)][static_cast<std::size_t>(e.pitch)]=e.on;
-      else {
-        // The failed event may have been a NoteOff. Preserve pending recovery
-        // until the sink accepts the outstanding releases.
-        recoveryPending_=true;
-        return;
-      }
+      if(sink(e))active_[e.pitch]=e.on;
+      else {recover_=true;return;}
     }
-  }
-  template<class Sink> bool flushBus(int bus,Sink&& sink,int offset) noexcept {
-    if(bus<0 || bus>=4)return false;
-    bool complete=true;
-    for(int pitch=0;pitch<128;++pitch) {
-      auto& active=active_[static_cast<std::size_t>(bus)][static_cast<std::size_t>(pitch)];
-      if(active) {
-        if(sink(ScheduledMidiEvent{bus,offset,pitch,0,-1,false}))active=false;
-        else complete=false;
-      }
-    }
-    return complete;
-  }
-  template<class Sink> bool flush(Sink&& sink,int offset) noexcept {
-    bool complete=true;
-    for(int bus=0;bus<4;++bus) for(int pitch=0;pitch<128;++pitch) {
-      auto& active=active_[static_cast<std::size_t>(bus)][static_cast<std::size_t>(pitch)];
-      if(active) {
-        if(sink(ScheduledMidiEvent{bus,offset,pitch,0,-1,false}))active=false;
-        else complete=false;
-      }
-    }
-    return complete;
   }
 private:
-  std::array<std::array<bool,128>,4> active_{};
-  const std::vector<MidiNote>* drums_{};
-  const std::vector<MidiNote>* chords_{};
-  bool haveExpected_{};
-  bool recoveryPending_{};
-  double expectedPpq_{};
+  std::array<bool,128> active_{};
+  double expected_{};
+  bool haveExpected_{},recover_{};
 };
 } // namespace a125::rifferator

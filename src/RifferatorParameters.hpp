@@ -2,8 +2,10 @@
 #include "pluginterfaces/vst/vsttypes.h"
 namespace a125::rifferator {
 enum : Steinberg::Vst::ParamID {
-  kGuitarGate=100, kBassGate=101, kBassEnabled=102,
-  kRootPitch=103, kPmMin=112, kPmMax=113, kBassVelocity=104, kFillIntensity=105,
-  kDrumEnabled=106, kBassMode=107, kEbmStyle=108, kChordsEnabled=109, kChordsMode=110, kChordsQuality=111, kHybridRootBase=600, kGuitarStepBase=300, kGuitarArticulationBase=400, kGuitarDegreeBase=416, kGuitarLockBase=432, kGuitarDoubleBase=448, kDrumStepBase=200 // 200..215 Kick, 216..231 Snare, 232..247 Hat
+  // Persist the historical guitar IDs: projects and host automation depend on them.
+  kGuitarGate=100, kRootPitch=103, kFillIntensity=105,
+  kPmMin=112, kPmMax=113,
+  kGuitarStepBase=300, kGuitarArticulationBase=400,
+  kGuitarDegreeBase=416, kGuitarLockBase=432, kGuitarDoubleBase=448
 };
 }
