@@ -1,0 +1,39 @@
+#pragma once
+namespace a125::riff::vst::ui {
+constexpr int width=1160,height=570,gridLeft=180,gridTop=224;
+enum class Target { None,Zoom,Bars,Key,Scale,Root,Pm,Fill,Prev,Next,StepOn,Lock,Mode,Generate,Variate,Clear,Export,Cell,Picker };
+struct Hit {Target target{Target::None};int column{-1};int row{-1};};
+inline bool inside(int x,int y,int left,int top,int width,int height) noexcept {
+ return x>=left&&x<left+width&&y>=top&&y<top+height;
+}
+inline Hit hit(int x,int y,bool picker) noexcept {
+ if(x<0||y<0||x>=width||y>=height)return {};
+ if(picker&&inside(x,y,180,423,800,43)){
+  const int column=(x-180)/50;
+  return column<15&&x<180+column*50+48?Hit{Target::Picker,column,0}:Hit{};
+ }
+ if(inside(x,y,180,224,800,240)){
+  const int c=(x-180)/50,r=(y-224)/48;
+  if(c<16&&r<5&&x<180+c*50+48&&y<224+r*48+46)
+   return {Target::Cell,c,r};
+  return {};
+ }
+ if(inside(x,y,972,25,152,40))return {Target::Zoom};
+ if(inside(x,y,34,100,134,55))return {Target::Bars};
+ if(inside(x,y,180,100,116,55))return {Target::Key};
+ if(inside(x,y,308,100,174,55))return {Target::Scale};
+ if(inside(x,y,494,100,152,55))return {Target::Root};
+ if(inside(x,y,658,100,214,55))return {Target::Pm};
+ if(inside(x,y,884,100,242,55))return {Target::Fill};
+ if(inside(x,y,82,177,40,40))return {Target::Prev};
+ if(inside(x,y,155,177,40,40))return {Target::Next};
+ if(inside(x,y,1008,276,112,42))return {Target::StepOn};
+ if(inside(x,y,1008,322,112,42))return {Target::Lock};
+ if(inside(x,y,1008,426,112,40))return {Target::Mode};
+ if(inside(x,y,34,493,235,44))return {Target::Generate};
+ if(inside(x,y,283,493,168,44))return {Target::Variate};
+ if(inside(x,y,465,493,215,44))return {Target::Clear};
+ if(inside(x,y,694,493,219,44))return {Target::Export};
+ return {};
+}
+} // namespace a125::riff::vst::ui

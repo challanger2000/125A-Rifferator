@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<vstgui-ui-description version="1">
+  <template name="RifferatorView" class="CViewContainer" origin="0,0"
+            size="1160,570" transparent="false">
+    <view class="CView" custom-view-name="RifferatorPanel"
+          origin="0,0" size="1160,570"/>
+    <view class="CView" custom-view-name="RifferatorBrandLogo"
+          origin="35,17" size="126,59" mouse-enabled="false"/>
+  </template>
+</vstgui-ui-description>

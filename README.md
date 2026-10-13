@@ -36,3 +36,5 @@ A fixed-size V1 processor state codec now stores all pattern cells and musical s
 - Independent Steinberg VST3 Validator against staged, branded native bundle: **537 tests passed, 0 failed**.
 - Verified experimental artifact: [Rifferator-V1-EXPERIMENTAL-Windows-x64](https://github.com/challanger2000/125A-Rifferator/actions/runs/38393090916/artifacts/11810467004). Artifact ID 11810467004; ZIP 398192 bytes; SHA256 b7239140e59ccb9608b8863069c74888f83897f211838376b4db25408946789c.
 - **NOT VERIFIED / NOT IMPLEMENTED:** VSTGUI editor/zoom/inputs, full Controller-to-GUI traceability, actual Studio One MIDI routing, real host automation/state recall, user musical acceptance, 125A Plugin Tester. No FINAL packaging or claim.
+
+Experimental first VSTGUI editor source added on the clean branch. It is NOT host accepted yet; inspect the Windows GUI build/validator result before using any artifact. Studio One manual controls and zoom acceptance remain mandatory.

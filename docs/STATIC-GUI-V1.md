@@ -19,3 +19,6 @@ Coordinates (left, top, width, height):
 One bar visible at once. Show pitch name in activated note cells (not STOP). SHIFT+left-click enters in-cell diatonic note selector; regular left click handles articulation. STEP ON and LOCK are separate. Empty steps must be visually distinct from STOP. Min interactive hit area 40×40 at 100%. Audit CViewContainer nested bounds and hit overlap recursively, each button's on/off visual state, zoom host resize and 20-cycle editor lifecycle.
 
 This file is the **geometry contract**, not a claimed finished static mockup. Complete branded static render using authoritative master assets before implementing VSTGUI.
+
+## Actual VSTGUI implementation stage
+Interactive RifferatorPanel maps the previously specified 16×5 cells to one on-screen bar and dispatches internally by fixed geometry. Standalone geometry contract covers all cells, 40-pixel-plus hitboxes on global actions, BAR and STEP ON/LOCK, and note-picker overlay. Original branding master is copied unmodified to resource/ and rendered by the separately verified High Gain Guitar Finisher vector-logo view. VSTGUI output, Studio One hit coordinates and lifecycle remain NOT VERIFIED until Windows build and host test.
