@@ -256,6 +256,15 @@ int main(int argc,char** argv){
                 (running?ProcessContext::kPlaying:0u);
   return processor->process(data)==kResultOk;
  };
+ // The recall fixture deliberately starts in MIDI NOTE mode. Explicitly
+ // automate TRANSPORT=0 before the transport scenarios; never let tests
+ // depend on an implicit default after restoring a non-default project.
+ int32 modeQueueIndex=0,modePointIndex=0;
+ auto* transportQueue=changes.addParameterData(a125::riff::vst::Mode,
+                                                 modeQueueIndex);
+ if(!check(transportQueue!=nullptr &&
+           transportQueue->addPoint(0,0.,modePointIndex)==kResultOk,
+           "prepare explicit TRANSPORT mode automation"))return 2;
  const auto is=[&](int idx,bool on,int pitch,int velocity,int offset){
   Event e{};
   if(outgoing.getEvent(idx,e)!=kResultOk)return false;
@@ -267,6 +276,7 @@ int main(int argc,char** argv){
  };
  if(!check(processAt(0.,true)&&outgoing.getEventCount()==1 &&
            is(0,true,40,65,0),"Step 1 PalmMute note and velocity"))return 2;
+ changes.clearQueue();
  if(!check(processAt(.25,true)&&outgoing.getEventCount()==2 &&
            is(0,false,40,0,0)&&is(1,true,42,115,0),
            "Step 2 changes pitch/articulation with release first"))return 2;
