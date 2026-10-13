@@ -50,3 +50,6 @@ The [native Windows VST3 QA #38417386319](https://github.com/challanger2000/125A
 
 ## Controller state v2 regression gate (pending)
 New RGU2 Controller state saves zoom, selected BAR and GENERATE/VARIATE RNG seed; old RGU1 zoom+BAR state is still accepted. Native SDK host harness checks invalid/truncated state cannot modify an existing correct state, and rejects LOCK-protected host parameter changes without corrupting VST3 parameter readback. Studio One resave/reopen still requires user acceptance.
+
+## Release-audit host data (latest experimental build)
+[Windows CI #38424202886](https://github.com/challanger2000/125A-Rifferator/actions/runs/38424202886) confirmed SDK-native RGU1→RGU2 controller state migration (seed + zoom + BAR), 8-bar processor state, locked-step parameter readback, 20 Editor cycles, 44.1/96 kHz varying sample block realtime/offline MIDI balance, 6/6 CTest and 537/537 Validator. The remaining real Studio One actions—install that exact build, verify resave/reopen of all bars/LOCK/seed-related Generate continuity, live host automation and actual H7 articulations—are NOT VERIFIED. Do not mark complete based on SDK-host evidence.
