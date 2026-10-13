@@ -27,7 +27,7 @@ int main(){
  }
  const std::vector<std::string> edit{"RootValue","GtrGateValue","FillValue","PmMinValue","PmMaxValue"};
  assert(byName.count("GuitarGallop")&&byName["GuitarGallop"]==723);
- assert(xml.find("class=\\\"CTextButton\\\" control-tag=\\\"GuitarGallop\\\"")!=std::string::npos);
+ assert(xml.find("class=\"CTextButton\" control-tag=\"GuitarGallop\"")!=std::string::npos);
  for(const auto& name:edit) {
   assert(byName.count(name));
   assert(xml.find("class=\"CTextEdit\" control-tag=\""+name+"\"")!=std::string::npos);
