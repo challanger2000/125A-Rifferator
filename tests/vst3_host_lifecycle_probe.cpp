@@ -12,6 +12,10 @@
 #include "pluginterfaces/vst/ivstcomponent.h"
 #include "pluginterfaces/vst/ivsteditcontroller.h"
 #include "pluginterfaces/vst/vsttypes.h"
+#include "pluginterfaces/vst/ivstprocesscontext.h"
+#include "pluginterfaces/vst/ivstaudioprocessor.h"
+#include "public.sdk/source/vst/hosting/eventlist.h"
+#include "public.sdk/source/vst/hosting/parameterchanges.h"
 #include "../src/product/RifferatorState.hpp"
 #include "../src/vst3/Parameters.hpp"
 #include <cmath>
@@ -74,6 +78,13 @@ int main(int argc,char** argv){
  fixture.musical.fillIntensity=70;
  fixture.pmVelocity=65;
  fixture.syncMode=a125::riff::SyncMode::MidiNote;
+ fixture.pattern.steps[0].on=true;
+ fixture.pattern.steps[0].articulation=0; // PM velocity 65
+ fixture.pattern.steps[1].on=true;
+ fixture.pattern.steps[1].articulation=2; // OPEN velocity 115
+ fixture.pattern.steps[1].degree=1; // F#2 in E natural minor
+ fixture.pattern.steps[2].on=true;
+ fixture.pattern.steps[2].stop=true; // release, no new attack
  auto& guitar=fixture.pattern.steps[4];
  guitar.on=true;guitar.degree=2;guitar.articulation=2;guitar.locked=true;
  auto& lastBar=fixture.pattern.steps[100];
@@ -190,6 +201,133 @@ int main(int argc,char** argv){
   DestroyWindow(hwnd);
   std::cout<<"[PASS] Editor attach/detach "<<n<<"/20\n";
  }
+ // SDK-hosted VST3 MIDI/automation integration: no private QA source is used.
+ // This checks actual ProcessData IEventList and IParameterChanges, not the
+ // separate MidiRuntime C++ unit tests.
+ IAudioProcessor* processor=nullptr;
+ if(fresh->queryInterface(IAudioProcessor::iid,
+       reinterpret_cast<void**>(&processor))!=kResultOk||!processor){
+  std::cerr<<"[FAIL] Fresh Processor IAudioProcessor interface\n";return 2;
+ }
+ const auto check=[&](bool valid,const char* why){
+  if(!valid)std::cerr<<"[FAIL] Host MIDI/automation: "<<why<<"\n";
+  return valid;
+ };
+ if(!check(fresh->getBusCount(kAudio,kInput)==0 &&
+            fresh->getBusCount(kAudio,kOutput)==0 &&
+            fresh->getBusCount(kEvent,kInput)==1 &&
+            fresh->getBusCount(kEvent,kOutput)==1,
+            "unexpected bus topology"))return 2;
+ if(!check(fresh->activateBus(kEvent,kInput,0,true)==kResultOk &&
+            fresh->activateBus(kEvent,kOutput,0,true)==kResultOk,
+            "event bus activation"))return 2;
+ ProcessSetup setup{};
+ setup.processMode=kRealtime;
+ setup.symbolicSampleSize=kSample32;
+ setup.maxSamplesPerBlock=512;
+ setup.sampleRate=48000.;
+ if(!check(processor->setupProcessing(setup)==kResultOk &&
+            fresh->setActive(true)==kResultOk &&
+            processor->setProcessing(true)==kResultOk,
+            "processor activation/setup"))return 2;
+ EventList incoming(256),outgoing(256);
+ ParameterChanges changes(16);
+ ProcessContext context{};
+ context.state=ProcessContext::kPlaying |
+               ProcessContext::kProjectTimeMusicValid |
+               ProcessContext::kTempoValid;
+ context.sampleRate=48000.;
+ context.tempo=120.;
+ ProcessData data{};
+ data.processMode=kRealtime;
+ data.symbolicSampleSize=kSample32;
+ data.numSamples=512;
+ data.numInputs=0;
+ data.numOutputs=0;
+ data.inputEvents=&incoming;
+ data.outputEvents=&outgoing;
+ data.inputParameterChanges=&changes;
+ data.processContext=&context;
+ const auto processAt=[&](double ppq,bool running) {
+  outgoing.clear();
+  context.projectTimeMusic=ppq;
+  context.state=ProcessContext::kProjectTimeMusicValid |
+                ProcessContext::kTempoValid |
+                (running?ProcessContext::kPlaying:0u);
+  return processor->process(data)==kResultOk;
+ };
+ const auto is=[&](int idx,bool on,int pitch,int velocity,int offset){
+  Event e{};
+  if(outgoing.getEvent(idx,e)!=kResultOk)return false;
+  if(e.sampleOffset!=offset||e.busIndex!=0)return false;
+  if(on)return e.type==Event::kNoteOnEvent &&
+              e.noteOn.pitch==pitch &&
+              std::abs(e.noteOn.velocity*127.-velocity)<0.02;
+  return e.type==Event::kNoteOffEvent&&e.noteOff.pitch==pitch;
+ };
+ if(!check(processAt(0.,true)&&outgoing.getEventCount()==1 &&
+           is(0,true,40,65,0),"Step 1 PalmMute note and velocity"))return 2;
+ if(!check(processAt(.25,true)&&outgoing.getEventCount()==2 &&
+           is(0,false,40,0,0)&&is(1,true,42,115,0),
+           "Step 2 changes pitch/articulation with release first"))return 2;
+ if(!check(processAt(.5,true)&&outgoing.getEventCount()==1 &&
+           is(0,false,42,0,0),"STOP only emits NoteOff"))return 2;
+ if(!check(processAt(1.,true)&&outgoing.getEventCount()==1 &&
+           is(0,true,43,115,0),"locked OPEN G2 on Step 5"))return 2;
+ if(!check(processAt(1.01,false)&&outgoing.getEventCount()==1 &&
+           is(0,false,43,0,0),"host transport STOP flushes sounding voice"))return 2;
+ std::cout<<"[PASS] Native VST3 MIDI: PM/OPEN velocity, STOP, transport release\n";
+
+ const auto automate=[&](ParamID id,double normalized){
+  int32 qidx=0,point=0;
+  auto* q=changes.addParameterData(id,qidx);
+  return q&&q->addPoint(0,normalized,point)==kResultOk;
+ };
+ if(!check(automate(a125::riff::vst::Key,
+                    a125::riff::vst::n(6,0,11)),
+           "send KEY automation"))return 2;
+ if(!check(processAt(0.,true)&&outgoing.getEventCount()==1 &&
+           is(0,true,42,65,0),
+           "KEY automation transposes actual MIDI and velocity"))return 2;
+ changes.clearQueue();
+ MemoryStream editedState;
+ if(!check(fresh->getState(&editedState)==kResultOk,
+           "save automated Processor state"))return 2;
+ a125::riff::product::Snapshot savedAutomation;
+ if(!check(a125::riff::product::decode(
+                reinterpret_cast<const std::uint8_t*>(editedState.getData()),
+                static_cast<std::size_t>(editedState.getSize()),savedAutomation) &&
+           savedAutomation.musical.key==6 &&
+           savedAutomation.musical.rootMidi==42 &&
+           savedAutomation.pattern.steps[4].locked,
+           "KEY automation persists a valid F# minor root"))return 2;
+ if(!check(automate(a125::riff::vst::On+0,1.),
+           "send unchanged STEP ON automation"))return 2;
+ if(!check(processAt(512./24000.,true)&&outgoing.getEventCount()==0,
+           "unchanged STEP ON must not retrigger/release"))return 2;
+ changes.clearQueue();
+ if(!check(automate(a125::riff::vst::Mode,1.),
+           "switch to MIDI NOTE trigger mode"))return 2;
+ Event on{};on.type=Event::kNoteOnEvent;on.sampleOffset=100;
+ on.busIndex=0;on.noteOn.channel=0;on.noteOn.pitch=48;on.noteOn.velocity=1.f;
+ Event off{};off.type=Event::kNoteOffEvent;off.sampleOffset=200;
+ off.busIndex=0;off.noteOff.channel=0;off.noteOff.pitch=48;
+ if(!check(incoming.addEvent(on)==kResultOk&&
+           incoming.addEvent(off)==kResultOk,
+           "prepare NoteOn/NoteOff input events"))return 2;
+ if(!check(processAt(0.,false)&&outgoing.getEventCount()==3 &&
+           is(0,false,42,0,0) &&
+           is(1,true,42,65,100) &&
+           is(2,false,42,0,200),
+           "MIDI NOTE mode must trigger and release exactly"))return 2;
+ changes.clearQueue();incoming.clear();
+ if(!check(processAt(0.,false)&&outgoing.getEventCount()==0,
+           "no residual note after MIDI NoteOff"))return 2;
+ if(!check(processor->setProcessing(false)==kResultOk &&
+           fresh->setActive(false)==kResultOk,
+           "host suspend"))return 2;
+ processor->release();
+ std::cout<<"[PASS] Native VST3 KEY automation/ROOT state, redundant parameter, MIDI trigger\n";
  controller->terminate();
  fresh->terminate();
  component->terminate();

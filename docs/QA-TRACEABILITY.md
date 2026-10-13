@@ -108,3 +108,6 @@ Real-host picker had obstructed STOP. It now replaces the right detail panel, pr
 - Steinberg VST3 Validator: **537 passed, 0 failed**.
 - Experimental Windows x64 bundle: [artifact #11824790128](https://github.com/challanger2000/125A-Rifferator/actions/runs/38414680086/artifacts/11824790128), not a release-ready package.
 - **Not verified:** changed picker appearance, Studio One automation and save/reload, standalone 125A Plugin Tester I/O/event torture, complete H7 articulation audition and precise 4/8-bar DAW playback. No FINAL gate promotion.
+
+## 2026-10-13 native VST3 event/automation extension (PENDING WINDOWS QA)
+A host-driven QA fixture was added to the existing native Windows lifecycle probe, invoking actual IAudioProcessor::process with VST3 EventList, ParameterChanges and ProcessContext. It checks eight-bar saved-state bus topology, PM velocity 65, OPEN 115, STOP releases only, transport STOP note release, KEY automation E→F# and its persisted Root, unchanged STEP ON automation not retriggering, and MIDI NOTE trigger NoteOn(100)/NoteOff(200) with correct emitted sample offsets and release. This is a stronger host-interface probe than core tests but does not substitute for the full 125A Plugin Tester or real Studio One automation checks. No PASS claimed before workflow result.

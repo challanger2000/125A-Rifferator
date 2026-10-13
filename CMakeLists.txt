@@ -70,7 +70,9 @@ if(RIFFERATOR_ENABLE_VST3)
     add_executable(RifferatorHostProbe
       tests/vst3_host_lifecycle_probe.cpp
       "${vst3sdk_SOURCE_DIR}/public.sdk/source/vst/hosting/module_win32.cpp"
-      "${vst3sdk_SOURCE_DIR}/public.sdk/source/common/memorystream.cpp")
+      "${vst3sdk_SOURCE_DIR}/public.sdk/source/common/memorystream.cpp"
+      "${vst3sdk_SOURCE_DIR}/public.sdk/source/vst/hosting/eventlist.cpp"
+      "${vst3sdk_SOURCE_DIR}/public.sdk/source/vst/hosting/parameterchanges.cpp")
     target_link_libraries(RifferatorHostProbe PRIVATE
       sdk_hosting sdk_common base pluginterfaces user32 ole32)
     target_compile_definitions(RifferatorHostProbe PRIVATE _CRT_SECURE_NO_WARNINGS NOMINMAX)
