@@ -7,9 +7,9 @@ using namespace a125::riff;
 using namespace a125::riff::heavier;
 static Pattern sample(){
   Pattern p;assert(p.setBars(2));
-  Step pm;pm.on=true;pm.articulation=Articulation::PalmMute;
-  Step open=pm;open.articulation=Articulation::OpenPowerchord;
-  Step stop=pm;stop.articulation=Articulation::Stop;
+  Step pm;pm.on=true;pm.articulation=code(Articulation::PalmMute);
+  Step open=pm;open.articulation=code(Articulation::OpenPowerchord);
+  Step stop=pm;stop.stop=true;
   assert(p.setStep(0,pm));assert(p.setStep(4,open));
   assert(p.setStep(10,stop));assert(p.setStep(16,pm));
   return p;
@@ -57,7 +57,7 @@ int main(){
     assert(a.steps[i].degree==b.steps[i].degree);
     assert(a.steps[i].articulation==b.steps[i].articulation);
   }
-  const auto midi=exportMidi(sample(),s,velocity);
+  const auto midi=exportMidi(sample(),s,Velocity{});
   assert(midi.size()>30);
   assert(midi[0]=='M'&&midi[1]=='T'&&midi[2]=='h'&&midi[3]=='d');
   assert(midi[10]==0&&midi[11]==1&&midi[12]==3&&midi[13]==0xc0);
@@ -65,9 +65,9 @@ int main(){
   // Live loop must not cut off a long note at the barline if early steps
   // are empty. It ends at the first active step of the NEXT cycle.
   Pattern looping;looping.setBars(1);
-  Step note;note.on=true;note.articulation=Articulation::PalmMute;
+  Step note;note.on=true;note.articulation=code(Articulation::PalmMute);
   assert(looping.setStep(5,note));
-  note.articulation=Articulation::OpenPowerchord;
+  note.articulation=code(Articulation::OpenPowerchord);
   assert(looping.setStep(15,note));
   const auto clipped=compile(looping,s);
   const auto cyclic=compileLoop(looping,s);
@@ -77,5 +77,23 @@ int main(){
   visitAbsoluteEvents(cyclic,looping.lengthTicks(),looping.lengthTicks()+5*kTicksPerStep,
       looping.lengthTicks()+5*kTicksPerStep+1,[&](Event e){join.push_back(e);});
   assert(join.size()==2&&!join[0].noteOn&&join[1].noteOn);
+
+  // The universal pattern core must allow an arbitrary instrument's technique
+  // code; velocity mapping is supplied by policy and knows nothing about H7.
+  struct BassPolicy {
+    int operator()(std::uint8_t code,const Settings&) const noexcept {
+      return code==77?66:80;
+    }
+  };
+  Pattern generic;
+  Step ebm;
+  ebm.on=true;ebm.articulation=77;
+  assert(generic.setStep(0,ebm));
+  const auto genericEvents=compileOneCycle(generic,s,BassPolicy{});
+  assert(genericEvents.size()==2&&genericEvents[0].velocity==66);
+  // H7 PM velocity remains an independent instrument setting, bounded 30..83.
+  const auto strongPm=compile(sample(),s,Velocity{83});
+  assert(strongPm[0].velocity==83);
+  assert(!Velocity{29}.valid()&&!Velocity{84}.valid());
 
 }

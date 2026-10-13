@@ -55,7 +55,7 @@ public:
        !std::isfinite(block.tempo)||block.tempo<=0.||block.tempo>1000.||
        triggerCount<0||triggerCount>kMaxTriggerEvents||
        (triggerCount>0&&!triggers)||pattern.activeSteps()<16||
-       (pattern.bars!=1&&pattern.bars!=2&&pattern.bars!=4&&pattern.bars!=8)||!settings.valid()||
+       !pattern.valid()||!settings.valid()||
        !pitchInScale(settings.rootMidi,settings)){
       release(0,sink);
       haveExpected_=false;held_=false;
@@ -174,7 +174,7 @@ private:
       const auto& step=p.steps[static_cast<std::size_t>(stepIndex)];
       if(!step.on)continue;
       if(!release(sample,sink))return false;
-      if(step.articulation==Articulation::Stop)continue;
+      if(step.stop)continue;
       const int pitch=pitchForDegree(step.degree,s);
       if(pitch<0||pitch>127)return false;
       const int vel=policy(step.articulation,s);

@@ -23,7 +23,7 @@ inline void vlq(std::vector<std::uint8_t>& out,std::uint32_t value){
 template<class VelocityPolicy>
 inline std::vector<std::uint8_t> exportMidi(const Pattern& pattern,const Settings& settings,VelocityPolicy&& policy){
   const auto events=compileOneCycle(pattern,settings,policy);
-  if(!settings.valid()||!pitchInScale(settings.rootMidi,settings))return {};
+  if(!pattern.valid()||!settings.valid()||!pitchInScale(settings.rootMidi,settings))return {};
   std::vector<std::uint8_t> track;
   std::int64_t previous=0;
   for(const auto& e:events){

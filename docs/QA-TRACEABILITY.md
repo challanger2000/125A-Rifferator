@@ -7,7 +7,7 @@
 | 1/2/4/8 bars | Pattern::setBars; grid test | CORE TESTED |
 | 16 steps, one BAR, BAR navigation | 16-per-bar model, static GUI contract | BAR GUI NOT IMPLEMENTED |
 | STEP ON, LOCK and CLEAR PATTERN | Pattern::setStep/setLock/clear | CORE TESTED; UI NOT IMPLEMENTED |
-| PINCH / OPEN / PM / NOISE / STOP | velocity and compileOneCycle | CORE TESTED; Heavier7Strings/GUI NOT VERIFIED |
+| PINCH / OPEN / PM / NOISE / STOP | velocity and compileOneCycle | CORE TESTED, H7-specific Velocity policy; actual Heavier7Strings/GUI NOT VERIFIED |
 | Empty step sustains; next note or STOP releases | compileOneCycle | CORE TESTED |
 | KEY / SCALE / ROOT NOTE, scale notes always visible | Settings, pitchForDegree | CORE TESTED; GUI NOT IMPLEMENTED |
 | SHIFT+left-click note chooser | static UI design | NOT IMPLEMENTED |
@@ -29,3 +29,7 @@
 - Export SMF imported/played in Studio One; independent SMF parse and note parity.
 - Native VST3 validation, Steinberg Validator, 125A Plugin Tester, 20 GUI attach/reopen cycles, zoom actual Studio One geometry and manual musical verification.
 - FINAL remains **BLOCKED** until all applicable gates and Studio One acceptance succeed.
+
+Source separation checked: Pattern and MidiRuntime do not name H7 performance techniques; the H7 adapter declares the named mapping and PM velocity policy. Regression with arbitrary non-H7 technique code will run in the next core CI. This does not certify the eventual EBM bass product.
+
+Additional independent Standard MIDI File decoder regression (header, VLQ timing, NoteOff-first order, 8-bar boundary and malformed pattern rejection) staged for the next core CI.
