@@ -6,7 +6,7 @@ Source redesign staged 2026-10-13. **DAW interactions NOT VERIFIED.** This matri
 | --- | --- | --- | --- | --- |
 | 16× STEP ON `GuitarActive0..15` | 300..315, edit callback | Enable/disable one guitar step | GUI structural, processor state | NOT VERIFIED |
 | 16× articulation × six rows `GCell0_0..GCell5_15` | 400..415 with 300..315 | One exclusive articulation; STOP releases active guitar notes | 16-step matrix structural, scheduler regression | NOT VERIFIED |
-| 16× DOUBLE `GDouble0..15` | 448..463 | Exactly two sequential strokes/step | Scheduler double regression | NOT VERIFIED |
+| 16× DOUBLE `GDouble0..15` | 448..463 | Two half-step strokes on the selected step only; PM second at velocity 75 with Heavier AUTO; no CC40 | Scheduler double regression | NOT VERIFIED |
 | 16× LOCK `GLock0..15` | 432..447 | Protects whole step vs live edit/generation | Generator and state tests | NOT VERIFIED |
 | 16× degree `DegreeValue0..15` plus ± | 416..431; direct `CTextEdit`, commands 800..831 | Relative scale degrees -13..15 | GUI, numeric, state | NOT VERIFIED |
 | ROOT NOTE `RootValue` plus ± | 103; direct `CTextEdit`, commands 900/901 | Guitars transpose; E2=40 | Numeric, scheduler, state | NOT VERIFIED |
@@ -14,7 +14,7 @@ Source redesign staged 2026-10-13. **DAW interactions NOT VERIFIED.** This matri
 | FILL INTENSITY `FillValue` plus ± | 105; direct edit, 906/907 | 0 disables; bounded prepared fill | Fill tests, state | NOT VERIFIED |
 | PM MIN/MAX `PmMinValue`, `PmMaxValue` plus ± | 112/113; direct edit, 880..883 | MIDI velocity band user-configurable 1..127 | PM regression, state | NOT VERIFIED |
 | GENERATE `GuitarGenerate` | controller command 700 | New seeded unlocked guitar pattern | Generator determinism/LOCK | NOT VERIFIED |
-| GALLOP `GuitarGallop` | controller command 723 | 1/8 + 1/16 + 1/16 (three PM hits per beat), no extra DOUBLE, LOCK preserved | Generation and MIDI scheduler regressions | NOT VERIFIED |
+| MANUAL GALLOP | user-programmed PM/OFF grid, no control tag | Pattern only at selected steps; no global overwrite; pulse offsets 0, 2, 3 × sixteenth grid | MIDI scheduler manual pattern regression | NOT VERIFIED |
 | VARIATE `GuitarVariate` | command 722 | Bounded unlocked step variation | Generator determinism/LOCK | NOT VERIFIED |
 | CLEAR `ClearPattern` | command 721 | Clear unlocked activity and double, retain LOCK | source contract; host required | NOT VERIFIED |
 | ZOOM `Action701/702` | Editor zoom 100/150%; separate controller state v2 | No MIDI/state modification | static editor size | NOT VERIFIED |

@@ -1,6 +1,5 @@
 #include "../src/core/BlockScheduler.hpp"
 #include "../src/core/RiffArrangement.hpp"
-#include "../src/core/RiffGeneration.hpp"
 #include <cassert>
 #include <vector>
 using namespace a125::rifferator;
@@ -47,28 +46,50 @@ int main(){
  opens=releases=0;
  for(auto e:emitted){opens+=e.on;releases+=!e.on;}
  assert(opens==2&&releases==2);
- // Gallop regression: attack offsets at 0 / 0.5 / 0.75 PPQ
- // and repeat at 1 PPQ. It must never generate a 32nd re-trigger.
+ // Manual short gallop: player sets PM at steps 0, 2, 3 and silence
+ // at 1. Other steps remain independently programmable; no global mode.
  emitted.clear();scheduler.reset();
- auto gallop=makeGallop(std::vector<Step>(16,Step{Articulation::Off,1,false,false}));
- auto gallopSong=arrange(gallop,cfg,fill,16);
+ std::vector<Step> manual(16,Step{Articulation::Off,1,false,false});
+ for(int step:{0,2,3})manual[step].articulation=Articulation::PalmMute;
+ auto manualSong=arrange(manual,cfg,fill,16);
  live.enabled.fill(false);live.doubled.fill(false);live.gate=95;
- for(int step=0;step<16;++step) {
-   live.enabled[step]=gallop[step].articulation!=Articulation::Off;
-   live.articulation[step]=static_cast<int>(gallop[step].articulation);
+ for(int step:{0,2,3})live.enabled[step]=true;
+ scheduler.process(manualSong.guitar,0.,1.,44100,manualSong.periodTicks,sink,true,live);
+ int shortOn=0,shortOff=0;
+ std::vector<int> shortOffsets;
+ for(const auto& e:emitted){
+   if(e.on){++shortOn;shortOffsets.push_back(e.sampleOffset);}
+   else ++shortOff;
  }
- scheduler.process(gallopSong.guitar,0.,4.,88200,gallopSong.periodTicks,sink,true,live);
- int gallopOn=0,gallopOff=0;
- std::vector<int> offsets;
- for(auto e:emitted) {
-   if(e.on){++gallopOn;offsets.push_back(e.sampleOffset);}
-   else ++gallopOff;
+ assert(shortOn==3&&shortOff==3);
+ assert(shortOffsets.size()==3);
+ assert(shortOffsets[0]==0&&shortOffsets[1]==22050&&shortOffsets[2]==33075);
+ // Per-step DOUBLE is independent of the manual gallop grid.
+ // Kontakt UP uses a second event at half a step with velocity 75.
+ // Heavier7Strings AUTO selects physical stroke direction itself.
+ emitted.clear();scheduler.reset();
+ live.enabled.fill(false);live.enabled[8]=true;live.doubled[8]=true;
+ scheduler.process(song.guitar,2.,2.25,6000,song.periodTicks,sink,true,live);
+ int doubleOn=0,doubleOff=0;
+ std::vector<int> doubleOffsets,doubleVels;
+ for(auto e:emitted){
+   if(e.on){++doubleOn;doubleOffsets.push_back(e.sampleOffset);doubleVels.push_back(e.velocity);}
+   else ++doubleOff;
  }
- assert(gallopOn==12&&gallopOff==12);
- assert(offsets[0]==0&&offsets[1]==11025&&offsets[2]==16537&&offsets[3]==22050);
+ assert(doubleOn==2&&doubleOff==2);
+ assert(doubleOffsets[0]==0&&doubleOffsets[1]==3000);
+ assert(doubleVels[0]>=30&&doubleVels[0]<=40&&doubleVels[1]==75);
+ // Pure PM steps MUST NOT inject secondary hits unless DOUBLE enabled.
+ emitted.clear();scheduler.reset();
+ live.doubled.fill(false);
+ scheduler.process(song.guitar,2.,2.25,6000,song.periodTicks,sink,true,live);
+ int singleOn=0;
+ for(auto e:emitted)if(e.on)++singleOn;
+ assert(singleOn==1);
  // Host rejecting NoteOff cannot be followed by new attacks until flush.
  emitted.clear();scheduler.reset();
- live.doubled[0]=false;
+ live.enabled.fill(false);live.enabled[0]=true;
+ live.doubled.fill(false);
  scheduler.process(song.guitar,0.,.1,600,song.periodTicks,sink,true,live);
  int rejected=0;
  auto reject=[&](ScheduledMidiEvent e){if(!e.on){++rejected;return false;}return true;};

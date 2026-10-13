@@ -26,8 +26,6 @@ int main(){
   assert(ids.insert(std::stoi((*it)[2].str())).second);
  }
  const std::vector<std::string> edit{"RootValue","GtrGateValue","FillValue","PmMinValue","PmMaxValue"};
- assert(byName.count("GuitarGallop")&&byName["GuitarGallop"]==723);
- assert(xml.find("class=\"CTextButton\" control-tag=\"GuitarGallop\"")!=std::string::npos);
  for(const auto& name:edit) {
   assert(byName.count(name));
   assert(xml.find("class=\"CTextEdit\" control-tag=\""+name+"\"")!=std::string::npos);
@@ -70,7 +68,7 @@ int main(){
  }
  assert(stack.size()==1);
  assert(seenViews.size()==byName.size());
- assert(interactive.size()==213);
+ assert(interactive.size()==212);
  std::ifstream processorFile("src/RifferatorProcessor.cpp");
  const std::string p((std::istreambuf_iterator<char>(processorFile)),std::istreambuf_iterator<char>());
  assert(p.find("addEventOutput(STR16(\"Guitar Out\")")!=std::string::npos);

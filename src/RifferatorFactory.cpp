@@ -27,7 +27,7 @@ class Controller final : public Steinberg::Vst::EditControllerEx1,
                          public VSTGUI::IControlListener {
 public:
   unsigned generateCount_{};
-  // All GUI generation commands run on the control thread, never in process().
+  // Both GUI commands run on the control thread, never in process().
   // Existing core generation preserves every locked step. The MIDI engine
   // receives only ordinary, stable VST3 step parameter edits.
   void runGuitarGeneration(a125::rifferator::GenerationCommand command) {
@@ -83,9 +83,9 @@ public:
       publish(kGuitarArticulationBase+i,
               static_cast<int>(step.articulation)/5.);
       publish(kGuitarDegreeBase+i,(step.degree+13)/28.);
-      // GALLOP and GENERATE never inherit stale 32nd-note doubles.
-      // VARIATE alone preserves the existing stroke subdivision.
-      if(command!=GenerationCommand::Variate)publish(kGuitarDoubleBase+i,0.);
+      // GENERATE starts a new pattern with no stale double strokes.
+      // VARIATE preserves the existing stroke subdivision.
+      if(command==GenerationCommand::Generate)publish(kGuitarDoubleBase+i,0.);
     }
   }
   unsigned drumGenerationCount_{};
@@ -289,7 +289,7 @@ public:
     }
     if(auto* control=dynamic_cast<VSTGUI::CControl*>(view)) {
       const auto tag=control->getTag();
-      if((tag>=500&&tag<596)||(tag==700||tag==701||tag==702||tag==721||tag==722||tag==723)||
+      if((tag>=500&&tag<596)||(tag==700||tag==701||tag==702||tag==721||tag==722)||
          (tag>=300&&tag<316)||(tag>=432&&tag<464)||
          (tag>=800&&tag<832)||(tag>=850&&tag<866)||
          (tag>=880&&tag<886)||(tag==900||tag==901||tag==902||tag==903||tag==906||tag==907)||
@@ -425,10 +425,9 @@ public:
       applyMusicalStepCommand(command);
       return;
     }
-    if(command==700 || command==722 || command==723) {
+    if(command==700 || command==722) {
       runGuitarGeneration(command==700?
         a125::rifferator::GenerationCommand::Generate:
-        command==723?a125::rifferator::GenerationCommand::Gallop:
         a125::rifferator::GenerationCommand::Variate);
       return;
     }

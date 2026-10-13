@@ -92,7 +92,12 @@ public:
         const int64_t begin=t+(attacks==2?120*hit:0);
         const int64_t limit=attacks==2?t+120*(hit+1):boundary;
         const int64_t off=std::max(begin+1,begin+(limit-begin)*live.gate/100);
-        const int v=art==2&&hit==1?std::max(live.pmMin,vel-std::min(4,(live.pmMax-live.pmMin)/3)):vel;
+        // Heavier7Strings AUTO chooses stroke direction internally, without CC40.
+        // Reproduce the Kontakt Riffmaker's per-step UP second strike at
+        // velocity 75. This is the SECOND PM articulation, not a new rhythm
+        // generator. First PM strike still uses configured PM MIN/MAX.
+        // For non-PM articulations retain their own current velocity mapping.
+        const int v=(art==2&&hit==1)?75:vel;
         const double phase=static_cast<double>(begin)/960.;
         const double release=static_cast<double>(off)/960.;
         const int64_t first=static_cast<int64_t>(std::floor((start-phase)/period))-1;
