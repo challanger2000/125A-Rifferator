@@ -83,3 +83,6 @@ Windows GUI MSVC stage #38395611145: new VST3 GUI code compiled/linked, but UI g
 
 ## 2026-10-13 host probe expansion (PENDING CI)
 The new workflow builds the pinned 125A-Plugin-Tester source revision `70aeb0d9` against the same Steinberg 3.8.1 SDK and executes fresh-instance state transfer, repeated module reload, I/O+MIDI-event stress and 4×5=20 native Win32 editor attach/detach cycles. These are host-harness tests, not actual Studio One tests, and success must only be stated after logs show PASS. The Controller now retains saved BAR selection independently of setState/setComponentState call order. Processor only releases sustained notes on an effective step change, not a redundant same-value parameter notification.
+
+## Windows test-inventory correction, run #38406361914
+The new 4/8-bar CTest target was registered in CMake and passed 6/6 Linux, but was omitted from the explicit Windows cmake --build target list. Therefore Windows CTest reported NOT RUN (missing .exe) after the VST3 and five other tests compiled/passed. This is a CI build-target inventory defect, not a Rifferator engine failure. The Windows workflow now builds all six CTest targets before running ctest. Required 125A Plugin Tester host probes still pending the corrected Windows run.
