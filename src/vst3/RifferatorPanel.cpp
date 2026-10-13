@@ -91,8 +91,8 @@ void RifferatorPanel::onMouseWheelEvent(VSTGUI::MouseWheelEvent& event){
  owner_->nudgeNumeric(x,y,event.deltaY>0.?1:-1);
  event.consumed=true;
 }
-int32_t RifferatorPanel::onKeyDown(VSTGUI::VstKeyCode& key){
- if(key.virt==VSTGUI::VKEY_ESCAPE&&owner_&&owner_->cancelPicker())return 1;
+int32_t RifferatorPanel::onKeyDown(::VstKeyCode& key){
+ if(key.virt==VKEY_ESCAPE&&owner_&&owner_->cancelPicker())return 1;
  return 0;
 }
 void RifferatorPanel::draw(VSTGUI::CDrawContext* dc) {

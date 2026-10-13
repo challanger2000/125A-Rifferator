@@ -7,7 +7,7 @@ public:
  RifferatorPanel(const VSTGUI::CRect& r,Controller* owner);
  void draw(VSTGUI::CDrawContext*) override;
  void onMouseWheelEvent(VSTGUI::MouseWheelEvent&) override;
- int32_t onKeyDown(VSTGUI::VstKeyCode&) override;
+ int32_t onKeyDown(::VstKeyCode&) override;
  VSTGUI::CMouseEventResult onMouseDown(VSTGUI::CPoint&,
                               const VSTGUI::CButtonState&) override;
  VSTGUI::CMouseEventResult onMouseMoved(VSTGUI::CPoint&,
