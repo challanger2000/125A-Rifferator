@@ -14,6 +14,7 @@ Source redesign staged 2026-10-13. **DAW interactions NOT VERIFIED.** This matri
 | FILL INTENSITY `FillValue` plus ± | 105; direct edit, 906/907 | 0 disables; bounded prepared fill | Fill tests, state | NOT VERIFIED |
 | PM MIN/MAX `PmMinValue`, `PmMaxValue` plus ± | 112/113; direct edit, 880..883 | MIDI velocity band user-configurable 1..127 | PM regression, state | NOT VERIFIED |
 | GENERATE `GuitarGenerate` | controller command 700 | New seeded unlocked guitar pattern | Generator determinism/LOCK | NOT VERIFIED |
+| GALLOP `GuitarGallop` | controller command 723 | 1/8 + 1/16 + 1/16 (three PM hits per beat), no extra DOUBLE, LOCK preserved | Generation and MIDI scheduler regressions | NOT VERIFIED |
 | VARIATE `GuitarVariate` | command 722 | Bounded unlocked step variation | Generator determinism/LOCK | NOT VERIFIED |
 | CLEAR `ClearPattern` | command 721 | Clear unlocked activity and double, retain LOCK | source contract; host required | NOT VERIFIED |
 | ZOOM `Action701/702` | Editor zoom 100/150%; separate controller state v2 | No MIDI/state modification | static editor size | NOT VERIFIED |

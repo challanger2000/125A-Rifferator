@@ -1,5 +1,6 @@
 #include "../src/core/BlockScheduler.hpp"
 #include "../src/core/RiffArrangement.hpp"
+#include "../src/core/RiffGeneration.hpp"
 #include <cassert>
 #include <vector>
 using namespace a125::rifferator;
@@ -46,6 +47,25 @@ int main(){
  opens=releases=0;
  for(auto e:emitted){opens+=e.on;releases+=!e.on;}
  assert(opens==2&&releases==2);
+ // Gallop regression: attack offsets at 0 / 0.5 / 0.75 PPQ
+ // and repeat at 1 PPQ. It must never generate a 32nd re-trigger.
+ emitted.clear();scheduler.reset();
+ auto gallop=makeGallop(std::vector<Step>(16,Step{Articulation::Off,1,false,false}));
+ auto gallopSong=arrange(gallop,cfg,fill,16);
+ live.enabled.fill(false);live.doubled.fill(false);live.gate=95;
+ for(int step=0;step<16;++step) {
+   live.enabled[step]=gallop[step].articulation!=Articulation::Off;
+   live.articulation[step]=static_cast<int>(gallop[step].articulation);
+ }
+ scheduler.process(gallopSong.guitar,0.,4.,88200,gallopSong.periodTicks,sink,true,live);
+ int gallopOn=0,gallopOff=0;
+ std::vector<int> offsets;
+ for(auto e:emitted) {
+   if(e.on){++gallopOn;offsets.push_back(e.sampleOffset);}
+   else ++gallopOff;
+ }
+ assert(gallopOn==12&&gallopOff==12);
+ assert(offsets[0]==0&&offsets[1]==11025&&offsets[2]==16537&&offsets[3]==22050);
  // Host rejecting NoteOff cannot be followed by new attacks until flush.
  emitted.clear();scheduler.reset();
  live.doubled[0]=false;

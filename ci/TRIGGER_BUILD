@@ -132,3 +132,4 @@
 2026-10-12 GUI LAYOUT BUNDLE: user Studio One screenshot fix, separate Guitar/Rhythm pages, 1120x640 root, nested clipping/text/hitbox checks, exclusive zoom/nav, v2 page+zoom state with legacy migration; single Windows CI run
 2026-10-13 ONE BUNDLED CI: guitar-only MIDI engine, legacy V10 state, editable note/numbers, 16-step GUI, scheduler and regression suite
 2026-10-13 TARGETED CI: fix invalid multiple structured binding in gui_layout_contract_tests.cpp after #38325340609
+2026-10-13 ONE BUNDLED: classic gallop 8th+16th+16th preset, GUI command and locked-step MIDI regression
