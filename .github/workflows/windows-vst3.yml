@@ -6,6 +6,7 @@ on:
       - rebuild/v1.0.0-clean
     paths:
       - 'src/vst3/**'
+      - 'tests/vst3_host_lifecycle_probe.cpp'
       - 'CMakeLists.txt'
       - '.github/workflows/windows-vst3.yml'
 permissions:

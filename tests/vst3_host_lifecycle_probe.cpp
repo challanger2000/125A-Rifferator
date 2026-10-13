@@ -2,10 +2,10 @@
 // Original standalone harness using the licensed Steinberg SDK public API.
 // Does not depend on the private 125A Plugin Tester repository.
 #ifdef _WIN32
-#define NOMINMAX
 #include <windows.h>
 #include <objbase.h>
 #include "public.sdk/source/vst/hosting/module.h"
+#include "public.sdk/source/main/pluginfactory.h"
 #include "public.sdk/source/vst/hosting/hostclasses.h"
 #include "public.sdk/source/common/memorystream.h"
 #include "pluginterfaces/gui/iplugview.h"

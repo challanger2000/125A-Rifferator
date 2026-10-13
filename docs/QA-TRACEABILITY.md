@@ -89,3 +89,6 @@ The new 4/8-bar CTest target was registered in CMake and passed 6/6 Linux, but w
 
 ## Private QA dependency correction
 CI #38406858006 compiled the current VST3 and passed all six Windows CTest tests; a separate 125A Plugin Tester checkout failed because the runner's scoped GitHub token does not have access to the private QA repository. This was an AUTHENTICATION/INFRASTRUCTURE failure, not a plugin test failure. No private 125A tester code has been copied to the public repository. A new original, small SDK-hosted harness is built locally to test fresh-instance processor/controller state and 20 repeated native HWND Editor attach/detach cycles; it is not equivalent to the full 125A Plugin Tester, which remains a separate QA gate.
+
+## Host harness compile gate #38408632263
+The full Windows VST3 compiled and all 6/6 Release regressions, GUI packaging checks and validator binary build passed. The newly added SDK-based host harness did not compile because its class-category constants lacked the SDK pluginfactory header (C2065). This was detected before any attach/detach testing; no editor lifecycle PASS was claimed. The missing include has been added; Windows workflow path filters now cover host harness source changes so regression updates do not silently evade CI.
