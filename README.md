@@ -26,3 +26,13 @@ A fixed-size V1 processor state codec now stores all pattern cells and musical s
 **GitHub Actions [#38389103512](https://github.com/challanger2000/125A-Rifferator/actions/runs/38389103512): 4/4 CTest PASS** at commit `630c2034`. This measures the standalone MIDI core, runtime, standard-MIDI-file format and fixed-size state codec only; no VST3, Windows or GUI status is implied. Release remains blocked until genuine Studio One/125A/Steinberg QA.
 
 **Windows host-adapter source:** Windows x64 VST3 binary successfully compiled/link-checked and 4/4 CTest passed in [GitHub run #38392621834](https://github.com/challanger2000/125A-Rifferator/actions/runs/38392621834). Its experimental downloadable bundle is NOT FINAL and has no VSTGUI editor. Any later build/Validator claims must cite their own exact commit and run.
+
+## Latest native VST3 verification (2026-10-13)
+
+- Branch: rebuild/v1.0.0-clean; source commit: e4804275e26c0b320d2086763169c847b5a4581e.
+- [Windows SDK/Validator CI #38393090916](https://github.com/challanger2000/125A-Rifferator/actions/runs/38393090916): full workflow SUCCESS.
+- Windows 2022 / MSVC Release: real Windows x64 VST3 compiled and linked: BUILDS PASS.
+- Four independent Windows Release CTest targets: **4/4 PASS** (assertions kept enabled).
+- Independent Steinberg VST3 Validator against staged, branded native bundle: **537 tests passed, 0 failed**.
+- Verified experimental artifact: [Rifferator-V1-EXPERIMENTAL-Windows-x64](https://github.com/challanger2000/125A-Rifferator/actions/runs/38393090916/artifacts/11810467004). Artifact ID 11810467004; ZIP 398192 bytes; SHA256 b7239140e59ccb9608b8863069c74888f83897f211838376b4db25408946789c.
+- **NOT VERIFIED / NOT IMPLEMENTED:** VSTGUI editor/zoom/inputs, full Controller-to-GUI traceability, actual Studio One MIDI routing, real host automation/state recall, user musical acceptance, 125A Plugin Tester. No FINAL packaging or claim.

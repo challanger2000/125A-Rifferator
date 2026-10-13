@@ -54,3 +54,13 @@ Windows MSVC successfully linked the native x64 VST3 in #38392237851, but the wo
 
 ## Native VST3 compilation evidence
 At commit ba3207c, [Windows CI #38392621834](https://github.com/challanger2000/125A-Rifferator/actions/runs/38392621834) compiled and linked the actual x64 VST3 binary, ran 4/4 Release CTest with NDEBUG explicitly off, and published ZIP artifact #11809317427. **BUILDS PASS, WINDOWS CORE TEST PASS.** Host interaction, actual VST3 editor and Steinberg validator are NOT VERIFIED. The next source change adds Validator plus branded bundle packaging. No FINAL claim.
+
+## Latest native VST3 verification (2026-10-13)
+
+- Branch: rebuild/v1.0.0-clean; source commit: e4804275e26c0b320d2086763169c847b5a4581e.
+- [Windows SDK/Validator CI #38393090916](https://github.com/challanger2000/125A-Rifferator/actions/runs/38393090916): full workflow SUCCESS.
+- Windows 2022 / MSVC Release: real Windows x64 VST3 compiled and linked: BUILDS PASS.
+- Four independent Windows Release CTest targets: **4/4 PASS** (assertions kept enabled).
+- Independent Steinberg VST3 Validator against staged, branded native bundle: **537 tests passed, 0 failed**.
+- Verified experimental artifact: [Rifferator-V1-EXPERIMENTAL-Windows-x64](https://github.com/challanger2000/125A-Rifferator/actions/runs/38393090916/artifacts/11810467004). Artifact ID 11810467004; ZIP 398192 bytes; SHA256 b7239140e59ccb9608b8863069c74888f83897f211838376b4db25408946789c.
+- **NOT VERIFIED / NOT IMPLEMENTED:** VSTGUI editor/zoom/inputs, full Controller-to-GUI traceability, actual Studio One MIDI routing, real host automation/state recall, user musical acceptance, 125A Plugin Tester. No FINAL packaging or claim.
