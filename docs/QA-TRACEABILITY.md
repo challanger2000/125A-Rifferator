@@ -33,3 +33,5 @@
 Source separation checked: Pattern and MidiRuntime do not name H7 performance techniques; the H7 adapter declares the named mapping and PM velocity policy. Regression with arbitrary non-H7 technique code will run in the next core CI. This does not certify the eventual EBM bass product.
 
 Additional independent Standard MIDI File decoder regression (header, VLQ timing, NoteOff-first order, 8-bar boundary and malformed pattern rejection) staged for the next core CI.
+
+Product-state SDK-free V1 codec: fixed 408-byte endian-stable snapshot includes all 128 cells, bars, key/scale/root, FILL, H7 PM velocity, MIDI trigger mode and seed. Reject unsupported version, CRC/FNV mismatch, malformed values and truncated data *atomically*. Tests pending next core CI. Controller-only BAR selection and zoom state remain separate and not yet implemented.

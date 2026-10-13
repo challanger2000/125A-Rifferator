@@ -18,3 +18,5 @@ Mandatory general standards in 125A-Engineering START-HERE / ENGINEERING-GUARDRA
 2026-10-13: A separate allocation-free, host-neutral MidiRuntime.hpp and MIDI trigger transport regression suite have been introduced. Until the new core CI is green, treat these changes as unverified. No VST3 binary exists yet.
 
 **Core/instrument split:** Pattern technique codes are opaque in the generic timing layer. Heavier7Strings.hpp owns the technique labels and velocity profile; tests exercise an independent synthetic bass velocity mapping.
+
+A fixed-size V1 processor state codec now stores all pattern cells and musical settings with atomic validation; this is still SDK-free and its first CI validation is pending.

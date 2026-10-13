@@ -11,3 +11,6 @@ Current branch is a **core prototype**; isolation is not a claim of complete arc
 
 ## Separated technique policy (rebuild/v1.0.0-clean)
 The core Step now stores only `on`, `stop`, `locked`, an opaque technique byte and a diatonic degree. In particular, **no guitar articulation labels or PM velocity bounds remain in the generic core**. The Heavier7Strings adapter defines its own named techniques, user PM velocity bounds 30..83, and H7 generation policy. The runtime receives a velocity policy callable. A separate synthetic-bass policy regression demonstrates that the generic pattern/emission code can encode a non-H7 technique.
+
+## V1 project state codec
+src/product/RifferatorState.hpp owns the 408-byte product-specific, versioned processor snapshot with explicit field encoding and FNV-1a accidental-corruption checking. Generic MIDI modules remain free of H7-specific serialized data. The codec returns success/failure to a future VST3 IBStream adapter; it does not perform file I/O and does not replace mandatory host project-recall verification.
