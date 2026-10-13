@@ -1,0 +1,40 @@
+name: Rifferator Experimental Windows VST3
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - rebuild/v1.0.0-clean
+    paths:
+      - 'src/vst3/**'
+      - 'CMakeLists.txt'
+      - '.github/workflows/windows-vst3.yml'
+permissions:
+  contents: read
+jobs:
+  windows-vst3:
+    runs-on: windows-2022
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure SDK 3.8.1 x64
+        shell: pwsh
+        run: cmake -S . -B build-vst3 -G "Visual Studio 17 2022" -A x64 -DRIFFERATOR_ENABLE_VST3=ON
+      - name: Compile prototype VST3 and all C++ tests
+        shell: pwsh
+        run: cmake --build build-vst3 --config Release --parallel 4 --target Rifferator rifferator_core_tests rifferator_runtime_tests rifferator_midi_file_tests rifferator_state_tests
+      - name: Run SDK-free regression suite on Windows
+        shell: pwsh
+        run: ctest --test-dir build-vst3 -C Release --output-on-failure
+      - name: Stage experimental VST3 bundle
+        shell: pwsh
+        run: |
+          $bundles = @(Get-ChildItem -Path build-vst3 -Directory -Filter '*.vst3' -Recurse)
+          if ($bundles.Count -lt 1) { throw "No VST3 bundle found" }
+          New-Item -ItemType Directory -Force -Path stage | Out-Null
+          Copy-Item -Path $bundles[0].FullName -Destination stage -Recurse
+      - name: Archive experimental VST3 (NOT FINAL)
+        uses: actions/upload-artifact@v4
+        with:
+          name: Rifferator-V1-EXPERIMENTAL-Windows-x64
+          path: stage/
+          if-no-files-found: error

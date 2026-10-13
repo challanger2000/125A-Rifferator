@@ -43,3 +43,6 @@ Product-state SDK-free V1 codec: fixed 408-byte endian-stable snapshot includes 
 - **Subtests:** `rifferator_core_contract`, `rifferator_midi_runtime`, `rifferator_midi_file_format0`, `rifferator_state_roundtrip`.
 - **Evidence limitation:** This is source-level C++ compliance only. No VST3 processor/controller, no Windows native plugin, no Steinberg Validator result, no Editor Lifecycle, no 125A Plugin Tester, no Studio One acceptance. Static SVG is not a functional GUI.
 - **State format:** New V1 wire contract intentionally does not attempt to migrate unreleased/abandoned previous Rifferator V1..V11 implementations. Old source preserved in the historic branch.
+
+## Experimental Steinberg VST3 adapter
+Source-only prototype at src/vst3: 647 parameter IDs (7 globals + 5×128 step controls), event in/out, VST3 component state translation and host PPQ/MIDI trigger runtime. First Windows x64 build is **NOT VERIFIED**. There is **no editor yet**; GUI and DAW QA remain blocking. Linux standalone 4/4 CTest cannot establish Windows VST3 binary PASS. Review docs/VST3-INTEGRATION.md and the experimental CI run before any further compliance claim.
