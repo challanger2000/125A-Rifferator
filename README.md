@@ -1,4 +1,23 @@
-# 125A Rifferator V1 — CLEAN REBUILD
+# 125A Rifferator V1.0.0 — PRIVATE STABLE BASELINE
+
+**Private use only — no public release planned.** Authoritative working branch: `rebuild/v1.0.0-clean`. Accepted source/binary baseline: `d6440d205f440d8fc6c8ac01fde970895241638e` (2026-10-13). This README maintenance does not modify the plugin binary.
+
+## Current acceptance (user, Studio One, 2026-10-14)
+
+- User confirms normal functionality and no currently observed defects in Studio One with the current experimental build.
+- Generate and Variate are musically satisfactory; manual riff editing is the primary intended workflow.
+- User confirms MIDI export and Studio One project save/reload tested successfully.
+- GUI at 150% reviewed via screenshot; Shift+click pitch picker is somewhat cumbersome but accepted for now.
+- Technical evidence for exact baseline: [Windows VST3 #38444977246](https://github.com/challanger2000/125A-Rifferator/actions/runs/38444977246) SUCCESS; [Core #38444977265](https://github.com/challanger2000/125A-Rifferator/actions/runs/38444977265) SUCCESS; [official 125A Plugin Tester #38445480681](https://github.com/challanger2000/125A-Plugin-Tester/actions/runs/38445480681) 30 PASS / 0 WARN / 0 FAIL, with Steinberg Validator PASS.
+- Experimental Windows x64 VST3 from this exact source: [artifact #11838530699](https://github.com/challanger2000/125A-Rifferator/actions/runs/38444977246/artifacts/11838530699).
+- **Disposition: privately accepted working baseline, NOT public FINAL / no Final repository, demo, Gumroad packaging or marketing.**
+- This is user acceptance and technical test evidence, not a claim of exhaustive proof across every possible DAW operation.
+- Future work: resume only on request, preserve exact baseline/compatibility; batch fixes and avoid speculative workflows. Do not delete historical branches or alter released/tested binary for documentation-only housekeeping.
+
+---
+
+## Historical development notes (superseded by status above)
+
 
 **Current development branch:** rebuild/v1.0.0-clean. **Current status:** working experimental Windows x64 MIDI-only VST3 with VSTGUI, complete technical 125A Plugin Tester PASS (2026-10-13), final Studio One GUI/musical acceptance still open. **NOT FINAL.** Earlier prototype stages below are historical.
 
