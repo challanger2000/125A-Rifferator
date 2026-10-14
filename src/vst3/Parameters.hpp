@@ -4,7 +4,7 @@
 #include <cstdint>
 #include "../product/RifferatorState.hpp"
 namespace a125::riff::vst {
-constexpr std::uint32_t Key=100,ScaleId=101,Root=102,Bars=103,Pm=104,Fill=105,Mode=106;
+constexpr std::uint32_t PasteTransaction=200,Key=100,ScaleId=101,Root=102,Bars=103,Pm=104,Fill=105,Mode=106;
 constexpr std::uint32_t On=1000,Stop=1200,Type=1400,Degree=1600,Lock=1800;
 inline int q(double v,int steps) noexcept {return std::isfinite(v)?static_cast<int>(std::floor(std::clamp(v,0.,1.)*steps+0.5)):-1;}
 inline double n(int value,int min,int max) noexcept {return double(value-min)/double(max-min);}
