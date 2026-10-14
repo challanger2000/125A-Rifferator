@@ -175,7 +175,10 @@ int main(){
  assert(hit(972,35,false).target==Target::None);
  assert(hit(1030,64,false).target==Target::None);
  assert(hit(34,510,false).target==Target::Generate);
- assert(hit(720,510,false).target==Target::Export);
+ assert(hit(560,510,false).target==Target::Export);
+ assert(hit(745,510,false).target==Target::CopyBar);
+ assert(hit(850,510,false).target==Target::PasteBar);
+ assert(!supportsReset(Target::CopyBar)&&!supportsReset(Target::PasteBar));
  assert(hit(1010,284,false).target==Target::StepOn);
  assert(hit(1010,340,false).target==Target::Lock);
  for(int y=0;y<570;++y)for(int x=0;x<1160;++x){
