@@ -7,7 +7,7 @@
 - Lock-protected target replacement uses an explicit paste transaction; ordinary LOCK behavior remains unchanged. A marker without the full 16-LOCK payload cannot unlock a BAR.
 - Test evidence: [Core #38566513825](https://github.com/challanger2000/125A-Rifferator/actions/runs/38566513825) PASS; [Windows VST3 #38566513819](https://github.com/challanger2000/125A-Rifferator/actions/runs/38566513819) PASS, including Windows CTest, Steinberg validator and 20 editor lifecycle cycles.
 - [Exact Windows x64 test binary, artifact #11895282485](https://github.com/challanger2000/125A-Rifferator/actions/runs/38566513819/artifacts/11895282485).
-- **Outstanding:** Real Studio One COPY/PASTE click, MIDI NOTE playback while pasting, exact target LOCKs and project reload must be confirmed. The 125A original Plugin Tester has not been rerun on this feature commit. Do not call this feature FINAL based on CI alone.
+- **User acceptance (2026-10-14):** User installed and tested the COPY/PASTE Windows VST3 in Studio One and reports that it works excellently. Adopt `c71d03f14a165c0ce81c2d06dd9475e713656963` as the **private working plugin baseline**. No public release, no Final repository, no Humanize implementation (Studio One handles post-recording humanization). **Qualification:** This user report confirms working COPY/PASTE in Studio One, but does not separately document every edge case (held MIDI NOTE during paste, LOCK replacement and project reload with this feature). Original 125A Plugin Tester was not rerun on this feature commit. The former accepted `d6440d20` binary remains preserved as fallback. No further development planned until requested.
 
 ---
 
