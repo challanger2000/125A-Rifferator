@@ -76,6 +76,21 @@ tresult PLUGIN_API Processor::setState(IBStream* stream){
 tresult PLUGIN_API Processor::process(ProcessData& data){
  if(data.numSamples<0)return kInvalidArgument;
  product::Snapshot candidate=snapshot_;
+ int pasteBar=-1;
+ if(data.inputParameterChanges){
+  auto* changes=data.inputParameterChanges;
+  for(int32 i=0;i<changes->getParameterCount();++i){
+   auto* queue=changes->getParameterData(i);
+   if(!queue||queue->getParameterId()!=PasteTransaction||queue->getPointCount()==0)continue;
+   int32 offset=0;ParamValue value=0.;
+   if(queue->getPoint(queue->getPointCount()-1,offset,value)==kResultOk)
+    pasteBar=q(value,15)%8;
+  }
+  if(pasteBar>=0&&pasteBar<candidate.pattern.bars)
+   for(int j=0;j<kStepsPerBar;++j)
+    candidate.pattern.steps[static_cast<std::size_t>(pasteBar*kStepsPerBar+j)].locked=false;
+  else pasteBar=-1;
+ }
  if(data.inputParameterChanges){
   auto* changes=data.inputParameterChanges;
   // LOCK first prevents same-block user edits from silently modifying a locked step.
@@ -85,7 +100,10 @@ tresult PLUGIN_API Processor::process(ProcessData& data){
     if(!queue||queue->getPointCount()==0)continue;
     const auto id=queue->getParameterId();
     const bool isLock=(id>=Lock&&id<Lock+kMaxSteps);
-    if((pass==0)!=isLock)continue;
+    if(id==PasteTransaction)continue;
+    if(pasteBar>=0){
+     if((pass==0)==isLock)continue; // explicit paste: payload before final locks
+    }else if((pass==0)!=isLock)continue;
     int32 sample=0;ParamValue value=0.;
     if(queue->getPoint(queue->getPointCount()-1,sample,value)==kResultOk){
       // A live STEP/LOCK edit updates the next grid event, not the MIDI trigger.
@@ -188,6 +206,7 @@ tresult PLUGIN_API Controller::initialize(FUnknown* context){
  add(STR16("PM Velocity"),Pm,30,83,30);
  add(STR16("Fill Intensity"),Fill,0,100,0);
  add(STR16("Trigger Mode"),Mode,0,1,0);
+ add(STR16("Bar Paste Transaction"),PasteTransaction,0,15,0);
  const struct {const char* name;ParamID base;int low,high,initial;} fields[]={
   {"ON",On,0,1,0},{"STOP",Stop,0,1,0},
   {"TYPE",Type,0,3,0},{"DEGREE",Degree,-14,14,0},
@@ -291,6 +310,7 @@ void Controller::redraw(){
  if(panel_)panel_->invalid();
 }
 tresult PLUGIN_API Controller::setParamNormalized(ParamID tag,ParamValue value){
+ if(tag==PasteTransaction)return EditController::setParamNormalized(tag,value);
  const auto result=EditController::setParamNormalized(tag,value);
  if(result!=kResultOk)return result;
  if(!apply(visual_,tag,value)){
@@ -530,6 +550,37 @@ void Controller::click(int x,int y,bool shift,bool control){
   bar_=(bar_+visual_.pattern.bars+move)%visual_.pattern.bars;
   focused_=bar_*16;
   pickerStep_=-1;
+ }else if(hit.target==Target::CopyBar){
+   status_=clipboard_.copy(visual_.pattern,bar_)?"BAR COPIED":"COPY FAILED";
+ }else if(hit.target==Target::PasteBar){
+   auto updated=visual_;
+   if(!clipboard_.paste(updated.pattern,bar_)){
+    status_="COPY A BAR FIRST";
+   }else{
+    const auto previous=visual_;
+    visual_=updated;
+    pasteToggle_=!pasteToggle_;
+    const double marker=n(bar_+(pasteToggle_?8:0),0,15);
+    auto send=[this](ParamID tag,double value){
+     beginEdit(tag);
+     EditController::setParamNormalized(tag,value);
+     performEdit(tag,value);
+     endEdit(tag);
+    };
+    send(PasteTransaction,marker);
+    for(int j=0;j<kStepsPerBar;++j){
+     const int index=bar_*kStepsPerBar+j;
+     const auto& old=previous.pattern.steps[static_cast<std::size_t>(index)];
+     const auto& now=visual_.pattern.steps[static_cast<std::size_t>(index)];
+     const ParamID cell=static_cast<ParamID>(index);
+     if(old.on!=now.on)send(On+cell,read(visual_,On+cell));
+     if(old.stop!=now.stop)send(Stop+cell,read(visual_,Stop+cell));
+     if(old.articulation!=now.articulation)send(Type+cell,read(visual_,Type+cell));
+     if(old.degree!=now.degree)send(Degree+cell,read(visual_,Degree+cell));
+     if(old.locked!=now.locked)send(Lock+cell,read(visual_,Lock+cell));
+    }
+    status_="BAR PASTED";
+   }
  }else if(hit.target==Target::Bars){
   openChoiceMenu(Bars,x,y);
  }else if(hit.target==Target::Key){
