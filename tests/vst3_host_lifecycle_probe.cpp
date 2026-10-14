@@ -25,6 +25,7 @@
 #include <atomic>
 #include <cstring>
 #include <iostream>
+#include <limits>
 #include <string>
 
 using namespace Steinberg;
@@ -267,7 +268,7 @@ int main(int argc,char** argv){
             processor->setProcessing(true)==kResultOk,
             "processor activation/setup"))return 2;
  EventList incoming(256),outgoing(256);
- ParameterChanges changes(16);
+ ParameterChanges changes(32);
  ProcessContext context{};
  context.state=ProcessContext::kPlaying |
                ProcessContext::kProjectTimeMusicValid |
@@ -329,6 +330,44 @@ int main(int argc,char** argv){
   auto* q=changes.addParameterData(id,qidx);
   return q&&q->addPoint(0,normalized,point)==kResultOk;
  };
+ // Exercise paste protection through the loaded DLL's actual ProcessData API.
+ MemoryStream beforePaste;
+ if(!check(fresh->getState(&beforePaste)==kResultOk,"save pre-paste state"))return 2;
+ for(int scenario=0;scenario<4;++scenario){
+  using namespace a125::riff::vst;
+  a125::riff::product::Snapshot pasteFixture;
+  pasteFixture.pattern.bars=2;
+  pasteFixture.pattern.steps[16].locked=true;
+  pasteFixture.pattern.steps[0].locked=scenario==3;
+  a125::riff::product::StateBytes pasteBytes{};
+  if(!check(a125::riff::product::encode(pasteFixture,pasteBytes),
+            "encode paste fixture"))return 2;
+  MemoryStream pasteState(pasteBytes.data(),static_cast<TSize>(pasteBytes.size()));
+  if(!check(fresh->setState(&pasteState)==kResultOk,"restore paste fixture"))return 2;
+  changes.clearQueue();
+  if(!check(automate(PasteTransaction,scenario==2?1.1:n(1,0,15))&&
+            automate(On+16,1.)&&automate(On,1.)&&
+            automate(Lock,scenario==3?0.:1.),"prepare paste and other-bar edits"))return 2;
+  for(int j=0;j<a125::riff::kStepsPerBar;++j)
+   if(!check(automate(Lock+16+j,scenario==1&&j==15?
+        std::numeric_limits<double>::quiet_NaN():1.),"prepare paste locks"))return 2;
+  if(!check(processAt(0.,false),"process paste transaction"))return 2;
+  MemoryStream resultState;
+  a125::riff::product::Snapshot pasted;
+  if(!check(fresh->getState(&resultState)==kResultOk&&
+       a125::riff::product::decode(
+         reinterpret_cast<const std::uint8_t*>(resultState.getData()),
+         static_cast<std::size_t>(resultState.getSize()),pasted)&&
+       pasted.pattern.steps[16].on==(scenario==0||scenario==3)&&
+       pasted.pattern.steps[16].locked&&
+       pasted.pattern.steps[0].on==(scenario==3)&&
+       pasted.pattern.steps[0].locked!=(scenario==3),
+       "paste lock validation and isolation"))return 2;
+ }
+ changes.clearQueue();
+ beforePaste.seek(0,IBStream::kIBSeekSet,nullptr);
+ if(!check(fresh->setState(&beforePaste)==kResultOk,"restore after paste checks"))return 2;
+ std::cout<<"[PASS] VST3 paste: valid override, malformed payload/marker rejection, other-bar LOCK isolation\n";
  if(!check(automate(a125::riff::vst::Key,
                     a125::riff::vst::n(6,0,11)),
            "send KEY automation"))return 2;

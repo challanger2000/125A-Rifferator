@@ -114,7 +114,7 @@ void RifferatorPanel::draw(VSTGUI::CDrawContext* dc) {
  // Product title is centered on the editor axis; the official logo
  // stays on the left and a compact zoom switch occupies the right.
  titleLabel(dc,"RIFFERATOR",rect(260,24,640,35),text);
- label(dc,"V1.0.0  /  MIDI RIFF GENERATOR",
+ label(dc,"V1.0.1  /  MIDI RIFF GENERATOR",
        rect(260,57,640,17),muted,true);
  fill(dc,rect(1036,34,88,30),red,redBorder);
  label(dc,std::string("ZOOM ")+(owner_->zoom()>1.25?"150%":"100%"),

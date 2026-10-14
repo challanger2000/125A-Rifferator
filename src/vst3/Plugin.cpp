@@ -3,6 +3,7 @@
 #include "BrandLogoView.hpp"
 #include "UiGeometry.hpp"
 #include "UiStepPolicy.hpp"
+#include "ParameterChanges.hpp"
 #include "../core/StandardMidiFile.hpp"
 #include "vstgui/uidescription/uiattributes.h"
 #include "vstgui/lib/cfileselector.h"
@@ -76,54 +77,16 @@ tresult PLUGIN_API Processor::setState(IBStream* stream){
 tresult PLUGIN_API Processor::process(ProcessData& data){
  if(data.numSamples<0)return kInvalidArgument;
  product::Snapshot candidate=snapshot_;
- int pasteBar=-1;
  if(data.inputParameterChanges){
   auto* changes=data.inputParameterChanges;
-  for(int32 i=0;i<changes->getParameterCount();++i){
-   auto* queue=changes->getParameterData(i);
-   if(!queue||queue->getParameterId()!=PasteTransaction||queue->getPointCount()==0)continue;
-   int32 offset=0;ParamValue value=0.;
-   if(queue->getPoint(queue->getPointCount()-1,offset,value)==kResultOk)
-    pasteBar=q(value,15)%8;
-  }
-  // A recalled or automated marker alone must never disable LOCKs.
-  // Require the complete destination BAR lock payload in this same block.
-  bool lockPayload[kStepsPerBar]{};
-  if(pasteBar>=0&&pasteBar<candidate.pattern.bars){
-   for(int32 i=0;i<changes->getParameterCount();++i){
-    auto* queue=changes->getParameterData(i);
-    if(!queue||queue->getPointCount()==0)continue;
-    const auto id=queue->getParameterId();
-    if(id>=Lock+static_cast<ParamID>(pasteBar*kStepsPerBar)&&
-       id<Lock+static_cast<ParamID>((pasteBar+1)*kStepsPerBar))
-     lockPayload[id-Lock-static_cast<ParamID>(pasteBar*kStepsPerBar)]=true;
-   }
-   for(bool present:lockPayload)if(!present){pasteBar=-1;break;}
-  }else pasteBar=-1;
-  if(pasteBar>=0)
-   for(int j=0;j<kStepsPerBar;++j)
-    candidate.pattern.steps[static_cast<std::size_t>(pasteBar*kStepsPerBar+j)].locked=false;
- }
- if(data.inputParameterChanges){
-  auto* changes=data.inputParameterChanges;
-  // LOCK first prevents same-block user edits from silently modifying a locked step.
-  for(int pass=0;pass<2;++pass){
-   for(int32 i=0;i<changes->getParameterCount();++i){
-    auto* queue=changes->getParameterData(i);
-    if(!queue||queue->getPointCount()==0)continue;
-    const auto id=queue->getParameterId();
-    const bool isLock=(id>=Lock&&id<Lock+kMaxSteps);
-    if(id==PasteTransaction)continue;
-    if(pasteBar>=0){
-     if((pass==0)==isLock)continue; // explicit paste: payload before final locks
-    }else if((pass==0)!=isLock)continue;
-    int32 sample=0;ParamValue value=0.;
-    if(queue->getPoint(queue->getPointCount()-1,sample,value)==kResultOk){
-      // A live STEP/LOCK edit updates the next grid event, not the MIDI trigger.
-      apply(candidate,id,value);
-    }
-   }
-  }
+  applyParameterChanges(candidate,changes->getParameterCount(),
+      [&](int i,std::uint32_t& id,double& value){
+       auto* queue=changes->getParameterData(i);
+       if(!queue||queue->getPointCount()==0)return false;
+       id=queue->getParameterId();
+       int32 offset=0;
+       return queue->getPoint(queue->getPointCount()-1,offset,value)==kResultOk;
+      });
  }
  if(candidate.valid()){
   // Only pitch-basis changes need a voice release. Do not reset held_
@@ -666,7 +629,7 @@ using namespace a125::riff::vst;
 BEGIN_FACTORY_DEF("125A", "https://github.com/challanger2000/125A-Rifferator", "")
 DEF_CLASS2(INLINE_UID_FROM_FUID(ProcessorUID),PClassInfo::kManyInstances,kVstAudioEffectClass,
  "125A Rifferator",Vst::kDistributable,Vst::PlugType::kInstrumentSynth,
- "1.0.0",kVstVersionString,Processor::createInstance)
+ "1.0.1",kVstVersionString,Processor::createInstance)
 DEF_CLASS2(INLINE_UID_FROM_FUID(ControllerUID),PClassInfo::kManyInstances,kVstComponentControllerClass,
- "125A Rifferator Controller",0,"","1.0.0",kVstVersionString,Controller::createInstance)
+ "125A Rifferator Controller",0,"","1.0.1",kVstVersionString,Controller::createInstance)
 END_FACTORY

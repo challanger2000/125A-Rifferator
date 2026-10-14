@@ -5,6 +5,7 @@ on:
     branches:
       - rebuild/v1.0.0-clean
       - feature/v1-bar-copy-paste
+      - repair/v1.0.1-lock-fix
     paths:
       - 'src/**'
       - 'tests/**'

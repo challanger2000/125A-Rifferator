@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.20)
-project(125A_Rifferator VERSION 1.0.0 LANGUAGES CXX)
+project(125A_Rifferator VERSION 1.0.1 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
@@ -46,7 +46,7 @@ if(RIFFERATOR_ENABLE_VST3)
  set(SMTG_RUN_VST_VALIDATOR OFF CACHE BOOL "" FORCE)
  set(SMTG_CREATE_PLUGIN_LINK OFF CACHE BOOL "" FORCE)
  set(SMTG_ENABLE_VST3_PLUGIN_EXAMPLES OFF CACHE BOOL "" FORCE)
- set(SMTG_ENABLE_VST3_HOSTING_EXAMPLES ON CACHE BOOL "" FORCE)
+ option(SMTG_ENABLE_VST3_HOSTING_EXAMPLES "Build SDK hosting examples and validator" ON)
  set(SMTG_ENABLE_VSTGUI_SUPPORT ON CACHE BOOL "" FORCE)
  include(FetchContent)
  FetchContent_Declare(vst3sdk
@@ -59,6 +59,13 @@ if(RIFFERATOR_ENABLE_VST3)
     src/vst3/RifferatorPanel.cpp src/vst3/RifferatorPanel.hpp
     src/vst3/BrandLogoView.cpp src/vst3/BrandLogoView.hpp)
  target_link_libraries(Rifferator PRIVATE sdk vstgui_support)
+ if(MINGW)
+  # VSTGUI's MSVC pragma libraries must be linked explicitly with MinGW.
+  target_link_libraries(vstgui PUBLIC windowscodecs d2d1 dwrite d3d11
+    dwmapi opengl32 glu32 shlwapi imm32 ole32 oleaut32 uuid)
+  target_link_libraries(Rifferator PRIVATE
+    "$<LINK_GROUP:RESCAN,vstgui_support,vstgui_uidescription,vstgui>")
+ endif()
  target_include_directories(Rifferator PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src")
  smtg_target_add_plugin_resources(Rifferator RESOURCES
     resource/rifferator.uidesc
@@ -112,3 +119,12 @@ else()
  target_compile_options(rifferator_extended_timeline_tests PRIVATE -Wall -Wextra -Wpedantic -Werror -UNDEBUG)
 endif()
 add_test(NAME rifferator_extended_timeline COMMAND rifferator_extended_timeline_tests)
+
+add_executable(rifferator_parameter_changes_tests tests/parameter_changes_tests.cpp)
+target_include_directories(rifferator_parameter_changes_tests PRIVATE src)
+if(MSVC)
+ target_compile_options(rifferator_parameter_changes_tests PRIVATE /W4 /WX /UNDEBUG)
+else()
+ target_compile_options(rifferator_parameter_changes_tests PRIVATE -Wall -Wextra -Wpedantic -Werror -UNDEBUG)
+endif()
+add_test(NAME rifferator_parameter_changes COMMAND rifferator_parameter_changes_tests)
