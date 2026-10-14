@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - rebuild/v1.0.0-clean
+      - feature/v1-bar-copy-paste
     paths:
       - 'src/**'
       - 'tests/**'
