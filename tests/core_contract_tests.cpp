@@ -1,4 +1,5 @@
 #include "core/Pattern.hpp"
+#include "core/BarClipboard.hpp"
 #include "instruments/Heavier7Strings.hpp"
 #include "core/StandardMidiFile.hpp"
 #ifdef NDEBUG
@@ -18,6 +19,25 @@ static Pattern sample(){
   return p;
 }
 int main(){
+  // One-bar copy is a frozen snapshot, not an alias into the source pattern.
+  for(int bars : {2,4,8}){
+   Pattern p;assert(p.setBars(bars));
+   BarClipboard clip;assert(!clip.available()&&!clip.paste(p,1));
+   Step special;special.on=true;special.locked=true;special.articulation=2;special.degree=5;
+   p.steps[1]=special;
+   Step stop;stop.on=true;stop.stop=true;stop.locked=true;
+   p.steps[15]=stop;
+   assert(clip.copy(p,0)&&clip.available());
+   p.steps[1]=Step{}; // source changes after COPY must not affect clipboard
+   p.steps[16+1].locked=true;
+   assert(clip.paste(p,1));
+   assert(p.steps[17].on&&p.steps[17].locked&&
+          p.steps[17].articulation==2&&p.steps[17].degree==5);
+   assert(p.steps[31].stop&&p.steps[31].locked);
+   assert(!p.steps[1].on);
+   assert(!clip.paste(p,bars)&&!clip.copy(p,-1));
+  }
+
   Settings s;
   assert(s.valid()&&pitchInScale(40,s));
   assert(pitchForDegree(0,s)==40&&pitchForDegree(1,s)==42);
