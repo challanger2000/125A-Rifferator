@@ -577,7 +577,8 @@ void Controller::click(int x,int y,bool shift,bool control){
      if(old.stop!=now.stop)send(Stop+cell,read(visual_,Stop+cell));
      if(old.articulation!=now.articulation)send(Type+cell,read(visual_,Type+cell));
      if(old.degree!=now.degree)send(Degree+cell,read(visual_,Degree+cell));
-     if(old.locked!=now.locked)send(Lock+cell,read(visual_,Lock+cell));
+     // Marker temporarily unlocks target BAR: publish every final LOCK bit.
+     send(Lock+cell,read(visual_,Lock+cell));
     }
     status_="BAR PASTED";
    }
