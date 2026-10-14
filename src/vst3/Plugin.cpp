@@ -86,10 +86,23 @@ tresult PLUGIN_API Processor::process(ProcessData& data){
    if(queue->getPoint(queue->getPointCount()-1,offset,value)==kResultOk)
     pasteBar=q(value,15)%8;
   }
-  if(pasteBar>=0&&pasteBar<candidate.pattern.bars)
+  // A recalled or automated marker alone must never disable LOCKs.
+  // Require the complete destination BAR lock payload in this same block.
+  bool lockPayload[kStepsPerBar]{};
+  if(pasteBar>=0&&pasteBar<candidate.pattern.bars){
+   for(int32 i=0;i<changes->getParameterCount();++i){
+    auto* queue=changes->getParameterData(i);
+    if(!queue||queue->getPointCount()==0)continue;
+    const auto id=queue->getParameterId();
+    if(id>=Lock+static_cast<ParamID>(pasteBar*kStepsPerBar)&&
+       id<Lock+static_cast<ParamID>((pasteBar+1)*kStepsPerBar))
+     lockPayload[id-Lock-static_cast<ParamID>(pasteBar*kStepsPerBar)]=true;
+   }
+   for(bool present:lockPayload)if(!present){pasteBar=-1;break;}
+  }else pasteBar=-1;
+  if(pasteBar>=0)
    for(int j=0;j<kStepsPerBar;++j)
     candidate.pattern.steps[static_cast<std::size_t>(pasteBar*kStepsPerBar+j)].locked=false;
-  else pasteBar=-1;
  }
  if(data.inputParameterChanges){
   auto* changes=data.inputParameterChanges;
