@@ -196,8 +196,9 @@ void RifferatorPanel::draw(VSTGUI::CDrawContext* dc) {
  if(notes.size()>16)label(dc,notes.substr(16),rect(1002,420,133,20),text);
  fill(dc,rect(23,483,1113,61),dark,border);
  struct Footer {int x,w;const char* title;};
- const Footer footer[]={{34,235,"GENERATE PATTERN"},{283,168,"VARIATE"},
- {465,215,"CLEAR PATTERN"},{694,219,"EXPORT MIDI"}};
+ const Footer footer[]={{34,180,"GENERATE"},{226,125,"VARIATE"},
+ {363,145,"CLEAR"},{520,170,"EXPORT MIDI"},
+ {702,96,"COPY"},{810,96,"PASTE"}};
  for(const auto& item:footer){
   fill(dc,rect(item.x,493,item.w,44),item.x==34?red:panel,
        item.x==34?redBorder:border);
