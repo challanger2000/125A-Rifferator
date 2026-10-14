@@ -1,3 +1,16 @@
+# Experimental single-BAR COPY/PASTE — private feature branch (2026-10-14)
+
+**Branch:** `feature/v1-bar-copy-paste`. **Tested plugin source:** `c71d03f14a165c0ce81c2d06dd9475e713656963`. **Accepted prior baseline remains:** `d6440d205f440d8fc6c8ac01fde970895241638e`; no public release or Final repository planned.
+
+- COPY freezes the selected 16-step BAR; PASTE replaces one selected destination BAR including ON/STOP/articulation/degree/LOCK. Source unchanged; clipboard retains its copy through subsequent source edits.
+- Buttons share the bottom toolbar with Generate, Variate, Clear and Export.
+- Lock-protected target replacement uses an explicit paste transaction; ordinary LOCK behavior remains unchanged. A marker without the full 16-LOCK payload cannot unlock a BAR.
+- Test evidence: [Core #38566513825](https://github.com/challanger2000/125A-Rifferator/actions/runs/38566513825) PASS; [Windows VST3 #38566513819](https://github.com/challanger2000/125A-Rifferator/actions/runs/38566513819) PASS, including Windows CTest, Steinberg validator and 20 editor lifecycle cycles.
+- [Exact Windows x64 test binary, artifact #11895282485](https://github.com/challanger2000/125A-Rifferator/actions/runs/38566513819/artifacts/11895282485).
+- **Outstanding:** Real Studio One COPY/PASTE click, MIDI NOTE playback while pasting, exact target LOCKs and project reload must be confirmed. The 125A original Plugin Tester has not been rerun on this feature commit. Do not call this feature FINAL based on CI alone.
+
+---
+
 # 125A Rifferator V1 — CLEAN REBUILD
 
 **Current development branch:** rebuild/v1.0.0-clean. **Current status:** working experimental Windows x64 MIDI-only VST3 with VSTGUI, complete technical 125A Plugin Tester PASS (2026-10-13), final Studio One GUI/musical acceptance still open. **NOT FINAL.** Earlier prototype stages below are historical.
