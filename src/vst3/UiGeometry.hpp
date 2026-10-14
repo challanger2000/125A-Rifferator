@@ -2,7 +2,7 @@
 #include <algorithm>
 namespace a125::riff::vst::ui {
 constexpr int width=1160,height=570,gridLeft=180,gridTop=224;
-enum class Target { None,Zoom,Bars,Key,Scale,Root,Pm,Fill,Prev,Next,StepOn,Lock,Mode,Generate,Variate,Clear,Export,Cell,Picker,PickerCancel };
+enum class Target { None,CopyBar,PasteBar,Zoom,Bars,Key,Scale,Root,Pm,Fill,Prev,Next,StepOn,Lock,Mode,Generate,Variate,Clear,Export,Cell,Picker,PickerCancel };
 struct Hit {Target target{Target::None};int column{-1};int row{-1};};
 // Direct horizontal selection for PM VELOCITY and FILL. All values are
 // reachable, endpoints included, independent of GUI zoom.
@@ -58,10 +58,12 @@ inline Hit hit(int x,int y,bool picker) noexcept {
  if(inside(x,y,1008,276,112,42))return {Target::StepOn};
  if(inside(x,y,1008,322,112,42))return {Target::Lock};
  if(inside(x,y,992,177,144,40))return {Target::Mode};
- if(inside(x,y,34,493,235,44))return {Target::Generate};
- if(inside(x,y,283,493,168,44))return {Target::Variate};
- if(inside(x,y,465,493,215,44))return {Target::Clear};
- if(inside(x,y,694,493,219,44))return {Target::Export};
+ if(inside(x,y,34,493,180,44))return {Target::Generate};
+ if(inside(x,y,226,493,125,44))return {Target::Variate};
+ if(inside(x,y,363,493,145,44))return {Target::Clear};
+ if(inside(x,y,520,493,170,44))return {Target::Export};
+ if(inside(x,y,702,493,96,44))return {Target::CopyBar};
+ if(inside(x,y,810,493,96,44))return {Target::PasteBar};
  return {};
 }
 } // namespace a125::riff::vst::ui
