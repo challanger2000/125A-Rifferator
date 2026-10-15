@@ -98,6 +98,10 @@ ID or state format changed.
   `11940132568`, 1.58 MB, Actions archive SHA-256
   `0e7c5399757ae3245faaf76f0556f0f9b5033f75f1da7f9085ce90727f8e3198`.
   It remains an audit artifact and is not a commercial release package.
+- Original 125A Plugin Tester on the repaired Windows artifact: **PASS**,
+  reported by the owner after testing on 2026-10-15. The exact tester version,
+  report files, run ID, and individual check counts were not supplied in this
+  audit session and therefore remain NOT VERIFIED as archived evidence.
 
 ## Control and behavior matrix
 
@@ -121,7 +125,6 @@ compatibility.
 
 ## Gates still NOT VERIFIED in this environment
 
-- Original 125A Plugin Tester against the repaired binary.
 - Studio One: all clicks/menus/drag/wheel/Escape at 100% and 150%, automation,
   save/reopen, COPY/PASTE immediately after reload, MIDI routing, transport
   start/stop/seek/loop, and repeated editor lifecycle.
