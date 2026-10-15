@@ -28,10 +28,23 @@ void applyParameterChanges(product::Snapshot& candidate,int count,ReadPoint read
  if(pasteBar>=0)
   for(int j=0;j<kStepsPerBar;++j)
    candidate.pattern.steps[static_cast<std::size_t>(pasteBar*kStepsPerBar+j)].locked=false;
+
+ // VST3 does not give musical meaning to the order of parameter queues.
+ // Resolve the mutually dependent pitch basis in one stable order: transpose
+ // the old tonic for KEY, then apply SCALE, then let an explicitly automated
+ // ROOT win and snap inside the final key/scale. Otherwise identical points
+ // could produce different roots solely from host queue enumeration order.
+ constexpr std::uint32_t orderedGlobals[]{Key,ScaleId,Root,Bars,Pm,Fill,Mode};
+ for(const auto wanted:orderedGlobals)
+  for(int i=0;i<count;++i){
+   std::uint32_t id=0;double value=0.;
+   if(readPoint(i,id,value)&&id==wanted)apply(candidate,id,value);
+  }
  for(int pass=0;pass<2;++pass){
   for(int i=0;i<count;++i){
    std::uint32_t id=0;double value=0.;
-   if(!readPoint(i,id,value)||id==PasteTransaction)continue;
+   if(!readPoint(i,id,value)||id==PasteTransaction||
+      (id>=Key&&id<=Mode))continue;
    const bool isLock=id>=Lock&&id<Lock+kMaxSteps;
    const auto base=(id/200u)*200u,index=id-base;
    const bool pasteCell=pasteBar>=0&&

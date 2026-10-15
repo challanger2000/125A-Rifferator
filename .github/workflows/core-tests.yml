@@ -6,6 +6,7 @@ on:
       - rebuild/v1.0.0-clean
       - feature/v1-bar-copy-paste
       - repair/v1.0.1-lock-fix
+      - audit/v1.0.1-independent-release-2026-10-15
     paths:
       - 'src/**'
       - 'tests/**'

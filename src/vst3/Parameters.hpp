@@ -8,6 +8,14 @@ constexpr std::uint32_t PasteTransaction=200,Key=100,ScaleId=101,Root=102,Bars=1
 constexpr std::uint32_t On=1000,Stop=1200,Type=1400,Degree=1600,Lock=1800;
 inline int q(double v,int steps) noexcept {return std::isfinite(v)?static_cast<int>(std::floor(std::clamp(v,0.,1.)*steps+0.5)):-1;}
 inline double n(int value,int min,int max) noexcept {return double(value-min)/double(max-min);}
+// Use the host-restored transaction value as the source of truth. The high
+// marker bit toggles while the low three bits retain the destination bar.
+// This guarantees a changed value after project reload without adding state.
+inline double nextPasteMarker(int bar,double current) noexcept {
+ const int previous=q(current,15);
+ const int bank=previous>=kMaxBars?0:kMaxBars;
+ return n(std::clamp(bar,0,kMaxBars-1)+bank,0,15);
+}
 // The selected root must always belong to the active scale. Resolve incompatible
 // KEY/SCALE/ROOT automation deterministically in BOTH Processor and Controller.
 inline void snapRoot(Settings& settings) noexcept {

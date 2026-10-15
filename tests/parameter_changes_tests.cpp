@@ -1,6 +1,7 @@
 #include "vst3/ParameterChanges.hpp"
 #include <cassert>
 #include <limits>
+#include <algorithm>
 #include <vector>
 #ifdef NDEBUG
 #error Assertions must remain enabled
@@ -53,4 +54,38 @@ int main(){
  s={};s.pattern.steps[0].locked=true;
  run(s,{{PasteTransaction,0.},{On,1.}});
  assert(!s.pattern.steps[0].on&&s.pattern.steps[0].locked);
+
+ // Host queue enumeration order cannot change simultaneous pitch automation.
+ std::vector<Point> pitch{{Key,n(6,0,11)},{ScaleId,0.},{Root,n(41,0,127)}};
+ do {
+  s={};
+  run(s,pitch);
+  assert(s.musical.key==6&&s.musical.scale==Scale::Major&&
+         s.musical.rootMidi==41);
+ } while(std::next_permutation(pitch.begin(),pitch.end(),
+   [](const Point& a,const Point& b){return a.id<b.id;}));
+
+ // KEY before SCALE also gives one deterministic implicit-root result when
+ // no explicit ROOT point exists in the block.
+ for(bool reverse:{false,true}){
+  s={};
+  std::vector<Point> keyScale{{Key,n(6,0,11)},{ScaleId,0.}};
+  if(reverse)std::reverse(keyScale.begin(),keyScale.end());
+  run(s,keyScale);
+  assert(s.musical.key==6&&s.musical.scale==Scale::Major&&
+         s.musical.rootMidi==42);
+ }
+
+ // The host-restored marker, not an unpersisted Controller boolean, drives the
+ // transaction toggle. The first paste after reload must always change value.
+ double marker=0.;
+ for(int bar:{0,0,3,3,7,7}){
+  const double next=nextPasteMarker(bar,marker);
+  assert(next!=marker);
+  assert(q(next,15)%kMaxBars==bar);
+  marker=next;
+  // Simulate project reload: only the normalized VST3 value survives.
+  const double afterReload=nextPasteMarker(bar,marker);
+  assert(afterReload!=marker&&q(afterReload,15)%kMaxBars==bar);
+ }
 }

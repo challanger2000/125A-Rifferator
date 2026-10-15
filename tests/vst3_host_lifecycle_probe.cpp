@@ -470,6 +470,29 @@ int main(int argc,char** argv){
            "original matching NoteOff releases live-edited riff"))return 2;
  incoming.clear();
  std::cout<<"[PASS] MIDI NOTE seamless live insert/delete and original 6000/12000/18000 sample boundaries\n";
+
+ // An oversized input batch must fail without leaving the currently sounding
+ // generated note or the MIDI trigger ownership alive.
+ on.sampleOffset=0;
+ if(!check(incoming.addEvent(on)==kResultOk&&
+           processAt(0.,false)&&outgoing.getEventCount()==1&&
+           is(0,true,42,65,0),"overflow fixture starts sounding note"))return 2;
+ incoming.clear();
+ for(int i=0;i<=a125::riff::MidiRuntime::kMaxTriggerEvents;++i){
+  Event excess=on;
+  excess.sampleOffset=i%data.numSamples;
+  excess.noteOn.pitch=60;
+  if(!check(incoming.addEvent(excess)==kResultOk,
+            "prepare oversized host event batch"))return 2;
+ }
+ outgoing.clear();
+ if(!check(processor->process(data)!=kResultOk&&
+           outgoing.getEventCount()==1&&is(0,false,42,0,0),
+           "oversized event batch releases active output note"))return 2;
+ incoming.clear();
+ if(!check(processAt(0.,false)&&outgoing.getEventCount()==0,
+           "oversized event batch clears trigger ownership"))return 2;
+ std::cout<<"[PASS] Oversized VST3 input batch fails closed without a hanging note\n";
  if(!check(processor->setProcessing(false)==kResultOk &&
            fresh->setActive(false)==kResultOk,
            "host suspend"))return 2;

@@ -76,7 +76,6 @@ private:
  bool componentRestored_{false};
  double zoom_{1.0};
  BarClipboard clipboard_{};
- bool pasteToggle_{false};
  std::uint32_t seed_{0x125A2026u}; // persisted Controller-only state v2
  const char* status_{"READY"};
 };

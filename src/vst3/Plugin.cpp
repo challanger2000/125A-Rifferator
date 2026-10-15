@@ -109,21 +109,6 @@ tresult PLUGIN_API Processor::process(ProcessData& data){
   if(b.tempoValid)b.tempo=context->tempo;
   if(b.ppqValid)b.projectPpq=context->projectTimeMusic;
  }
- TriggerEvent triggers[MidiRuntime::kMaxTriggerEvents]{};
- int triggerCount=0;
- if(data.inputEvents){
-  const int32 total=data.inputEvents->getEventCount();
-  if(total>MidiRuntime::kMaxTriggerEvents)return kResultFalse;
-  for(int32 i=0;i<total;++i){
-   Steinberg::Vst::Event e{};
-   if(data.inputEvents->getEvent(i,e)!=kResultOk)continue;
-   if(e.type!=Steinberg::Vst::Event::kNoteOnEvent&&e.type!=Steinberg::Vst::Event::kNoteOffEvent)continue;
-   const bool on=e.type==Steinberg::Vst::Event::kNoteOnEvent&&e.noteOn.velocity>0.f;
-   const int pitch=e.type==Steinberg::Vst::Event::kNoteOnEvent?e.noteOn.pitch:e.noteOff.pitch;
-   if(pitch<0||pitch>127||e.sampleOffset<0||e.sampleOffset>=data.numSamples)continue;
-   triggers[triggerCount++]={e.sampleOffset,pitch,on};
-  }
- }
  auto sink=[&](MidiOut midi)->bool {
   if(!data.outputEvents)return false;
   Steinberg::Vst::Event event{};
@@ -147,6 +132,27 @@ tresult PLUGIN_API Processor::process(ProcessData& data){
   }
   return data.outputEvents->addEvent(event)==kResultOk;
  };
+ TriggerEvent triggers[MidiRuntime::kMaxTriggerEvents]{};
+ int triggerCount=0;
+ if(data.inputEvents){
+  const int32 total=data.inputEvents->getEventCount();
+  if(total>MidiRuntime::kMaxTriggerEvents){
+   // Bound callback work, but fail closed: never abandon an accepted NoteOn.
+   // Reset trigger ownership only after the matching NoteOff reached the host;
+   // otherwise MidiRuntime retains its recovery retry for the next callback.
+   if(runtime_.releaseVoice(0,sink))runtime_.reset();
+   return kResultFalse;
+  }
+  for(int32 i=0;i<total;++i){
+   Steinberg::Vst::Event e{};
+   if(data.inputEvents->getEvent(i,e)!=kResultOk)continue;
+   if(e.type!=Steinberg::Vst::Event::kNoteOnEvent&&e.type!=Steinberg::Vst::Event::kNoteOffEvent)continue;
+   const bool on=e.type==Steinberg::Vst::Event::kNoteOnEvent&&e.noteOn.velocity>0.f;
+   const int pitch=e.type==Steinberg::Vst::Event::kNoteOnEvent?e.noteOn.pitch:e.noteOff.pitch;
+   if(pitch<0||pitch>127||e.sampleOffset<0||e.sampleOffset>=data.numSamples)continue;
+   triggers[triggerCount++]={e.sampleOffset,pitch,on};
+  }
+ }
  if(releasePitchOnly_&&!cleanupPending_){
   if(!runtime_.releaseVoice(0,sink))return kResultFalse;
  }
@@ -535,8 +541,8 @@ void Controller::click(int x,int y,bool shift,bool control){
    }else{
     const auto previous=visual_;
     visual_=updated;
-    pasteToggle_=!pasteToggle_;
-    const double marker=n(bar_+(pasteToggle_?8:0),0,15);
+    const double marker=nextPasteMarker(
+        bar_,getParamNormalized(PasteTransaction));
     auto send=[this](ParamID tag,double value){
      beginEdit(tag);
      EditController::setParamNormalized(tag,value);
