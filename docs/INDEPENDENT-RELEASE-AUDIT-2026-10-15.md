@@ -85,6 +85,19 @@ ID or state format changed.
   COPY/PASTE policy, MIDI timing/release/backpressure, 1/2/4/8-bar state,
   malformed state rejection, SMF0 encoding, GUI geometry/hit targets, numeric
   bounds, and parameter mapping.
+- GitHub Actions Core run
+  [38664652476](https://github.com/challanger2000/125A-Rifferator/actions/runs/38664652476):
+  SUCCESS on repaired source commit `fff8deca9236a3c1fd5adf271c37f709bf385ab1`.
+- GitHub Actions Windows VST3 run
+  [38664652508](https://github.com/challanger2000/125A-Rifferator/actions/runs/38664652508):
+  SUCCESS on the same source. This independently covers MSVC Release build,
+  all seven CTest targets, bundle/resource checks, 20 editor lifecycle cycles,
+  state and native ProcessData host probes including the new 129-event case,
+  and Steinberg Validator execution.
+- Windows artifact: `Rifferator-V1-EXPERIMENTAL-Windows-x64`, artifact ID
+  `11940132568`, 1.58 MB, Actions archive SHA-256
+  `0e7c5399757ae3245faaf76f0556f0f9b5033f75f1da7f9085ce90727f8e3198`.
+  It remains an audit artifact and is not a commercial release package.
 
 ## Control and behavior matrix
 
@@ -108,10 +121,6 @@ compatibility.
 
 ## Gates still NOT VERIFIED in this environment
 
-- Windows MSVC VST3 compilation and bundle assembly for the repaired source.
-- Native Windows VSTGUI attach/detach probe and the new 129-event Processor
-  integration regression.
-- Steinberg validator against the repaired binary.
 - Original 125A Plugin Tester against the repaired binary.
 - Studio One: all clicks/menus/drag/wheel/Escape at 100% and 150%, automation,
   save/reopen, COPY/PASTE immediately after reload, MIDI routing, transport
